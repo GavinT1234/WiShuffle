@@ -1,5 +1,5 @@
 {
-  "name": "captoneproject",
+  "name": "WiShuffle",
   "version": "1.0.0",
   "description": "- Node v24.13.1",
   "main": "index.js",
@@ -8,16 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GavinT1234/CaptoneProject.git"
+    "url": "git+https://github.com/GavinT1234/WiShuffle.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "bugs": {
-    "url": "https://github.com/GavinT1234/CaptoneProject/issues"
+    "url": "https://github.com/GavinT1234/WiShuffle/issues"
   },
-  "homepage": "https://github.com/GavinT1234/CaptoneProject#readme",
+  "homepage": "https://github.com/GavinT1234/WiShuffle#readme",
   "dependencies": {
     "express": "^5.2.1"
   }
