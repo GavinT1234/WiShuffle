@@ -1,0 +1,24 @@
+{
+  "name": "captoneproject",
+  "version": "1.0.0",
+  "description": "- Node v24.13.1",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GavinT1234/CaptoneProject.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/GavinT1234/CaptoneProject/issues"
+  },
+  "homepage": "https://github.com/GavinT1234/CaptoneProject#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
