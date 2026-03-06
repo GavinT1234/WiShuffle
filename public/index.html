@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Player</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: white;
+    }
+    
+    h1 {
+      text-align: center;
+    }
+    
+    #player-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+    
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #ff0000;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    
+    button:hover {
+      background: #cc0000;
+    }
+    
+    #controls {
+      text-align: center;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎵 YouTube Player</h1>
+  
+  <!-- YouTube player will be injected here -->
+  <div id="player-container">
+    <div id="player"></div>
+  </div>
+  
+  <!-- Control buttons -->
+  <div id="controls">
+    <button onclick="playVideo()">▶️ Play</button>
+    <button onclick="pauseVideo()">⏸️ Pause</button>
+    <button onclick="stopVideo()">⏹️ Stop</button>
+  </div>
+
+  <!-- Load YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  
+  <script>
+    // Global variable for the YouTube player
+    let player;
+
+    // This function is called automatically by YouTube API when ready
+    function onYouTubeIframeAPIReady() {
+      console.log('YouTube API ready!');
+      
+      // Fetch video ID from our Express API
+      fetch('/api/video')
+        .then(response => response.json())
+        .then(data => {
+          createPlayer(data.videoId);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Create the YouTube player
+    function createPlayer(videoId) {
+      player = new YT.Player('player', {
+        height: '390',
+        width: '640',
+        videoId: videoId,
+        playerVars: {
+          'playsinline': 1,
+          'controls': 1,
+          'autoplay': 0
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    // Called when player is ready
+    function onPlayerReady(event) {
+      console.log('Player is ready!');
+    }
+
+    // Called when player state changes
+    function onPlayerStateChange(event) {
+      if (event.data == YT.PlayerState.PLAYING) {
+        console.log('Video is playing');
+      } else if (event.data == YT.PlayerState.PAUSED) {
+        console.log('Video is paused');
+      } else if (event.data == YT.PlayerState.ENDED) {
+        console.log('Video ended');
+      }
+    }
+
+    // Control functions
+    function playVideo() {
+      if (player) {
+        player.playVideo();
+      }
+    }
+
+    function pauseVideo() {
+      if (player) {
+        player.pauseVideo();
+      }
+    }
+
+    function stopVideo() {
+      if (player) {
+        player.stopVideo();
+      }
+    }
+  </script>
+</body>
+</html>
