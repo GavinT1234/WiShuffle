@@ -1,0 +1,185 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+// User model for accounts
+model User {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  username  String  @unique
+  password  String  // Should be hashed
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  playlists Playlist[]
+  rooms     Room[]
+  votes     Vote[]
+  djQueue   DJQueueEntry[]
+}
+
+// Room model for group listening
+model Room {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  ownerId     Int
+  owner       User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  currentSongId Int?
+  currentSong   Song?   @relation("CurrentSong", fields: [currentSongId], references: [id], onDelete: SetNull)
+  
+  skipVoteThreshold Int @default(50) // Percentage of votes needed to skip
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  votes         Vote[]
+  djQueue       DJQueueEntry[]
+  songHistory   SongHistory[]
+}
+
+// Playlist model
+model Playlist {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  userId      Int
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  isPublic    Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  folders Folder[]
+  songs   PlaylistSong[]
+}
+
+// Folder model - can be nested within playlists
+model Folder {
+  id          Int     @id @default(autoincrement())
+  playlistId  Int
+  playlist    Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String?
+  
+  // For shuffling/order control
+  isShuffle   Boolean @default(false)
+  orderIndex  Int     @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  songs       FolderSong[]
+
+  @@unique([playlistId, name])
+}
+
+// Song model
+model Song {
+  id          Int     @id @default(autoincrement())
+  title       String
+  artist      String
+  youtubeUrl  String
+  duration    Int     // in seconds
+  thumbnail   String?
+  
+  addedBy     Int?
+  createdAt   DateTime @default(now())
+
+  playlistSongs PlaylistSong[]
+  folderSongs   FolderSong[]
+  votes         Vote[]
+  roomCurrent   Room[] @relation("CurrentSong")
+  songHistory   SongHistory[]
+}
+
+// Join table for playlist songs (songs not in folders)
+model PlaylistSong {
+  id          Int     @id @default(autoincrement())
+  playlistId  Int
+  playlist    Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  
+  songId      Int
+  song        Song    @relation(fields: [songId], references: [id], onDelete: Cascade)
+  
+  orderIndex  Int     @default(0)
+  
+  createdAt   DateTime @default(now())
+
+  @@unique([playlistId, songId])
+}
+
+// Join table for folder songs
+model FolderSong {
+  id          Int     @id @default(autoincrement())
+  folderId    Int
+  folder      Folder  @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  
+  songId      Int
+  song        Song    @relation(fields: [songId], references: [id], onDelete: Cascade)
+  
+  orderIndex  Int     @default(0)
+  
+  createdAt   DateTime @default(now())
+
+  @@unique([folderId, songId])
+}
+
+// Vote model for like/skip functionality
+model Vote {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  roomId    Int
+  room      Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  
+  songId    Int
+  song      Song    @relation(fields: [songId], references: [id], onDelete: Cascade)
+  
+  voteType  String  @default("like") // "like" or "skip"
+  
+  createdAt DateTime @default(now())
+
+  @@unique([userId, roomId, songId, voteType])
+}
+
+// DJ Queue model
+model DJQueueEntry {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  roomId    Int
+  room      Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  
+  playlistId Int?
+  position  Int     // Position in queue
+  
+  createdAt DateTime @default(now())
+
+  @@unique([userId, roomId])
+}
+
+// Song History model for tracking what was played
+model SongHistory {
+  id        Int     @id @default(autoincrement())
+  roomId    Int
+  room      Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  
+  songId    Int
+  song      Song    @relation(fields: [songId], references: [id], onDelete: Cascade)
+  
+  playedAt  DateTime @default(now())
+  duration  Int? // How long it was played (in seconds)
+}
