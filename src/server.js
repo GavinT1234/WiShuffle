@@ -4,6 +4,9 @@ import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import taskRoutes from './routes/taskRoutes.js';
+import playlistRoutes from './routes/playlistRoutes.js';
+import songRoutes from './routes/songRoutes.js';
+import roomRoutes from './routes/roomRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,7 +21,11 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// API Routes
 app.use('/tasks', taskRoutes);
+app.use('/api/playlists', playlistRoutes);
+app.use('/api/songs', songRoutes);
+app.use('/api/rooms', roomRoutes);
 
 app.use((req, res, next) => {
   res.status(404).json({ error: 'Not found' });
