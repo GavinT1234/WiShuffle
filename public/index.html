@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Player</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: white;
+      text-align: center;
+    }
+    
+    h1 {
+      color: #ff0000;
+    }
+    
+    #player {
+      margin: 20px auto;
+    }
+    
+    button {
+      padding: 15px 30px;
+      margin: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      background: #ff0000;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    
+    button:hover {
+      background: #cc0000;
+    }
+    
+    #status {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎵 YouTube Player Test</h1>
+  
+  <div id="status">Loading YouTube player...</div>
+  
+  <!-- YouTube player appears here -->
+  <div id="player"></div>
+  
+  <!-- Control buttons -->
+  <div>
+    <button onclick="playVideo()">▶️ Play</button>
+    <button onclick="pauseVideo()">⏸️ Pause</button>
+    <button onclick="stopVideo()">⏹️ Stop</button>
+  </div>
+
+  <!-- Load YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  
+  <script>
+    let player;
+
+    // Called automatically when YouTube API is ready
+    function onYouTubeIframeAPIReady() {
+      document.getElementById('status').textContent = 'YouTube API loaded! Fetching video...';
+      
+      // Get video ID from our Express backend
+      fetch('/api/videos/current')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('status').textContent = 'Video loaded! Video ID: ' + data.videoId;
+          createPlayer(data.videoId);
+        })
+        .catch(error => {
+          document.getElementById('status').textContent = 'Error: ' + error.message;
+          console.error('Error:', error);
+        });
+    }
+
+    // Create the player
+    function createPlayer(videoId) {
+      player = new YT.Player('player', {
+        height: '390',
+        width: '640',
+        videoId: videoId,
+        events: {
+          'onReady': onPlayerReady,
+          'onError': onPlayerError
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      document.getElementById('status').textContent = 'Player ready! Click Play to start.';
+      console.log('Player is ready!');
+    }
+
+    function onPlayerError(event) {
+      document.getElementById('status').textContent = 'Player error: ' + event.data;
+      console.error('Player error:', event.data);
+    }
+
+    // Control functions
+    function playVideo() {
+      if (player && player.playVideo) {
+        player.playVideo();
+        document.getElementById('status').textContent = 'Playing...';
+      } else {
+        alert('Player not ready yet!');
+      }
+    }
+
+    function pauseVideo() {
+      if (player && player.pauseVideo) {
+        player.pauseVideo();
+        document.getElementById('status').textContent = 'Paused';
+      }
+    }
+
+    function stopVideo() {
+      if (player && player.stopVideo) {
+        player.stopVideo();
+        document.getElementById('status').textContent = 'Stopped';
+      }
+    }
+  </script>
+</body>
+</html>

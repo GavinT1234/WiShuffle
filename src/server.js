@@ -4,18 +4,30 @@ import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import taskRoutes from './routes/taskRoutes.js';
-import playlistRoutes from './routes/playlistRoutes.js';
-import songRoutes from './routes/songRoutes.js';
-import roomRoutes from './routes/roomRoutes.js';
+// Some files and api routes dont exist yet so commented out
+// import playlistRoutes from './routes/playlistRoutes.js';
+// import songRoutes from './routes/songRoutes.js';
+// import roomRoutes from './routes/roomRoutes.js';
+import videoRoutes from './routes/videoRoutes.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// for connection to src/swagger.yaml and public/
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 app.use(cors());
 app.use(express.json());
 app.use(morgan('tiny'));
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
 
-const specs = YAML.load('./public/bundled.yaml');
+const specs = YAML.load(path.join(__dirname, 'swagger.yaml'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
@@ -23,9 +35,10 @@ app.get('/health', (req, res) => {
 
 // API Routes
 app.use('/tasks', taskRoutes);
-app.use('/api/playlists', playlistRoutes);
-app.use('/api/songs', songRoutes);
-app.use('/api/rooms', roomRoutes);
+// app.use('/api/playlists', playlistRoutes);
+// app.use('/api/songs', songRoutes);
+// app.use('/api/rooms', roomRoutes);
+app.use('/api/videos', videoRoutes)
 
 app.use((req, res, next) => {
   res.status(404).json({ error: 'Not found' });
