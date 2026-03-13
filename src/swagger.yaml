@@ -1,11 +1,11 @@
 openapi: 3.0.0
 info:
-  title: Music Room API
+  title: WiShuffle API
   version: 1.0.0
   description: API for collaborative music room application
   contact:
-    name: API Support
-    email: support@musicroom.com
+    name: Martin Anuonye
+    email: manuonye@charlotte.edu
 
 servers:
   - url: http://localhost:3000

@@ -34,5 +34,8 @@
     "pg": "^8.11.3",
     "swagger-ui-express": "^5.0.0",
     "yamljs": "^0.3.0"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
