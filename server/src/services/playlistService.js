@@ -1,6 +1,6 @@
 import { playlists } from '../repositories/playlistRepo.js'
 
 export async function getPlaylists(ownerId) {
-    const playlists = playlists(ownerId);
+    const playlists = userPlaylists(ownerId);
     return playlists;
 }
