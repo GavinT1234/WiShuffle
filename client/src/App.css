@@ -1,4 +1,12 @@
-.counter {
+@import "tailwindcss";
+@plugin "daisyui";
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark --prefersdark,
+    business;
+}
+/* .counter {
   font-size: 16px;
   padding: 5px 10px;
   border-radius: 5px;
@@ -181,4 +189,4 @@
     right: 0;
     border-right-color: var(--border);
   }
-}
+} */
