@@ -6,6 +6,7 @@ import { initSocket } from "./socket/index.js";
 import { connectRedis } from "./config/redis.js";
 import roomRoutes from './routes/roomRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import playlistRoutes from './routes/playlistRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,7 @@ const io = initSocket(server);
 // Routes
 app.use('/api/rooms', roomRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/playlists', playlistRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {

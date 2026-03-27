@@ -19,6 +19,7 @@ model User {
   password String
   createdAt DateTime @default(now()) @map("created_at")
   rooms Room[]
+  playlists Playlist[]
 
   @@map("users")
 }
@@ -31,4 +32,30 @@ model Room {
   ownerId Int @map("user_id")
 
   @@map("rooms")
+}
+
+model Playlist {
+  id Int @id @default(autoincrement())
+  name String // Probably should be unique to the user, but multiple users should be able to have playlists with the same name
+  shuffle Boolean
+
+  items PlaylistItem[]
+  subPlaylist Playlist[] @relation("PlaylistHierarchy")
+  parentPlaylist Playlist[] @relation("PlaylistHierarchy")
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId Int @map("user_id")
+
+  @@map("playlists")
+}
+
+model PlaylistItem {
+  id Int @id @default(autoincrement())
+  title String
+  author String
+  url String
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  playlistId Int @map("playlist_id")
+
+  @@map("playlist_item")
 }
