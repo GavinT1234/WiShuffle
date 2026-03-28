@@ -22,13 +22,12 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await loginApi({ email, password });
-      console.log("full response:", response);
-      localStorage.setItem("token", response.token);
+
+      localStorage.setItem("token", response.accessToken.accessToken);
 
       setIsLoggedIn(true);
       navigate("/dashboard");
     } catch (err) {
-      console.log("login error:", err);
       setError(err.message);
     } finally {
       setLoading(false);

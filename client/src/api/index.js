@@ -2,13 +2,8 @@ const BASE_URL = "/api";
 
 export const request = async (endpoint, options = {}) => {
   try {
+    console.log(`URL: ${BASE_URL}${endpoint}`);
     const token = localStorage.getItem("token");
-    console.log("token:", token); // ✅ check if token exists
-    console.log("headers being sent:", {
-      "Content-Type": "application/json",
-      ...options.headers,
-      ...(token && { Authorization: `Bearer ${token}` }),
-    }); // ✅ check what headers are being sent
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...options,
       headers: {
@@ -22,8 +17,6 @@ export const request = async (endpoint, options = {}) => {
     }
 
     const text = await response.text();
-
-    console.log("Raw response:", text);
 
     const data = JSON.parse(text);
 

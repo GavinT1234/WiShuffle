@@ -10,6 +10,7 @@ export const useGetUser = () => {
     setError(null);
     try {
       const userData = await getUser();
+      console.log("User data", userData);
       setUser(userData);
     } catch (err) {
       setError(err.message);
