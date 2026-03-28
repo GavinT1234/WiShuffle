@@ -149,6 +149,7 @@ exports.Genre = exports.$Enums.Genre = {
   HIPHOP: 'HIPHOP',
   RNB: 'RNB',
   POP: 'POP',
+  RAP: 'RAP',
   ROCK: 'ROCK',
   ELECTRONIC: 'ELECTRONIC',
   JAZZ: 'JAZZ',

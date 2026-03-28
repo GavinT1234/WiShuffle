@@ -32,6 +32,7 @@ export namespace $Enums {
   HIPHOP: 'HIPHOP',
   RNB: 'RNB',
   POP: 'POP',
+  RAP: 'RAP',
   ROCK: 'ROCK',
   ELECTRONIC: 'ELECTRONIC',
   JAZZ: 'JAZZ',

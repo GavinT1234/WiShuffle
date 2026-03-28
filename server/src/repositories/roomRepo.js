@@ -1,5 +1,5 @@
 import prisma from '../config/db.js';
-
+import { Genre } from '../generated/prisma/index.js';
 export async function getAll() {
   const rooms = await prisma.room.findMany({
     include: { owner: { select: { username: true } } },
@@ -14,8 +14,16 @@ export async function getById(id) {
 }
 
 export async function create(data) {
+  const { name, tags, ownerId } = data;
+
   const newRoom = await prisma.room.create({
-    data: data,
+    data: {
+      name,
+      tags: {
+        set: tags.map((t) => Genre[t]),
+      },
+      ownerId,
+    },
     include: {
       owner: {
         select: {

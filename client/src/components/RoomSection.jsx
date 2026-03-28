@@ -71,17 +71,20 @@ const RoomSection = () => {
                 </td>
 
                 <td>{r.listenerCount}</td>
-                <td className="flex gap-2 items-center justify-center">
-                  <button className="btn btn-success btn-sm">JOIN</button>
-                  <button className="btn btn-ghost btn-xs">details</button>
+                <td>
+                  <div className="flex gap-2 items-center">
+                    <button className="btn btn-success btn-sm">JOIN</button>
+                    <button className="btn btn-ghost btn-xs">details</button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className="bg-black w-full lg:w-[30%] min-h-50">
+      <div className="bg-base-content/10 w-full lg:w-[30%] min-h-50 p-4">
         <div>
+          <h1 className="font-medium mb-4">Filter tags:</h1>
           <form className="flex gap-2">
             <input
               className="btn"

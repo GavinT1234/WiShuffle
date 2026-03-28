@@ -27,6 +27,7 @@ enum Genre {
   HIPHOP
   RNB
   POP
+  RAP
   ROCK
   ELECTRONIC
   JAZZ
