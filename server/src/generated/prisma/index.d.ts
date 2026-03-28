@@ -25,6 +25,41 @@ export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 export type Room = $Result.DefaultSelection<Prisma.$RoomPayload>
 
 /**
+ * Enums
+ */
+export namespace $Enums {
+  export const Genre: {
+  HIPHOP: 'HIPHOP',
+  RNB: 'RNB',
+  POP: 'POP',
+  ROCK: 'ROCK',
+  ELECTRONIC: 'ELECTRONIC',
+  JAZZ: 'JAZZ',
+  CLASSICAL: 'CLASSICAL',
+  REGGAE: 'REGGAE',
+  LATIN: 'LATIN',
+  COUNTRY: 'COUNTRY',
+  METAL: 'METAL',
+  INDIE: 'INDIE',
+  SOUL: 'SOUL',
+  FUNK: 'FUNK',
+  LOFI: 'LOFI',
+  AFROBEATS: 'AFROBEATS',
+  KPOP: 'KPOP',
+  EDM: 'EDM',
+  HOUSE: 'HOUSE',
+  TRAP: 'TRAP'
+};
+
+export type Genre = (typeof Genre)[keyof typeof Genre]
+
+}
+
+export type Genre = $Enums.Genre
+
+export const Genre: typeof $Enums.Genre
+
+/**
  * ##  Prisma Client ʲˢ
  *
  * Type-safe database client for TypeScript & Node.js
@@ -2136,6 +2171,7 @@ export namespace Prisma {
     id: number
     name: number
     createdAt: number
+    tags: number
     ownerId: number
     _all: number
   }
@@ -2169,6 +2205,7 @@ export namespace Prisma {
     id?: true
     name?: true
     createdAt?: true
+    tags?: true
     ownerId?: true
     _all?: true
   }
@@ -2263,6 +2300,7 @@ export namespace Prisma {
     id: number
     name: string
     createdAt: Date
+    tags: $Enums.Genre[]
     ownerId: number
     _count: RoomCountAggregateOutputType | null
     _avg: RoomAvgAggregateOutputType | null
@@ -2289,6 +2327,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     createdAt?: boolean
+    tags?: boolean
     ownerId?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["room"]>
@@ -2297,6 +2336,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     createdAt?: boolean
+    tags?: boolean
     ownerId?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["room"]>
@@ -2305,6 +2345,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     createdAt?: boolean
+    tags?: boolean
     ownerId?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["room"]>
@@ -2313,10 +2354,11 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     createdAt?: boolean
+    tags?: boolean
     ownerId?: boolean
   }
 
-  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "createdAt" | "ownerId", ExtArgs["result"]["room"]>
+  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "createdAt" | "tags" | "ownerId", ExtArgs["result"]["room"]>
   export type RoomInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -2336,6 +2378,7 @@ export namespace Prisma {
       id: number
       name: string
       createdAt: Date
+      tags: $Enums.Genre[]
       ownerId: number
     }, ExtArgs["result"]["room"]>
     composites: {}
@@ -2764,6 +2807,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Room", 'Int'>
     readonly name: FieldRef<"Room", 'String'>
     readonly createdAt: FieldRef<"Room", 'DateTime'>
+    readonly tags: FieldRef<"Room", 'Genre[]'>
     readonly ownerId: FieldRef<"Room", 'Int'>
   }
     
@@ -3213,6 +3257,7 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     createdAt: 'createdAt',
+    tags: 'tags',
     ownerId: 'ownerId'
   };
 
@@ -3279,6 +3324,20 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Genre[]'
+   */
+  export type ListEnumGenreFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Genre[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Genre'
+   */
+  export type EnumGenreFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Genre'>
     
 
 
@@ -3363,6 +3422,7 @@ export namespace Prisma {
     id?: IntFilter<"Room"> | number
     name?: StringFilter<"Room"> | string
     createdAt?: DateTimeFilter<"Room"> | Date | string
+    tags?: EnumGenreNullableListFilter<"Room">
     ownerId?: IntFilter<"Room"> | number
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -3371,6 +3431,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     createdAt?: SortOrder
+    tags?: SortOrder
     ownerId?: SortOrder
     owner?: UserOrderByWithRelationInput
   }
@@ -3382,6 +3443,7 @@ export namespace Prisma {
     OR?: RoomWhereInput[]
     NOT?: RoomWhereInput | RoomWhereInput[]
     createdAt?: DateTimeFilter<"Room"> | Date | string
+    tags?: EnumGenreNullableListFilter<"Room">
     ownerId?: IntFilter<"Room"> | number
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "name">
@@ -3390,6 +3452,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     createdAt?: SortOrder
+    tags?: SortOrder
     ownerId?: SortOrder
     _count?: RoomCountOrderByAggregateInput
     _avg?: RoomAvgOrderByAggregateInput
@@ -3405,6 +3468,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"Room"> | number
     name?: StringWithAggregatesFilter<"Room"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
+    tags?: EnumGenreNullableListFilter<"Room">
     ownerId?: IntWithAggregatesFilter<"Room"> | number
   }
 
@@ -3468,6 +3532,7 @@ export namespace Prisma {
   export type RoomCreateInput = {
     name: string
     createdAt?: Date | string
+    tags?: RoomCreatetagsInput | $Enums.Genre[]
     owner: UserCreateNestedOneWithoutRoomsInput
   }
 
@@ -3475,12 +3540,14 @@ export namespace Prisma {
     id?: number
     name: string
     createdAt?: Date | string
+    tags?: RoomCreatetagsInput | $Enums.Genre[]
     ownerId: number
   }
 
   export type RoomUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tags?: RoomUpdatetagsInput | $Enums.Genre[]
     owner?: UserUpdateOneRequiredWithoutRoomsNestedInput
   }
 
@@ -3488,6 +3555,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tags?: RoomUpdatetagsInput | $Enums.Genre[]
     ownerId?: IntFieldUpdateOperationsInput | number
   }
 
@@ -3495,18 +3563,21 @@ export namespace Prisma {
     id?: number
     name: string
     createdAt?: Date | string
+    tags?: RoomCreatetagsInput | $Enums.Genre[]
     ownerId: number
   }
 
   export type RoomUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tags?: RoomUpdatetagsInput | $Enums.Genre[]
   }
 
   export type RoomUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tags?: RoomUpdatetagsInput | $Enums.Genre[]
     ownerId?: IntFieldUpdateOperationsInput | number
   }
 
@@ -3637,6 +3708,14 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type EnumGenreNullableListFilter<$PrismaModel = never> = {
+    equals?: $Enums.Genre[] | ListEnumGenreFieldRefInput<$PrismaModel> | null
+    has?: $Enums.Genre | EnumGenreFieldRefInput<$PrismaModel> | null
+    hasEvery?: $Enums.Genre[] | ListEnumGenreFieldRefInput<$PrismaModel>
+    hasSome?: $Enums.Genre[] | ListEnumGenreFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
@@ -3646,6 +3725,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     createdAt?: SortOrder
+    tags?: SortOrder
     ownerId?: SortOrder
   }
 
@@ -3731,10 +3811,19 @@ export namespace Prisma {
     deleteMany?: RoomScalarWhereInput | RoomScalarWhereInput[]
   }
 
+  export type RoomCreatetagsInput = {
+    set: $Enums.Genre[]
+  }
+
   export type UserCreateNestedOneWithoutRoomsInput = {
     create?: XOR<UserCreateWithoutRoomsInput, UserUncheckedCreateWithoutRoomsInput>
     connectOrCreate?: UserCreateOrConnectWithoutRoomsInput
     connect?: UserWhereUniqueInput
+  }
+
+  export type RoomUpdatetagsInput = {
+    set?: $Enums.Genre[]
+    push?: $Enums.Genre | $Enums.Genre[]
   }
 
   export type UserUpdateOneRequiredWithoutRoomsNestedInput = {
@@ -3842,12 +3931,14 @@ export namespace Prisma {
   export type RoomCreateWithoutOwnerInput = {
     name: string
     createdAt?: Date | string
+    tags?: RoomCreatetagsInput | $Enums.Genre[]
   }
 
   export type RoomUncheckedCreateWithoutOwnerInput = {
     id?: number
     name: string
     createdAt?: Date | string
+    tags?: RoomCreatetagsInput | $Enums.Genre[]
   }
 
   export type RoomCreateOrConnectWithoutOwnerInput = {
@@ -3883,6 +3974,7 @@ export namespace Prisma {
     id?: IntFilter<"Room"> | number
     name?: StringFilter<"Room"> | string
     createdAt?: DateTimeFilter<"Room"> | Date | string
+    tags?: EnumGenreNullableListFilter<"Room">
     ownerId?: IntFilter<"Room"> | number
   }
 
@@ -3936,23 +4028,27 @@ export namespace Prisma {
     id?: number
     name: string
     createdAt?: Date | string
+    tags?: RoomCreatetagsInput | $Enums.Genre[]
   }
 
   export type RoomUpdateWithoutOwnerInput = {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tags?: RoomUpdatetagsInput | $Enums.Genre[]
   }
 
   export type RoomUncheckedUpdateWithoutOwnerInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tags?: RoomUpdatetagsInput | $Enums.Genre[]
   }
 
   export type RoomUncheckedUpdateManyWithoutOwnerInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tags?: RoomUpdatetagsInput | $Enums.Genre[]
   }
 
 

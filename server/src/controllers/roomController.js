@@ -17,9 +17,10 @@ export async function getRoomByIdHandler(req, res) {
 }
 
 export async function createRoomHandler(req, res) {
-  const { name } = req.body;
+  const { name, tags } = req.body;
   const newRoom = await createRoom({
     name,
+    tags,
     ownerId: req.user.id,
   });
   res.status(201).json(newRoom);

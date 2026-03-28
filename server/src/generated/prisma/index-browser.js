@@ -132,6 +132,7 @@ exports.Prisma.RoomScalarFieldEnum = {
   id: 'id',
   name: 'name',
   createdAt: 'createdAt',
+  tags: 'tags',
   ownerId: 'ownerId'
 };
 
@@ -144,7 +145,28 @@ exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 };
-
+exports.Genre = exports.$Enums.Genre = {
+  HIPHOP: 'HIPHOP',
+  RNB: 'RNB',
+  POP: 'POP',
+  ROCK: 'ROCK',
+  ELECTRONIC: 'ELECTRONIC',
+  JAZZ: 'JAZZ',
+  CLASSICAL: 'CLASSICAL',
+  REGGAE: 'REGGAE',
+  LATIN: 'LATIN',
+  COUNTRY: 'COUNTRY',
+  METAL: 'METAL',
+  INDIE: 'INDIE',
+  SOUL: 'SOUL',
+  FUNK: 'FUNK',
+  LOFI: 'LOFI',
+  AFROBEATS: 'AFROBEATS',
+  KPOP: 'KPOP',
+  EDM: 'EDM',
+  HOUSE: 'HOUSE',
+  TRAP: 'TRAP'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',

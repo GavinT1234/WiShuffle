@@ -23,11 +23,35 @@ model User {
   @@map("users")
 }
 
+enum Genre {
+  HIPHOP
+  RNB
+  POP
+  ROCK
+  ELECTRONIC
+  JAZZ
+  CLASSICAL
+  REGGAE
+  LATIN
+  COUNTRY
+  METAL
+  INDIE
+  SOUL
+  FUNK
+  LOFI
+  AFROBEATS
+  KPOP
+  EDM
+  HOUSE
+  TRAP
+}
+
 model Room {
   id        Int      @id @default(autoincrement())
   name      String   @unique
   createdAt DateTime @default(now()) @map("created_at")
   owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  tags      Genre[]
   ownerId   Int      @map("user_id")
 
   @@map("rooms")
