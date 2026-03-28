@@ -30,8 +30,19 @@ model Room {
   createdAt DateTime @default(now()) @map("created_at")
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId Int @map("user_id")
+  genres RoomGenre[]
 
   @@map("rooms")
+}
+
+model RoomGenre {
+  id Int @id @default(autoincrement())
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId Int @map("room_id")
+  genre Genre
+
+  
+  @@map("room_genres")
 }
 
 model Playlist {
@@ -58,4 +69,71 @@ model PlaylistItem {
   playlistId Int @map("playlist_id")
 
   @@map("playlist_item")
+}
+
+enum Genre {
+  ROCK
+  POP
+  JAZZ
+  BLUES
+  SOUL
+  FUNK
+  DISCO
+  HOUSE
+  TECHNO
+  TRANCE
+  DUBSTEP
+  DRILL
+  GRIME
+  HIPHOP
+  TRAP
+  REGGAE
+  SKA
+  METAL
+  THRASH
+  HARDCORE
+  PUNK
+  SHOEGAZE
+  DREAMWAVE
+  SYNTHWAVE
+  VAPORWAVE
+  AMBIENT
+  DRONE
+  CLASSICAL
+  BAROQUE
+  OPERA
+  FOLK
+  COUNTRY
+  BLUEGRASS
+  FLAMENCO
+  BOSSA
+  SAMBA
+  AFROBEAT
+  HIGHLIFE
+  KPOP
+  JPOP
+  CITYPOP
+  REGGAETON
+  BACHATA
+  MERENGUE
+  TANGO
+  SALSA
+  CUMBIA
+  INDUSTRIAL
+  NOISE
+  CHIPTUNE
+  BREAKBEAT
+  JUNGLE
+  GARAGE
+  EMO
+  SCREAMO
+  POSTROCK
+  POSTPUNK
+  RNB
+  ELECTRONIC
+  LATIN
+  INDIE
+  LOFI
+  AFROBEATS
+  EDM
 }
