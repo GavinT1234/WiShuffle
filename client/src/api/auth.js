@@ -7,9 +7,15 @@ export const login = async ({ email, password }) => {
   });
 };
 
-export const register = async ({ name, email, password }) => {
+export const logout = async () => {
+  return await request("/auth/logout", {
+    method: "POST",
+  });
+};
+
+export const register = async ({ username, email, password }) => {
   return await request("/auth/register", {
     method: "POST",
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ username, email, password }),
   });
 };

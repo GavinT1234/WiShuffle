@@ -3,6 +3,12 @@ const BASE_URL = "/api";
 export const request = async (endpoint, options = {}) => {
   try {
     const token = localStorage.getItem("token");
+    console.log("token:", token); // ✅ check if token exists
+    console.log("headers being sent:", {
+      "Content-Type": "application/json",
+      ...options.headers,
+      ...(token && { Authorization: `Bearer ${token}` }),
+    }); // ✅ check what headers are being sent
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...options,
       headers: {
