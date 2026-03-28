@@ -36,7 +36,7 @@ const LoginPage = () => {
           />
           {error ? error : ""}
           <button className="btn btn-neutral mt-4" disable={loading}>
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Logging in..." : "Login"} 
           </button>
         </fieldset>
       </form>
