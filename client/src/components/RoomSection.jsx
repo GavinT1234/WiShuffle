@@ -88,14 +88,14 @@ const RoomSection = () => {
               type="checkbox"
               name="frameworks"
               value="HIPHIP"
-              aria-label="Hip-Hop"
+              aria-label="#hip-hop"
               onChange={handleChange}
             />
             <input
               className="btn"
               type="checkbox"
               name="frameworks"
-              aria-label="RNB"
+              aria-label="#rnb"
               value="RNB"
               onChange={handleChange}
             />
@@ -103,7 +103,7 @@ const RoomSection = () => {
               className="btn"
               type="checkbox"
               name="frameworks"
-              aria-label="Pop"
+              aria-label="#pop"
               value="POP"
               onChange={handleChange}
             />
@@ -111,7 +111,7 @@ const RoomSection = () => {
               className="btn"
               type="checkbox"
               name="frameworks"
-              aria-label="#LOFI"
+              aria-label="#lofi"
               value="LOFI"
               onChange={handleChange}
             />

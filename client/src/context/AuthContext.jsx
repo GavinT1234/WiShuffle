@@ -50,9 +50,9 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await registerApi({ username, email, password });
-      localStorage.setItem("token", response.token);
-
+      await registerApi({ username, email, password });
+      const response = await loginApi({ email, password }); // capture the response
+      localStorage.setItem("token", response.accessToken.accessToken);
       setIsLoggedIn(true);
       navigate("/dashboard");
     } catch (err) {
