@@ -1,10 +1,20 @@
 @import "tailwindcss";
 @plugin "daisyui";
 @plugin "daisyui" {
-  themes:
-    light --default,
-    dark --prefersdark,
-    business;
+  themes: light --default, dark --prefersdark, business;
+}
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari, and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge, and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
 }
 /* .counter {
   font-size: 16px;

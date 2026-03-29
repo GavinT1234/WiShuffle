@@ -14,7 +14,7 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <Navbar />
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-y-auto">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />

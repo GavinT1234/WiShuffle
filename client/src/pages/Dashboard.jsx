@@ -7,7 +7,7 @@ const Dashboard = () => {
   const { user, loading, error } = useGetUser();
 
   return (
-    <div className="">
+    <div className="min-h-screen">
       <div className="p-4 flex justify-center">
         {loading ? (
           <LoadingRing />
@@ -17,7 +17,7 @@ const Dashboard = () => {
         <section>{error ? error : ""}</section>
       </div>
       <div>
-        <RoomSection/>
+        <RoomSection />
       </div>
     </div>
   );
