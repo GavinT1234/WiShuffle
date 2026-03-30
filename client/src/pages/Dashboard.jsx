@@ -12,7 +12,9 @@ const Dashboard = () => {
         {loading ? (
           <LoadingRing />
         ) : (
-          <div className="text-4xl">Welcome, {user.username}</div>
+          <div className="text-2xl sm:text-3xl md:text-4xl font-bold ">
+            Welcome, {user.username}
+          </div>
         )}
         <section>{error ? error : ""}</section>
       </div>

@@ -67,16 +67,19 @@ const RoomSection = () => {
 
   return (
     <div className="flex flex-col lg:flex-row justify-center gap-6 p-4 w-full">
-      <div className="overflow-x-auto w-full lg:w-[70%]">
+      <div className="overflow-x-auto lg:w-[70%]">
         <table className="table w-full">
           <thead>
             <tr className="bg-base-200 text-xs text-base-content/50 uppercase">
-              <th className="w-[20%]">Host</th>
-              <th className="w-[35%]">Name</th>
-              <th className="w-[15%]">Listeners</th>
-              <th className="w-[30%]">
-                <div className="flex justify-between items-center">
-                  <span>Options</span>
+              <th className="w-[40%] sm:w-[20%]">Host</th>
+              <th className="w-[35%] md:w-[35%]">Name</th>
+              <th className="md:w-[15%] hidden md:table-cell">
+                Listeners
+              </th>{" "}
+              {/* ✅ hidden on mobile */}
+              <th>
+                <div className="flex  items-center justify-end md:justify-between">
+                  <span className="hidden md:block">Options</span>
                   <button
                     onClick={() => setIsOpen(true)}
                     className="btn border border-secondary btn-sm"
@@ -98,50 +101,65 @@ const RoomSection = () => {
               const visibleTags = r.tags.slice(0, 5);
               const remaining = r.tags.length - 5;
               const remainingTags = r.tags.slice(5);
-
               return (
                 <tr key={r.id}>
                   <td>
-                    <div className="font-medium text-xl">
-                      {r.owner.username}
-                    </div>
+                    <div className="font-medium">{r.owner.username}</div>
                   </td>
                   <td className="max-w-0">
                     {r.name}
-                    <br />
                     {r.tags.length > 0 && (
-                      <div className="flex gap-1 mt-2 flex-wrap">
-                        {visibleTags.map((t) => (
-                          <span
-                            key={t}
-                            className="badge badge-ghost badge-sm rounded-full text-xs px-2 py-0.5 text-base-content/60"
-                          >
-                            #{t.toLowerCase()}
+                      <>
+                        {/* mobile — first tag + count */}
+                        <div className="flex items-center gap-1 mt-1 md:hidden">
+                          <span className="badge badge-ghost badge-sm rounded-full text-xs">
+                            #{r.tags[0].toLowerCase()}
                           </span>
-                        ))}
-                        {remaining > 0 && (
-                          <span className="tooltip rounded-full text-xs px-2 py-0.5 text-base-content/40">
-                            <div className="tooltip-content flex flex-wrap gap-1 max-w-xs p-1">
-                              {remainingTags.map((t) => (
-                                <span
-                                  key={t}
-                                  className="badge badge-ghost badge-sm rounded-full text-xs px-2 py-0.5 text-base-content/60"
-                                >
-                                  #{t.toLowerCase()}
-                                </span>
-                              ))}
-                            </div>
-                            +{remaining} more
-                          </span>
-                        )}
-                      </div>
+                          {r.tags.length > 1 && (
+                            <span className="text-xs text-base-content/40">
+                              +{r.tags.length - 1}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* desktop — full tags with +more tooltip */}
+                        <div className="hidden md:flex gap-1 mt-2 flex-wrap">
+                          {visibleTags.map((t) => (
+                            <span
+                              key={t}
+                              className="badge badge-ghost badge-sm rounded-full text-xs"
+                            >
+                              #{t.toLowerCase()}
+                            </span>
+                          ))}
+                          {remaining > 0 && (
+                            <span className="tooltip rounded-full text-xs text-base-content/40">
+                              <div className="tooltip-content flex flex-wrap gap-1 max-w-xs p-1 shadow-lg bg-base-300">
+                                {remainingTags.map((t) => (
+                                  <span
+                                    key={t}
+                                    className="badge badge-ghost badge-sm rounded-full text-xs"
+                                  >
+                                    #{t.toLowerCase()}
+                                  </span>
+                                ))}
+                              </div>
+                              +{remaining} more
+                            </span>
+                          )}
+                        </div>
+                      </>
                     )}
                   </td>
-                  <td>{r.listenerCount}</td>
+                  <td className="hidden md:table-cell">{r.listenerCount}</td>{" "}
+                  {/* ✅ hidden on mobile */}
                   <td>
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-2 items-center justify-end md:justify-start">
                       <button className="btn btn-success btn-sm">JOIN</button>
-                      <button className="btn btn-ghost btn-xs">details</button>
+                      <button className="btn btn-ghost btn-xs hidden md:block">
+                        details
+                      </button>{" "}
+                      {/* ✅ hidden on mobile */}
                     </div>
                   </td>
                 </tr>
