@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -9,6 +10,7 @@ export function ProfilePage({ token, user, onLogout }) {
   const [previewSrc, setPreviewSrc] = useState(user?.avatarUrl || '');
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -68,9 +70,9 @@ export function ProfilePage({ token, user, onLogout }) {
   return (
     <div style={styles.page}>
       <header style={styles.header}>
-        <span style={styles.logo}>WiShuffle</span>
+        <span style={styles.logo} onClick={() => navigate('/rooms')} role="button">WiShuffle</span>
         <div style={styles.headerRight}>
-          <span style={styles.username}>{user?.username}</span>
+          <span style={styles.username} onClick={() => navigate('/profile')} role="button">{user?.username}</span>
           <button style={styles.logoutBtn} onClick={onLogout}>Logout</button>
         </div>
       </header>

@@ -54,9 +54,9 @@ export function RoomsPage({ token, user, onLogout }) {
   return (
     <div style={styles.page}>
       <header style={styles.header}>
-        <span style={styles.logo}>WiShuffle</span>
+        <span style={styles.logo} onClick={() => navigate('/rooms')} role="button">WiShuffle</span>
         <div style={styles.headerRight}>
-          <span style={styles.username}>{user?.username}</span>
+          <span style={styles.username} onClick={() => navigate('/profile')} role="button">{user?.username}</span>
           <button style={styles.logoutBtn} onClick={onLogout}>Logout</button>
         </div>
       </header>
@@ -133,6 +133,7 @@ const styles = {
     fontSize: '18px',
     fontWeight: '700',
     color: '#aa3bff',
+    cursor: 'pointer',
   },
   headerRight: {
     display: 'flex',
@@ -142,6 +143,7 @@ const styles = {
   username: {
     fontSize: '14px',
     color: '#888',
+    cursor: 'pointer',
   },
   logoutBtn: {
     background: 'transparent',

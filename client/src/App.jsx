@@ -4,6 +4,7 @@ import { useSocket } from './hooks/useSocket';
 import { LoginPage } from './pages/LoginPage';
 import { RoomsPage } from './pages/RoomsPage';
 import { RoomPage } from './pages/RoomPage';
+import { ProfilePage } from './pages/ProfilePage';
 
 function App() {
   const auth = useAuth();
@@ -40,6 +41,16 @@ function App() {
               connected={connected}
               user={auth.user}
               token={auth.token}
+            />
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProfilePage
+              token={auth.token}
+              user={auth.user}
+              onLogout={auth.logout}
             />
           }
         />
