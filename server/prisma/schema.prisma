@@ -30,19 +30,9 @@ model Room {
   createdAt DateTime @default(now()) @map("created_at")
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId Int @map("user_id")
-  genres RoomGenre[]
+  tags Genre[]
 
   @@map("rooms")
-}
-
-model RoomGenre {
-  id Int @id @default(autoincrement())
-  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roomId Int @map("room_id")
-  genre Genre
-
-  
-  @@map("room_genres")
 }
 
 model Playlist {
