@@ -47,12 +47,13 @@ model RoomGenre {
 
 model Playlist {
   id Int @id @default(autoincrement())
-  name String // Probably should be unique to the user, but multiple users should be able to have playlists with the same name
+  title String // Probably should be unique to the user, but multiple users should be able to have playlists with the same name
   shuffle Boolean
 
   items PlaylistItem[]
+  parentId Int?
+  parentPlaylist Playlist? @relation("PlaylistHierarchy", fields: [parentId], references: [id])
   subPlaylist Playlist[] @relation("PlaylistHierarchy")
-  parentPlaylist Playlist[] @relation("PlaylistHierarchy")
 
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId Int @map("user_id")
