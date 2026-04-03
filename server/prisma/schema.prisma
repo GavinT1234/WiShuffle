@@ -19,32 +19,9 @@ model User {
   password String
   createdAt DateTime @default(now()) @map("created_at")
   rooms Room[]
+  playlists Playlist[]
 
   @@map("users")
-}
-
-enum Genre {
-  HIPHOP
-  RNB
-  POP
-  RAP
-  ROCK
-  ELECTRONIC
-  JAZZ
-  CLASSICAL
-  REGGAE
-  LATIN
-  COUNTRY
-  METAL
-  INDIE
-  SOUL
-  FUNK
-  LOFI
-  AFROBEATS
-  KPOP
-  EDM
-  HOUSE
-  TRAP
 }
 
 model Room {
@@ -52,7 +29,102 @@ model Room {
   name String @unique
   createdAt DateTime @default(now()) @map("created_at")
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  tags    Genre[] 
+  tags Genre[] 
   ownerId Int @map("user_id")
+
   @@map("rooms")
+}
+
+model Playlist {
+  id Int @id @default(autoincrement())
+  title String // Probably should be unique to the user, but multiple users should be able to have playlists with the same name
+  shuffle Boolean
+
+  items PlaylistItem[]
+  parentId Int?
+  parentPlaylist Playlist? @relation("PlaylistHierarchy", fields: [parentId], references: [id])
+  subPlaylist Playlist[] @relation("PlaylistHierarchy")
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId Int @map("user_id")
+
+  @@map("playlists")
+}
+
+model PlaylistItem {
+  id Int @id @default(autoincrement())
+  title String
+  author String
+  url String
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  playlistId Int @map("playlist_id")
+
+  @@map("playlist_item")
+}
+
+enum Genre {
+  ROCK
+  POP
+  JAZZ
+  BLUES
+  SOUL
+  FUNK
+  DISCO
+  HOUSE
+  TECHNO
+  TRANCE
+  DUBSTEP
+  DRILL
+  GRIME
+  HIPHOP
+  TRAP
+  REGGAE
+  SKA
+  METAL
+  THRASH
+  HARDCORE
+  PUNK
+  SHOEGAZE
+  DREAMWAVE
+  SYNTHWAVE
+  VAPORWAVE
+  AMBIENT
+  DRONE
+  CLASSICAL
+  BAROQUE
+  OPERA
+  FOLK
+  COUNTRY
+  BLUEGRASS
+  FLAMENCO
+  BOSSA
+  SAMBA
+  AFROBEAT
+  HIGHLIFE
+  KPOP
+  JPOP
+  CITYPOP
+  REGGAETON
+  BACHATA
+  MERENGUE
+  TANGO
+  SALSA
+  CUMBIA
+  INDUSTRIAL
+  NOISE
+  CHIPTUNE
+  BREAKBEAT
+  JUNGLE
+  GARAGE
+  EMO
+  SCREAMO
+  POSTROCK
+  POSTPUNK
+  RNB
+  ELECTRONIC
+  LATIN
+  INDIE
+  LOFI
+  AFROBEATS
+  EDM
 }
