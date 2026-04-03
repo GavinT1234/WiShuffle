@@ -1,4 +1,3 @@
-import { getPostById } from "../services/postService.js";
 
 export async function authorizeOwnership(req, res, next) {
     const id = parseInt(req.params.id);
