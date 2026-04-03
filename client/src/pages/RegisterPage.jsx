@@ -1,25 +1,34 @@
 import React from "react";
-import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-const LoginPage = () => {
-  const { login, loading, error, clearError } = useAuth();
+import { useState, useEffect } from "react";
+const RegisterPage = () => {
+  const { loading, error, register, clearError } = useAuth();
 
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    login({ email, password });
+    register({ username, email, password });
   };
 
   useEffect(() => {
     clearError();
   }, []);
+
   return (
     <div className="flex flex-col justify-center place-items-center h-full overflow-hidden">
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleSubmit}>
         <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-          <legend className="fieldset-legend">Login</legend>
+          <legend className="fieldset-legend">Register</legend>
+          <label className="label">Name</label>
+          <input
+            type="name"
+            className="input"
+            placeholder="name"
+            onChange={(e) => setUsername(e.target.value)}
+          />
           <label className="label">Email</label>
           <input
             type="email"
@@ -35,13 +44,11 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
           {error ? error : ""}
-          <button className="btn btn-neutral mt-4" disable={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </button>
+          <button className="btn btn-neutral mt-4">Register</button>
         </fieldset>
       </form>
     </div>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
