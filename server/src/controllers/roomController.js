@@ -3,6 +3,7 @@ import {
   getRoomById,
   createRoom,
   deleteRoom,
+  getTags,
 } from '../services/roomService.js';
 
 export async function getAllRoomsHandler(req, res) {
@@ -30,4 +31,9 @@ export async function deleteRoomHandler(req, res) {
   const id = parseInt(req.params.id);
   await deleteRoom(id);
   res.status(204).send();
+}
+
+export async function getTagsHandler(req, res) {
+  const tags = await getTags();
+  res.status(200).json(tags);
 }
