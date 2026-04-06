@@ -1,4 +1,4 @@
-import { createPlaylist, deletePlaylist, getPlaylist, getPlaylists, updatePlaylist } from '../services/playlistService.js'
+import { createPlaylist, deletePlaylist, getPlaylist, getPlaylists, getSongs, updatePlaylist } from '../services/playlistService.js'
 
 export async function getPlaylistsHandler(req, res) {
     const playlists = await getPlaylists(req.user.id);
@@ -6,12 +6,16 @@ export async function getPlaylistsHandler(req, res) {
 }
 
 export async function getPlaylistHandler(req, res) {
+    const id = parseInt(req.params.id)
     const playlist = await getPlaylist(id);
     res.status(200).json(playlist);
 }
 
 export async function createPlaylistHandler(req, res) {
-    const { title, shuffle, parentPlaylist } = req.body;
+    const { title, shuffle, parentId } = req.body;
+    // if (parentId) {
+        
+    // }
     const playlist = await createPlaylist({title, shuffle, parentId, ownerId: req.user.id})
     res.status(200).json(playlist);
 }
@@ -26,4 +30,10 @@ export async function deletePlaylistHandler(req, res) {
     const id = parseInt(req.params.id);
     await deletePlaylist(id);
     res.status(204).send();
+}
+
+export async function getSongsHandler(req, res) {
+    const id = parseInt(req.params.id);
+    const songs = await getSongs(id);
+    res.status(200).json(songs);
 }

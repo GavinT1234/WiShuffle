@@ -39,8 +39,10 @@ model Playlist {
   id Int @id @default(autoincrement())
   title String // Probably should be unique to the user, but multiple users should be able to have playlists with the same name
   shuffle Boolean
+  position Float
 
-  items PlaylistItem[]
+  songs Song[]
+  
   parentId Int?
   parentPlaylist Playlist? @relation("PlaylistHierarchy", fields: [parentId], references: [id])
   subPlaylist Playlist[] @relation("PlaylistHierarchy")
@@ -48,18 +50,21 @@ model Playlist {
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId Int @map("user_id")
 
+  @@unique ([parentId, position])
   @@map("playlists")
 }
 
-model PlaylistItem {
+model Song {
   id Int @id @default(autoincrement())
   title String
   author String
   url String
   playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
   playlistId Int @map("playlist_id")
+  position Float
 
-  @@map("playlist_item")
+  @@unique ([playlistId, position])
+  @@map("songs")
 }
 
 enum Genre {
