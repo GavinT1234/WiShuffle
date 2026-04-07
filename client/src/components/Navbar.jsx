@@ -2,7 +2,6 @@ import React from "react";
 import LoginButton from "./LoginButton";
 import RegisterButton from "./RegisterButton";
 import { useAuth } from "../context/AuthContext";
-import LogoutButton from "./LogoutButton";
 import ProfileButton from "./ProfileButton";
 import { useGetUser } from "../hooks/useGetUser";
 
@@ -45,14 +44,9 @@ const Navbar = () => {
             <ul className="menu menu-horizontal flex gap-4 items-center">
               {/* Navbar menu content here */}
               {isLoggedIn ? (
-                <>
-                  <li>
-                    <ProfileButton user={user} loading={loading} />
-                  </li>
-                  <li>
-                    <LogoutButton />
-                  </li>
-                </>
+                <li>
+                  <ProfileButton user={user} loading={loading} />
+                </li>
               ) : (
                 <>
                   <li>
