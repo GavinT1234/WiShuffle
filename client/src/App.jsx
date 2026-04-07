@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProtectedRoutes from "./components/ProtectedRoutes";
+import ProfilePage from "./pages/ProfilePage";
 
 import { AuthProvider } from "./context/AuthContext";
 import Dashboard from "./pages/Dashboard";
@@ -25,6 +26,14 @@ function App() {
                 element={
                   <ProtectedRoutes>
                     <Dashboard />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoutes>
+                    <ProfilePage />
                   </ProtectedRoutes>
                 }
               />

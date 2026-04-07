@@ -17,6 +17,8 @@ model User {
   username String @unique
   email String @unique
   password String
+  avatarUrl   String?  @db.Text   @map("avatar_url")
+  description String?  @db.Text
   createdAt DateTime @default(now()) @map("created_at")
   rooms Room[]
   playlists Playlist[]

@@ -30,7 +30,7 @@ export async function login(email, password) {
   if (!match) throw error;
 
   const accessToken = jwt.sign({ id: user.id }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
+    expiresIn: JWT_EXPIRES_IN || '1d',
   });
 
   return { user: sanitizeUser(user), accessToken };
