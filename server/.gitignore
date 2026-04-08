@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 .env
-/generated/prisma
+/src/generated/prisma
 /prisma/migrations
-generated
+/migrations
+dump.rdb
