@@ -1,9 +1,9 @@
 import express from 'express';
 import morgan from 'morgan';
-import cors from "cors";
-import { createServer } from "node:http";
-import { initSocket } from "./socket/index.js";
-import { connectRedis } from "./config/redis.js";
+import cors from 'cors';
+import { createServer } from 'node:http';
+import { initSocket } from './socket/index.js';
+import { connectRedis } from './config/redis.js';
 import roomRoutes from './routes/roomRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 
@@ -13,14 +13,16 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(morgan('tiny'));
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  }),
+);
 
 // HTTP Server + WebSockets
 const server = createServer(app);
-const io = initSocket(server);
+const io = await initSocket(server);
 
 // Routes
 app.use('/api/rooms', roomRoutes);

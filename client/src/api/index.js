@@ -2,7 +2,7 @@ const BASE_URL = "/api";
 
 export const request = async (endpoint, options = {}) => {
   try {
-    console.log(`URL: ${BASE_URL}${endpoint}`);
+
     const token = localStorage.getItem("token");
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...options,
@@ -12,6 +12,7 @@ export const request = async (endpoint, options = {}) => {
         ...(token && { Authorization: `Bearer ${token}` }),
       },
     });
+    
     if (response.status === 401) {
       window.location.href = "/";
     }
