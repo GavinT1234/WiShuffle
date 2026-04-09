@@ -9,6 +9,7 @@ export async function authenticate(req, res, next) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.log('authHeader:', authHeader, 'authHeader.startsWith("Bearer "):', authHeader.startsWith('Bearer'));
         return next(err);
     }
 
