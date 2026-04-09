@@ -114,23 +114,24 @@ const RoomSection = () => {
                     {r.tags.length > 0 && (
                       <>
                         {/* mobile — first tag + count */}
-                        <div className="flex items-center gap-1 mt-1 md:hidden">
-                          <span className="badge badge-ghost badge-sm rounded-full text-xs">
+                        <div className="flex items-center gap-1 mt-1 md:hidden ">
+                          <span className="badge badge-ghost badge-sm rounded-full text-xs text-base-content/60">
+
                             #{r.tags[0].toLowerCase()}
                           </span>
                           {r.tags.length > 1 && (
-                            <span className="text-xs text-base-content/40">
+                            <span className="text-xs text-base-content/60">
                               +{r.tags.length - 1}
                             </span>
                           )}
                         </div>
 
                         {/* desktop — full tags with +more tooltip */}
-                        <div className="hidden md:flex gap-1 mt-2 flex-wrap">
+                        <div className="hidden md:flex gap-1 mt-2 flex-wrap ">
                           {visibleTags.map((t) => (
                             <span
                               key={t}
-                              className="badge badge-ghost badge-sm rounded-full text-xs"
+                              className="badge badge-ghost badge-sm rounded-full text-xs text-base-content/60"
                             >
                               #{t.toLowerCase()}
                             </span>
@@ -141,7 +142,7 @@ const RoomSection = () => {
                                 {remainingTags.map((t) => (
                                   <span
                                     key={t}
-                                    className="badge badge-ghost badge-sm rounded-full text-xs"
+                                    className="badge badge-ghost badge-sm rounded-full text-xs text-base-content/60"
                                   >
                                     #{t.toLowerCase()}
                                   </span>
