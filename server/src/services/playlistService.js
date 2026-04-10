@@ -1,12 +1,12 @@
-import { allSongs, create, getSingle, getUser, update } from '../repositories/playlistRepo.js'
+import { allSongs, create, singlePlaylist, userPlaylists, update, playlistSongs } from '../repositories/playlistRepo.js'
 
 export async function getPlaylists(ownerId) {
-    const playlists = await getUser(ownerId);
+    const playlists = await userPlaylists(ownerId);
     return playlists;
 }
 
 export async function getPlaylist(id) {
-    const playlist = await getSingle(id);
+    const playlist = await singlePlaylist(id);
     if (playlist) return playlist;
     else {
         const error = new Error(`Playlist not found`);
@@ -15,14 +15,24 @@ export async function getPlaylist(id) {
     }
 }
 
-export async function createPlaylist({playlistData}) {
+export async function getPlaylistSongs(id) {
+    const songs = await playlistSongs(id);
+    if (songs) return songs;
+    else {
+        const error = new Error(`Playlist not found`);
+        error.status = 404;
+        throw error;
+    }
+}
+
+export async function createPlaylist(playlistData) {
     
-    const playlist = await create({playlistData});
+    const playlist = await create(playlistData);
     return playlist;
 }
 
-export async function updatePlaylist({playlistData}) {
-    const playlist = await update({playlistData});
+export async function updatePlaylist(id, playlistData) {
+    const playlist = await update(id, playlistData);
     if (playlist) return playlist;
     else {
         const error = new Error(`Playlist not found`);

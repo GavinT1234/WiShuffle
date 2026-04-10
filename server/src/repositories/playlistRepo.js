@@ -1,42 +1,54 @@
 import prisma from '../config/db.js';
 
-export async function getUser(ownerId) {
+export async function userPlaylists(ownerId) {
     const playlists = await prisma.playlist.findMany({where: {ownerId}});
     return playlists;
 }
 
-export async function getSingle(id) {
+export async function singlePlaylist(id) {
     const playlist = await prisma.playlist.findUnique({where: {id}});
     return playlist;
 }
 
-export async function getPositions(id) {
+export async function playlistSongs(playlistId) {
     const songs = await prisma.song.findMany({
-        where: {playlistId: id},
-        include: {
-            position: true
-        }
+        where: {playlistId},
+        orderBy: {position: 'asc'}
     });
-    prisma.song
-    const playlists = await prisma.playlist.findMany({
-        where: {parentId: id},
-        include: {
-            position: true
-        }
-    });
-    
+    return songs;
 }
 
-export async function create({playlistData}) {
+export async function playlistContent(playlistId) {
+    const playlistContents = await Promise.all([
+    prisma.song.findMany({
+        where: { parentId },
+        orderBy: { position: 'asc' }
+    }),
+    prisma.playlist.findMany({
+        where: { parentId },
+        orderBy: { position: 'asc' }
+    })
+    ]);
+
+    // Merge with type indicators for frontend differentiation
+    const merged = [
+    ...playlistContents[0].map(song => ({ ...song, type: 'song' })),
+    ...playlistContents[1].map(playlist => ({ ...playlist, type: 'playlist' }))
+    ].sort((a, b) => a.position - b.position);
+
+    return merged;
+}
+
+export async function create(playlistData) {
     const playlist = await prisma.playlist.create({data: {playlistData}});
     return playlist;
 }
 
-export async function update({playlistData}) {
+export async function update(id, playlistData) {
     try {
         const playlist = await prisma.playlist.update({
         where: { id },
-        data: playlistData,
+        data: { playlistData },
         });
         return playlist;
     } catch (error) {
@@ -72,9 +84,7 @@ export async function remove(id) {
 export async function getAllSongsFromPlaylist(playlistId) {
   // Step 1: fetch playlist with children + songs
   const playlist = await prisma.playlist.findUnique({
-    where: { 
-        id: { playlistId }
-    },
+    where: { id: playlistId },
     include: {
       songs: true,
       subPlaylist: true

@@ -6,9 +6,15 @@ export async function getPlaylistsHandler(req, res) {
 }
 
 export async function getPlaylistHandler(req, res) {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id);
     const playlist = await getPlaylist(id);
     res.status(200).json(playlist);
+}
+
+export async function getPlaylistSongsHandler(req, res) {
+    const id = parseInt(req.params.id);
+    const songs = await getPlaylistSongs(id);
+    res.status(200).json(songs);
 }
 
 export async function createPlaylistHandler(req, res) {
@@ -21,8 +27,9 @@ export async function createPlaylistHandler(req, res) {
 }
 
 export async function updatePlaylistHandler(req, res) {
+    const id = req.params.id;
     const {title, shuffle} = req.body;
-    const playlist = await updatePlaylist({title, shuffle});
+    const playlist = await updatePlaylist(id, {title, shuffle});
     res.status(200).json(playlist);
 }
 
