@@ -14,7 +14,9 @@ export const request = async (endpoint, options = {}) => {
     });
     
     if (response.status === 401) {
+      if (localStorage.getItem("token")) {
       window.location.href = "/";
+      }
     }
 
     const text = await response.text();
