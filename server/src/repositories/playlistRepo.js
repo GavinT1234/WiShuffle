@@ -1,12 +1,12 @@
 import prisma from '../config/db.js';
 
 export async function userPlaylists(ownerId) {
-    const playlists = await prisma.playlist.findMany({where: {ownerId}});
+    const playlists = await prisma.playlist.findMany({where: {ownerId}, include: {ownerId: false}});
     return playlists;
 }
 
 export async function singlePlaylist(id) {
-    const playlist = await prisma.playlist.findUnique({where: {id}});
+    const playlist = await prisma.playlist.findUnique({where: {id}, include: {ownerId: false}});
     return playlist;
 }
 
@@ -18,14 +18,19 @@ export async function playlistSongs(playlistId) {
     return songs;
 }
 
+export async function playlistOrdering(parentId) {
+    const ordering = await prisma.$queryRaw(`SELECT id, position, 'PLAYLISTS' AS source FROM PLAYLISTS WHERE parentId = ${parentId} UNION ALL SELECT id, position, 'SONGS' AS source FROM SONGS WHERE parentId = ${parentId} ORDER BY position;`);
+    return ordering;
+}
+
 export async function playlistContent(playlistId) {
     const playlistContents = await Promise.all([
     prisma.song.findMany({
-        where: { parentId },
+        where: { playlistId },
         orderBy: { position: 'asc' }
     }),
     prisma.playlist.findMany({
-        where: { parentId },
+        where: { parentId: playlistId },
         orderBy: { position: 'asc' }
     })
     ]);
@@ -40,7 +45,12 @@ export async function playlistContent(playlistId) {
 }
 
 export async function create(playlistData) {
-    const playlist = await prisma.playlist.create({data: {playlistData}});
+    const playlist = await prisma.playlist.create({data: playlistData});
+    return playlist;
+}
+
+export async function add(songData) {
+    const song = await prisma.song.create({data: songData});
     return playlist;
 }
 
@@ -63,6 +73,18 @@ export async function remove(id) {
         where: { id },
         });
         return playlist;
+    } catch (error) {
+        if (error.code === 'P2025') return null;
+        throw error;
+    }
+}
+
+export async function removeSong(id) {
+    try {
+        const song = await prisma.song.delete({
+        where: { id },
+        });
+        return song;
     } catch (error) {
         if (error.code === 'P2025') return null;
         throw error;

@@ -37,9 +37,9 @@ model Room {
 
 model Playlist {
   id Int @id @default(autoincrement())
-  title String // Probably should be unique to the user, but multiple users should be able to have playlists with the same name
-  shuffle Boolean
-  position Float
+  name String // Probably should be unique to the user, but multiple users should be able to have playlists with the same name
+  shuffle Boolean @default(false)
+  position Float?
 
   songs Song[]
   
@@ -50,7 +50,7 @@ model Playlist {
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId Int @map("user_id")
 
-  @@unique ([parentId, position])
+  // @@unique ([parentId, position])
   @@map("playlists")
 }
 
@@ -63,7 +63,7 @@ model Song {
   playlistId Int @map("playlist_id")
   position Float
 
-  @@unique ([playlistId, position])
+  // @@unique ([playlistId, position])
   @@map("songs")
 }
 

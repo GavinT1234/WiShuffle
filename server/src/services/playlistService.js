@@ -1,4 +1,4 @@
-import { allSongs, create, singlePlaylist, userPlaylists, update, playlistSongs } from '../repositories/playlistRepo.js'
+import { create, singlePlaylist, userPlaylists, update, playlistSongs, playlistOrdering, add, removeSong } from '../repositories/playlistRepo.js'
 
 export async function getPlaylists(ownerId) {
     const playlists = await userPlaylists(ownerId);
@@ -25,10 +25,30 @@ export async function getPlaylistSongs(id) {
     }
 }
 
+export async function getPlaylistOrdering(id) {
+    const ordering = await playlistOrdering(id);
+    if (ordering) return ordering;
+    else {
+        const error = new Error(`Play;ist not found`);
+        error.status = 404;
+        throw error;
+    }
+}
+
 export async function createPlaylist(playlistData) {
     
     const playlist = await create(playlistData);
     return playlist;
+}
+
+export async function addSong(songData) {
+    const song = await add(songData);
+    if (song) return song;
+    else {
+        const error = new Error(`Playlist not found`);
+        error.status(400);
+        throw error;
+    }
 }
 
 export async function updatePlaylist(id, playlistData) {
@@ -51,8 +71,18 @@ export async function deletePlaylist(id) {
     }
 }
 
+export async function deleteSong(id) {
+    const song = await removeSong(id);
+    if (song) return;
+    else {
+        const error = new Error(`Song not found`);
+        error.status = 404;
+        throw error;
+    }
+}
+
 export async function getSongs(playlistId) {
-    const songs = await allSongs(playlistId);
+    const songs = await playlistSongs(playlistId);
     if (songs) return;
     else {
         const error = new Error(`Playlist not found`);
