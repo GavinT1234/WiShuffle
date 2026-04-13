@@ -28,7 +28,10 @@ export function useRoom(roomId) {
       hasJoinedRef.current = true;
       setIsLoading(true);
 
+      console.log('📤 Emitting room:join for roomId:', roomId, 'socket.id:', socket.id);
       socket.emit("room:join", { roomId }, (resp) => {
+        console.log('✅ room:join response:', resp);
+        console.log('   After join, socket.rooms:', socket.rooms);
         if (resp?.ok && resp.state) {
           applyState(resp.state);
         } else {

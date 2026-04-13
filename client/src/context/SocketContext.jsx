@@ -8,6 +8,8 @@ export function SocketProvider({ children }) {
     const token = localStorage.getItem("token");
     const [socket, setSocket] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
+    window._socket = socket;
+
 
     useEffect(() => {
         if (!token) return;

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { useYouTubePlayer } from '../hooks/useYouTubePlayer';
+import { useYoutubePlayer } from '../hooks/useYoutubePlayer';
 
 const PLAYER_DIV_ID = 'yt-player-container';
 
@@ -18,6 +18,7 @@ export function VideoPlayer({
                                 onPassDJ,
                                 onJoinQueue,
                                 onLeaveQueue,
+                                onPlayerReady,
                             }) {
     const [urlInput, setUrlInput] = useState('');
     const [titleInput, setTitleInput] = useState('');
@@ -27,35 +28,17 @@ export function VideoPlayer({
     const progressInterval = useRef(null);
 
     const { ready, loadVideo, play, pause, seekTo, getCurrentTime, getDuration } =
-        useYouTubePlayer({
+        useYoutubePlayer({
             containerId: PLAYER_DIV_ID,
             onStateChange: (state) => {
-                // YT.PlayerState: PLAYING=1, PAUSED=2, ENDED=0
                 if (state === 1) setLocalPlaying(true);
                 if (state === 2 || state === 0) setLocalPlaying(false);
-                if (state === 1) {
-                    setDuration(getDuration());
-                }
             },
         });
 
-    // Expose player controls upward via onReady callback
     useEffect(() => {
-        if (ready) onReady?.({ loadVideo, play, pause, seekTo, getCurrentTime, getDuration });
+        if (ready) onPlayerReady?.({ loadVideo, play, pause, seekTo, getCurrentTime, getDuration });
     }, [ready]);
-
-    // Progress bar ticker
-    useEffect(() => {
-        if (localPlaying) {
-            progressInterval.current = setInterval(() => {
-                setCurrentTime(getCurrentTime());
-                setDuration(getDuration());
-            }, 500);
-        } else {
-            clearInterval(progressInterval.current);
-        }
-        return () => clearInterval(progressInterval.current);
-    }, [localPlaying, getCurrentTime, getDuration]);
 
     const handleQueueVideo = (e) => {
         e.preventDefault();
