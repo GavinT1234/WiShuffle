@@ -1,4 +1,4 @@
-import { getAll, getById, create, remove } from '../repositories/roomRepo.js';
+import { getAll, getById, create, remove, tagsEnum } from '../repositories/roomRepo.js';
 import { redis } from '../config/redis.js';
 import prisma from '../config/db.js';
 // CRUD
@@ -150,4 +150,9 @@ export async function clearRoomState(id) {
   ];
 
   await Promise.all(keys.map((k) => redis.del(k)));
+}
+
+export async function getTags() {
+  const tags = await tagsEnum();
+  return tags;
 }
