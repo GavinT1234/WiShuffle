@@ -2,7 +2,7 @@ import express from 'express';
 import { addSongHandler, createPlaylistHandler, deletePlaylistHandler, deleteSongHandler, getPlaylistContentHandler, getPlaylistHandler, getPlaylistOrderingHandler, getPlaylistsHandler, getPlaylistSongsHandler, updatePlaylistHandler } from '../controllers/playlistController.js'
 import { authenticate } from '../middleware/authenticate.js';
 import { authorizeOwnership, authorizeParentOwnership } from '../middleware/authorizeOwnership.js';
-import { validateParent, validatePlaylist } from '../middleware/validator.js';
+import { validateParent, validatePlaylist } from '../middleware/playlistValidators.js';
 
 const router = express.Router();
 
