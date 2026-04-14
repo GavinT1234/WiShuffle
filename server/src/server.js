@@ -1,32 +1,39 @@
 import express from 'express';
 import morgan from 'morgan';
-import cors from "cors";
-import { createServer } from "node:http";
-import { initSocket } from "./socket/index.js";
-import { connectRedis } from "./config/redis.js";
+import cors from 'cors';
+import { createServer } from 'node:http';
+import { initSocket } from './socket/index.js';
+import { connectRedis } from './config/redis.js';
 import roomRoutes from './routes/roomRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import playlistRoutes from './routes/playlistRoutes.js';
+import userRoutes from './routes/userRoutes.js';  
+import youtubeRoutes from './routes/youtubeRoutes.js';
+
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(express.json());
 app.use(morgan('tiny'));
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  }),
+);
 
 // HTTP Server + WebSockets
 const server = createServer(app);
-const io = initSocket(server);
+const io = await initSocket(server);
 
 // Routes
 app.use('/api/rooms', roomRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/playlists', playlistRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/youtube', youtubeRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {

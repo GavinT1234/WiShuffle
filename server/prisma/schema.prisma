@@ -13,24 +13,26 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  username String @unique
-  email String @unique
-  password String
-  createdAt DateTime @default(now()) @map("created_at")
-  rooms Room[]
-  playlists Playlist[]
+  id          Int        @id @default(autoincrement())
+  username    String     @unique
+  email       String     @unique
+  password    String
+  avatarUrl   String?    @map("avatar_url") @db.Text
+  description String?    @db.Text
+  createdAt   DateTime   @default(now()) @map("created_at")
+  rooms       Room[]
+  playlists   Playlist[]
 
   @@map("users")
 }
 
 model Room {
-  id Int @id @default(autoincrement())
-  name String @unique
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
   createdAt DateTime @default(now()) @map("created_at")
-  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  tags Genre[] 
-  ownerId Int @map("user_id")
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  tags      Genre[]
+  ownerId   Int      @map("user_id")
 
   @@map("rooms")
 }
@@ -51,8 +53,8 @@ model Playlist {
   parentPlaylist Playlist? @relation("PlaylistHierarchy", fields: [parentId], references: [id])
   subPlaylist Playlist[] @relation("PlaylistHierarchy")
 
-  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId Int @map("user_id")
+  owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId Int  @map("user_id")
 
   // @@unique ([parentId, position])
   @@map("playlists")
@@ -76,6 +78,7 @@ enum Genre {
   POP
   JAZZ
   BLUES
+  RAP
   SOUL
   FUNK
   DISCO

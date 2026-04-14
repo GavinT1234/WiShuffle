@@ -2,10 +2,12 @@ import React from "react";
 import LoginButton from "./LoginButton";
 import RegisterButton from "./RegisterButton";
 import { useAuth } from "../context/AuthContext";
-import LogoutButton from "./LogoutButton";
+import ProfileButton from "./ProfileButton";
+import { useGetUser } from "../hooks/useGetUser";
 
 const Navbar = () => {
   const { isLoggedIn } = useAuth();
+  const { user, loading } = isLoggedIn ? useGetUser() : { user: null, loading: false };
   return (
     <div className="drawer border-b border-border">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
@@ -39,10 +41,12 @@ const Navbar = () => {
             </div>
           </a>
           <div className="hidden flex-none lg:block">
-            <ul className="menu menu-horizontal flex gap-4">
+            <ul className="menu menu-horizontal flex gap-4 items-center">
               {/* Navbar menu content here */}
               {isLoggedIn ? (
-                <LogoutButton />
+                <li>
+                  <ProfileButton user={user} loading={loading} />
+                </li>
               ) : (
                 <>
                   <li>
