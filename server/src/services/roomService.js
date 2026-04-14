@@ -39,12 +39,10 @@ export async function deleteRoom(id) {
 // Live State (Redis)
 
 export async function getRoomState(id) {
-  const [room, userIds, queue, currentSong, startedAt] = await Promise.all([
+  const [room, userIds, playlist] = await Promise.all([
     getById(id),
     redis.sMembers(`room:${id}:users`),
-    redis.lRange(`room:${id}:djQueue`, 0, -1),
-    redis.get(`room:${id}:currentSong`),
-    redis.get(`room:${id}:startedAt`),
+    redis.lRange(`room:${id}:playlist`, 0, -1),
   ]);
 
   if (!room) throw new Error('Room not found');
@@ -59,16 +57,10 @@ export async function getRoomState(id) {
       )
       : [];
 
-  const elapsedSeconds = startedAt
-      ? (Date.now() - Number(startedAt)) / 1000
-      : 0;
-
   return {
     room,
     users,
-    djQueue: queue,
-    currentSong: currentSong ? JSON.parse(currentSong) : null,
-    elapsedSeconds,
+    playlist,
   };
 }
 
@@ -143,10 +135,8 @@ export async function clearRoomState(id) {
   // Called when a room is deleted or the server restarts
   const keys = [
     `room:${id}:users`,
-    `room:${id}:djQueue`,
-    `room:${id}:currentSong`,
-    `room:${id}:startedAt`,
-    `room:${id}:votes`,
+    `room:${id}:playlist`,
+    `room:${id}:playback`,
   ];
 
   await Promise.all(keys.map((k) => redis.del(k)));

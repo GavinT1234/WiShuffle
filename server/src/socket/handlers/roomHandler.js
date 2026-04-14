@@ -36,7 +36,7 @@ export function registerRoomHandlers(io, socket) {
       // Get current playback state and send it to the new user
       try {
         const playbackData = await redis.hGetAll(`room:${roomId}:playback`);
-        const djQueue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
+        const playlist = await redis.lRange(`room:${roomId}:playlist`, 0, -1);
 
         if (playbackData && playbackData.videoId) {
           console.log(`📤 Sending current playback to new user:`, playbackData);
@@ -63,8 +63,8 @@ export function registerRoomHandlers(io, socket) {
           socket.emit('room:video_load', payload);
         }
 
-        // Also send the DJ queue
-        socket.emit('dj:queue_updated', { queue: djQueue, roomId });
+        // Send the playlist
+        socket.emit('room:queue_updated', { queue: playlist, roomId });
       } catch (err) {
         console.error('Error fetching playback state:', err);
       }
@@ -109,87 +109,11 @@ export function registerRoomHandlers(io, socket) {
       console.error(`[Socket] Error leaving room ${roomId}:`, err);
     }
   }
-  // ── Join DJ Queue ──
-  socket.on('dj:join_queue', async ({ roomId }) => {
+
+  // ── Queue Video (Any user) ──
+  socket.on('room:queue_video', async ({ roomId, input, title }, ack) => {
     try {
-      console.log(`🎧 User ${socket.id} joining DJ queue in room ${roomId}`);
-
-      const userId = String(socket.user.id);
-
-      // Check if already in queue
-      const queue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
-      if (queue.includes(userId)) {
-        console.log(`⚠️  User ${userId} already in queue`);
-        socket.emit('dj:error', { message: 'Already in queue' });
-        return;
-      }
-
-      // Add to queue
-      await redis.rPush(`room:${roomId}:djQueue`, userId);
-
-      const newQueue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
-
-      // Broadcast to room only
-      io.to(`room:${roomId}`).emit('dj:queue_updated', { queue: newQueue, roomId });
-
-      // Broadcast updated room state
-      const state = await getRoomState(roomId);
-      io.to(`room:${roomId}`).emit('room:state', state);
-
-      // Tell this user if they're now DJ
-      const isDJ = newQueue[0] === userId;
-      socket.emit('dj:status', { isDJ });
-
-      console.log(`✅ User ${userId} joined queue. Position: ${newQueue.indexOf(userId) + 1}/${newQueue.length}`);
-
-    } catch (error) {
-      console.error('❌ Join queue error:', error);
-      socket.emit('dj:error', { message: error.message });
-    }
-  });
-
-  // ── Leave DJ Queue ──
-  socket.on('dj:leave_queue', async ({ roomId }) => {
-    try {
-      console.log(`👋 User ${socket.id} leaving DJ queue in room ${roomId}`);
-
-      const userId = String(socket.user.id);
-
-      await redis.lRem(`room:${roomId}:djQueue`, 1, userId);
-
-      const newQueue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
-
-      io.to(`room:${roomId}`).emit('dj:queue_updated', { queue: newQueue, roomId });
-
-      // Broadcast updated room state
-      const state = await getRoomState(roomId);
-      io.to(`room:${roomId}`).emit('room:state', state);
-
-      console.log(`✅ User ${userId} left queue. Remaining: ${newQueue.length}`);
-
-    } catch (error) {
-      console.error('❌ Leave queue error:', error);
-      socket.emit('dj:error', { message: error.message });
-    }
-  });
-
-  // ── Queue Video (DJ only) ──
-  socket.on('dj:queue_video', async ({ roomId, input, title }, ack) => {
-    try {
-      console.log(`🎵 Received dj:queue_video from ${socket.id} in room ${roomId}:`, { input, title });
-
-      const userId = String(socket.user.id);
-      const queue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
-
-      console.log(`   DJ check: userId=${userId}, currentDJ=${queue[0]}, isQueueEmpty=${queue.length === 0}`);
-
-      // Only DJ can load videos
-      if (queue[0] !== userId) {
-        console.log(`❌ User ${userId} is not DJ (DJ is ${queue[0]})`);
-        socket.emit('dj:error', { message: 'Only DJ can queue videos' });
-        if (ack) ack({ ok: false, error: 'Only DJ can queue videos' });
-        return;
-      }
+      console.log(`🎵 Received room:queue_video from ${socket.id} in room ${roomId}:`, { input, title });
 
       // Extract video ID using robust regex
       const videoId = extractVideoId(input);
@@ -197,7 +121,7 @@ export function registerRoomHandlers(io, socket) {
 
       if (!videoId) {
         console.error(`❌ Could not extract video ID from: ${input}`);
-        socket.emit('dj:error', { message: 'Please enter a valid YouTube video URL or ID' });
+        socket.emit('room:error', { message: 'Please enter a valid YouTube video URL or ID' });
         if (ack) ack({ ok: false, error: 'Invalid YouTube URL' });
         return;
       }
@@ -207,54 +131,54 @@ export function registerRoomHandlers(io, socket) {
         title: title || videoId,
       };
 
-      console.log(`   Saving to Redis for room ${roomId}:`, song);
+      console.log(`   Adding to playlist for room ${roomId}:`, song);
 
-      // Set as current playback
-      await redis.hSet(`room:${roomId}:playback`, 'videoId', videoId);
-      await redis.hSet(`room:${roomId}:playback`, 'title', song.title);
-      await redis.hSet(`room:${roomId}:playback`, 'elapsedSeconds', '0');
-      await redis.hSet(`room:${roomId}:playback`, 'playState', 'playing');
-      await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
+      // Get current playlist
+      const currentPlaylist = await redis.lRange(`room:${roomId}:playlist`, 0, -1);
+      const isFirstVideo = currentPlaylist.length === 0;
 
-      const payload = {
-        song,
-        elapsedSeconds: 0,
-        playState: 'playing',
-        roomId  // Include roomId so clients can filter
-      };
+      // Add video to playlist
+      await redis.rPush(`room:${roomId}:playlist`, videoId);
 
-      console.log(`📢 Broadcasting room:video_load to room ${roomId}`);
+      // If this is the first video, load it immediately
+      if (isFirstVideo) {
+        await redis.hSet(`room:${roomId}:playback`, 'videoId', videoId);
+        await redis.hSet(`room:${roomId}:playback`, 'title', song.title);
+        await redis.hSet(`room:${roomId}:playback`, 'elapsedSeconds', '0');
+        await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
+        await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
-      // Send immediately to the DJ
-      socket.emit('room:video_load', payload);
+        const payload = {
+          song,
+          elapsedSeconds: 0,
+          playState: 'paused',
+          roomId
+        };
 
-      // Broadcast to all other users in the room
-      socket.broadcast.to(`room:${roomId}`).emit('room:video_load', payload);
+        console.log(`📢 Broadcasting first video to room ${roomId}`);
+        // Ensure sender gets the event immediately
+        socket.emit('room:video_load', payload);
+        // Then broadcast to everyone (including others in the room)
+        io.to(`room:${roomId}`).emit('room:video_load', payload);
+      }
 
-      // Also broadcast updated room state for redundancy
-      const state = await getRoomState(roomId);
-      io.to(`room:${roomId}`).emit('room:state', state);
+      // Broadcast updated playlist to room
+      const updatedPlaylist = await redis.lRange(`room:${roomId}:playlist`, 0, -1);
+      io.to(`room:${roomId}`).emit('room:queue_updated', { queue: updatedPlaylist, roomId });
 
       if (ack) ack({ ok: true });
-      console.log(`✅ Broadcast emitted`);
+      console.log(`✅ Video queued`);
 
     } catch (error) {
       console.error('❌ Queue video error:', error);
-      socket.emit('dj:error', { message: error.message });
+      socket.emit('room:error', { message: error.message });
       if (ack) ack({ ok: false, error: error.message });
     }
   });
 
-  // ── Play (DJ only) ──
-  socket.on('dj:play', async ({ roomId }) => {
+  // ── Play (Any user) ──
+  socket.on('room:video_play', async ({ roomId }) => {
     try {
-      const userId = String(socket.user.id);
-      const queue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
-
-      if (queue[0] !== userId) {
-        return socket.emit('dj:error', { message: 'Only DJ can play' });
-      }
-
       await redis.hSet(`room:${roomId}:playback`, 'playState', 'playing');
       await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
@@ -266,16 +190,9 @@ export function registerRoomHandlers(io, socket) {
     }
   });
 
-  // ── Pause (DJ only) ──
-  socket.on('dj:pause', async ({ roomId }) => {
+  // ── Pause (Any user) ──
+  socket.on('room:video_pause', async ({ roomId }) => {
     try {
-      const userId = String(socket.user.id);
-      const queue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
-
-      if (queue[0] !== userId) {
-        return socket.emit('dj:error', { message: 'Only DJ can pause' });
-      }
-
       await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
       await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
@@ -287,16 +204,9 @@ export function registerRoomHandlers(io, socket) {
     }
   });
 
-  // ── Seek (DJ only) ──
-  socket.on('dj:seek', async ({ roomId, positionSeconds }) => {
+  // ── Seek (Any user) ──
+  socket.on('room:video_seek', async ({ roomId, positionSeconds }) => {
     try {
-      const userId = String(socket.user.id);
-      const queue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
-
-      if (queue[0] !== userId) {
-        return socket.emit('dj:error', { message: 'Only DJ can seek' });
-      }
-
       await redis.hSet(`room:${roomId}:playback`, 'elapsedSeconds', positionSeconds.toString());
       await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
@@ -308,35 +218,60 @@ export function registerRoomHandlers(io, socket) {
     }
   });
 
-  // ── Pass DJ (DJ only) ──
-  socket.on('dj:next', async ({ roomId }) => {
+  // ── Next Video (Skip to next in queue) ──
+  socket.on('room:next_video', async ({ roomId }) => {
     try {
-      const userId = String(socket.user.id);
-      const queue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
+      console.log(`⏭️  Advancing to next video in room ${roomId}`);
 
-      if (queue[0] !== userId) {
-        return socket.emit('dj:error', { message: 'Only current DJ can pass' });
+      // Remove current video from queue
+      await redis.lPop(`room:${roomId}:playlist`);
+      const nextPlaylist = await redis.lRange(`room:${roomId}:playlist`, 0, -1);
+
+      if (nextPlaylist.length === 0) {
+        // Queue is empty
+        console.log(`📭 Queue empty in room ${roomId}`);
+        io.to(`room:${roomId}`).emit('room:queue_empty', { roomId });
+        // Clear playback
+        await redis.del(`room:${roomId}:playback`);
+      } else {
+        // Load next video
+        const nextVideoId = nextPlaylist[0];
+        console.log(`📹 Loading next video ${nextVideoId} in room ${roomId}`);
+
+        // Fetch video metadata (title might be in cache or we use videoId as fallback)
+        let videoTitle = nextVideoId;
+        const cachedInfo = await redis.get(`video:${nextVideoId}:info`);
+        if (cachedInfo) {
+          const info = JSON.parse(cachedInfo);
+          videoTitle = info.title || nextVideoId;
+        }
+
+        await redis.hSet(`room:${roomId}:playback`, 'videoId', nextVideoId);
+        await redis.hSet(`room:${roomId}:playback`, 'title', videoTitle);
+        await redis.hSet(`room:${roomId}:playback`, 'elapsedSeconds', '0');
+        await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
+        await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
+
+        const payload = {
+          song: {
+            videoId: nextVideoId,
+            title: videoTitle,
+          },
+          elapsedSeconds: 0,
+          playState: 'paused',
+          roomId
+        };
+
+        // Ensure everyone in room gets the next video
+        io.to(`room:${roomId}`).emit('room:video_load', payload);
       }
 
-      // Move first DJ to end of queue
-      const currentDJ = await redis.lPop(`room:${roomId}:djQueue`);
-      if (currentDJ) {
-        await redis.rPush(`room:${roomId}:djQueue`, currentDJ);
-      }
-
-      const newQueue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
-
-      io.to(`room:${roomId}`).emit('dj:queue_updated', { queue: newQueue, roomId });
-      io.to(`room:${roomId}`).emit('dj:changed', { djId: newQueue[0], roomId });
-
-      // Broadcast updated room state
-      const state = await getRoomState(roomId);
-      io.to(`room:${roomId}`).emit('room:state', state);
-
-      console.log(`🔄 DJ passed from ${currentDJ} to ${newQueue[0]} in room ${roomId}`);
+      // Broadcast updated playlist
+      io.to(`room:${roomId}`).emit('room:queue_updated', { queue: nextPlaylist, roomId });
 
     } catch (error) {
-      console.error('❌ Pass DJ error:', error);
+      console.error('❌ Next video error:', error);
+      socket.emit('room:error', { message: error.message });
     }
   });
 
