@@ -13,15 +13,20 @@ datasource db {
 }
 
 model User {
-  id          Int        @id @default(autoincrement())
-  username    String     @unique
-  email       String     @unique
-  password    String
-  avatarUrl   String?    @map("avatar_url") @db.Text
-  description String?    @db.Text
-  createdAt   DateTime   @default(now()) @map("created_at")
-  rooms       Room[]
-  playlists   Playlist[]
+  id Int @id @default(autoincrement())
+  username String @unique
+  email String @unique
+  password String
+  avatarUrl   String?  @db.Text   @map("avatar_url")
+  description String?  @db.Text
+  topSongs Json? @db.Json @map("top_songs") // Array of {title, artist, url}
+  createdAt DateTime @default(now()) @map("created_at")
+  rooms Room[]
+  playlists Playlist[]
+  friendsInitiated Friend[] @relation("friendInitiator")
+  friendsReceived Friend[] @relation("friendReceiver")
+  messagesSent Message[] @relation("sender")
+  messagesReceived Message[] @relation("receiver")
 
   @@map("users")
 }
@@ -38,30 +43,65 @@ model Room {
 }
 
 model Playlist {
-  id      Int     @id @default(autoincrement())
-  title   String // Probably should be unique to the user, but multiple users should be able to have playlists with the same name
-  shuffle Boolean
+  id Int @id @default(autoincrement())
+  name String // Probably should be unique to the user, but multiple users should be able to have playlists with the same name
+  shuffle Boolean @default(false)
 
-  items          PlaylistItem[]
-  parentId       Int?
-  parentPlaylist Playlist?      @relation("PlaylistHierarchy", fields: [parentId], references: [id])
-  subPlaylist    Playlist[]     @relation("PlaylistHierarchy")
+  author String?
+  url String?
+
+  position Int?
+
+  isSong Boolean @default(false)
+  
+  parentId Int?
+  parentPlaylist Playlist? @relation("PlaylistHierarchy", fields: [parentId], references: [id])
+  subPlaylist Playlist[] @relation("PlaylistHierarchy")
 
   owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId Int  @map("user_id")
 
+  // @@unique ([parentId, position])
   @@map("playlists")
 }
 
-model PlaylistItem {
-  id         Int      @id @default(autoincrement())
-  title      String
-  author     String
-  url        String
-  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
-  playlistId Int      @map("playlist_id")
+// model Song {
+//   id Int @id @default(autoincrement())
+//   title String
+//   author String
+//   url String
+//   playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+//   playlistId Int @map("playlist_id")
+//   position Float
 
-  @@map("playlist_item")
+//   // @@unique ([playlistId, position])
+//   @@map("songs")
+// }
+
+model Friend {
+  id Int @id @default(autoincrement())
+  initiator User @relation("friendInitiator", fields: [initiatorId], references: [id], onDelete: Cascade)
+  initiatorId Int @map("initiator_id")
+  receiver User @relation("friendReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId Int @map("receiver_id")
+  status String @default("pending") // "pending", "accepted", "rejected"
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([initiatorId, receiverId])
+  @@map("friends")
+}
+
+model Message {
+  id Int @id @default(autoincrement())
+  sender User @relation("sender", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId Int @map("sender_id")
+  receiver User @relation("receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId Int @map("receiver_id")
+  content String @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  isRead Boolean @default(false) @map("is_read")
+
+  @@map("messages")
 }
 
 enum Genre {

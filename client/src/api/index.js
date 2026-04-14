@@ -21,14 +21,13 @@ export const request = async (endpoint, options = {}) => {
       if (localStorage.getItem("token")) {
         localStorage.removeItem("token");
 
-
         const publicPaths = ['/login', '/register', '/'];
         if (!publicPaths.includes(window.location.pathname)) {
           window.location.href = '/login';
         }
       }
     }
-
+    
     const text = await response.text();
 
     if (!text) {

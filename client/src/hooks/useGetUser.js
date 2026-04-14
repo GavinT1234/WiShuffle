@@ -7,10 +7,15 @@ export const useGetUser = () => {
   const [error, setError] = useState(null);
 
   const fetchUser = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
     setError(null);
     try {
       const userData = await getUser();
-
       setUser(userData);
     } catch (err) {
       setError(err.message);

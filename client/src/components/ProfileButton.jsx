@@ -33,6 +33,12 @@ const ProfileButton = ({ user, loading }) => {
           <button onClick={() => navigate("/profile")}>View Profile</button>
         </li>
         <li>
+          <button onClick={() => navigate("/friends")}>Friends</button>
+        </li>
+        <li>
+          <button onClick={() => navigate("/messages")}>Messages</button>
+        </li>
+        <li>
           <button onClick={handleLogout}>Logout</button>
         </li>
       </ul>

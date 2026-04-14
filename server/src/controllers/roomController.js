@@ -3,6 +3,7 @@ import {
   getRoomById,
   createRoom,
   deleteRoom,
+  getTags,
 } from '../services/roomService.js';
 
 import { extractVideoId, getVideoDetails } from '../services/youtubeService.js';
@@ -32,6 +33,11 @@ export async function deleteRoomHandler(req, res) {
   const id = parseInt(req.params.id);
   await deleteRoom(id);
   res.status(204).send();
+}
+
+export async function getTagsHandler(req, res) {
+  const tags = await getTags();
+  res.status(200).json(tags);
 }
 
 export async function addVideoToQueueHandler(req, res) {
