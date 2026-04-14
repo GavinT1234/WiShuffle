@@ -1,44 +1,65 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useSocket } from "../context/SocketContext";
 
-export function useRoom(socket, roomId, onRoomState) {
-    const [users, setUsers] = useState([]);
-    const [joined, setJoined] = useState(false);
+export function useRoom(roomId) {
+  const { socket } = useSocket();
+  const [roomState, setRoomState] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const hasJoinedRef = useRef(false);
 
-    useEffect(() => {
-        if (!socket || !roomId) return;
+  const applyState = useCallback((state) => {
+    setRoomState(state);
+    setUsers(
+        (state?.users ?? []).map((u) =>
+            typeof u === "object" ? u : { userId: u, username: undefined }
+        )
+    );
+  }, []);
 
-        socket.emit('room:join', { roomId: Number(roomId) });
+  useEffect(() => {
+    if (!socket || !roomId) return;
 
-        socket.on('room:state', (state) => {
-            setUsers(state.users || []);
-            setJoined(true);
-            // Forward full state to sync hook (playback, djQueue, etc.)
-            onRoomState?.(state);
-        });
+    // Register listener FIRST, before joining, so we never miss a broadcast
+    socket.on("room:state", applyState);
 
-        socket.on('room:user_joined', ({ userId }) => {
-            setUsers((prev) =>
-                prev.includes(String(userId)) ? prev : [...prev, String(userId)]
-            );
-        });
+    const join = () => {
+      if (hasJoinedRef.current) return;
+      hasJoinedRef.current = true;
+      setIsLoading(true);
 
-        socket.on('room:user_left', ({ userId }) => {
-            setUsers((prev) => prev.filter((id) => id !== String(userId)));
-        });
+      console.log('📤 Emitting room:join for roomId:', roomId, 'socket.id:', socket.id);
+      socket.emit("room:join", { roomId }, (resp) => {
+        console.log('✅ room:join response:', resp);
+        console.log('   After join, socket.rooms:', socket.rooms);
+        if (resp?.ok && resp.state) {
+          applyState(resp.state);
+          setIsLoading(false);
+        } else {
+          console.error("[useRoom] join failed:", resp?.error);
+          // Set a timeout to allow fallback to "Room not found" state
+          setIsLoading(false);
+        }
+      });
+    };
 
-        return () => {
-            socket.emit('room:leave', { roomId: Number(roomId) });
-            socket.off('room:state');
-            socket.off('room:user_joined');
-            socket.off('room:user_left');
-            setJoined(false);
-            setUsers([]);
-        };
-    }, [socket, roomId]); // intentionally exclude onRoomState — stable ref not needed
+    // Use socket.connected directly — NOT isConnected state in deps
+    if (socket.connected) {
+      join();
+    } else {
+      socket.once("connect", join);
+    }
 
-    const leave = useCallback(() => {
-        if (socket) socket.emit('room:leave', { roomId: Number(roomId) });
-    }, [socket, roomId]);
+    return () => {
+      socket.off("room:state", applyState);
+      socket.off("connect", join); // clean up in case we never connected
 
-    return { users, joined, leave };
+      if (hasJoinedRef.current) {
+        if (socket.connected) socket.emit("room:leave", { roomId });
+        hasJoinedRef.current = false;
+      }
+    };
+  }, [socket, roomId, applyState]); // ← isConnected intentionally removed
+
+  return { roomState, users, isLoading };
 }

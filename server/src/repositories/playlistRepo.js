@@ -1,25 +1,81 @@
 import prisma from '../config/db.js';
 
-export async function getUser(ownerId) {
-    const playlists = await prisma.playlist.findMany({where: {ownerId}});
+export async function userPlaylists(ownerId) {
+    const playlists = await prisma.playlist.findMany({where: {ownerId, isSong: false}, include: {ownerId: false}});
     return playlists;
 }
 
-export async function getSingle(ownerId) {
-    const playlist = await prisma.playlist.findUnique({where: {id}});
+export async function singlePlaylist(id) {
+    const playlist = await prisma.playlist.findUnique({where: {id, isSong: false}, include: {isSong: false}});
     return playlist;
 }
 
-export async function create({playlistData}) {
-    const playlist = await prisma.playlist.create({data: {playlistData}});
+export async function playlistSongs(parentId) {
+    const songs = await prisma.playlist.findMany({
+        where: {parentId, isSong: true},
+        orderBy: {position: 'asc'},
+        include: {name: true, author: true, url: true, position: true}
+    });
+    return songs;
+}
+
+// export async function playlistSongs(playlistId) {
+//     const songs = await prisma.song.findMany({
+//         where: {playlistId},
+//         orderBy: {position: 'asc'}
+//     });
+//     return songs;
+// }
+
+export async function next(parentId) {
+    const next = await prisma.playlist.aggregate({
+        where: {parentId},
+        _max: {position: true}
+    });
+    console.log('nextsdfaskjlf', next._max.position);
+    if (next) return next._max.position + 1;
+    return 0;
+};
+
+export async function playlistOrdering(parentId) {
+    const ordering = await prisma.playlist.findMany({
+        where: {parentId},
+        include: {position: true},
+        orderBy: {position: 'asc'},
+    });
+    // const ordering = await prisma.$queryRaw(`SELECT id, position, 'PLAYLISTS' AS source FROM PLAYLISTS WHERE parentId = ${parentId} UNION ALL SELECT id, position, 'SONGS' AS source FROM SONGS WHERE parentId = ${parentId} ORDER BY position;`);
+    return ordering;
+}
+
+export async function playlistContent(parentId) {
+    const playlistContent = await prisma.playlist.findMany({
+        where: { parentId },
+        orderBy: { position: 'asc' }
+    });
+    return playlistContent;
+}
+
+export async function create(playlistData) {
+    const playlist = await prisma.playlist.create({
+        data: playlistData,
+        include: {author: false, url: false, isSong: false}
+    });
     return playlist;
 }
 
-export async function update({playlistData}) {
+export async function add(songData) {
+    const song = await prisma.playlist.create({
+        data: songData,
+        include: {shuffle: false, isSong: false}
+    });
+    return song;
+}
+
+export async function update(id, playlistData) {
     try {
         const playlist = await prisma.playlist.update({
         where: { id },
-        data: playlistData,
+        data: { playlistData },
         });
         return playlist;
     } catch (error) {
@@ -39,3 +95,32 @@ export async function remove(id) {
         throw error;
     }
 }
+
+export async function removeSong(id) {
+    try {
+        const song = await prisma.playlist.delete({
+        where: { id },
+        });
+        return song;
+    } catch (error) {
+        if (error.code === 'P2025') return null;
+        throw error;
+    }
+}
+
+export async function ownership(id) {
+    const item = await prisma.playlist.findUnique({where: {id}});
+    return item;
+}
+
+// export async function allSongs(playlistId) {
+//     try {
+//         const songs = await prisma.song.findMany({
+//             where: { playlistId }
+//         });
+//         return songs;
+//     } catch (error) {
+//         if (error.code === 'P2025') return null;
+//         throw error;
+//     }
+// }

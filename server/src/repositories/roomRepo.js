@@ -1,5 +1,6 @@
 import prisma from '../config/db.js';
 import { Genre } from '../generated/prisma/index.js';
+
 export async function getAll() {
   const rooms = await prisma.room.findMany({
     include: { owner: { select: { username: true } } },
@@ -44,4 +45,9 @@ export async function remove(id) {
     if (error.code === 'P2025') return null;
     throw error;
   }
+}
+
+export async function tagsEnum() {
+  const tags = Object.values(Genre);
+  return tags;
 }

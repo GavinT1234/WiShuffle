@@ -1,214 +1,127 @@
-import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useRoom } from '../hooks/useRoom';
-import { useRoomSync } from '../hooks/useRoomSync';
-import { VideoPlayer } from '../components/VideoPlayer';
+import { useParams, useNavigate } from "react-router-dom";
+import { useRoom } from "../hooks/useRoom";
+import { useSocket } from "../context/SocketContext";
+import { VideoPlayer } from "../components/VideoPlayer";
+import { useRoomSync } from "../hooks/useRoomSync";
+import { useRef } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const PLAYER_DIV_ID = 'yt-player-container';
 
-export function RoomPage({ socket, connected, user, token }) {
-    const { id: roomId } = useParams();
-    const navigate = useNavigate();
-    const [roomInfo, setRoomInfo] = useState(null);
+export default function RoomPage() {
+   const { id } = useParams();
+   const roomId = Number(id);
+   const navigate = useNavigate();
 
-    // Player controls ref — populated once the YT player is ready
-    const playerControlsRef = useRef(null);
+   const { socket, isConnected } = useSocket();
+   const { roomState, users, isLoading } = useRoom(roomId);
 
-    // Stable player controls proxy: useRoomSync needs these but the player
-    // isn't ready until after first render, so we proxy through a ref.
-    const playerControls = {
-        ready: !!playerControlsRef.current,
-        loadVideo: (...args) => playerControlsRef.current?.loadVideo(...args),
-        play: (...args) => playerControlsRef.current?.play(...args),
-        pause: (...args) => playerControlsRef.current?.pause(...args),
-        seekTo: (...args) => playerControlsRef.current?.seekTo(...args),
-        getCurrentTime: () => playerControlsRef.current?.getCurrentTime() ?? 0,
-        getDuration: () => playerControlsRef.current?.getDuration() ?? 0,
-    };
+   const playerControlsRef = useRef(null);
 
-    const {
-        playback,
-        djQueue,
-        isDJ,
-        handleRoomState,
-        joinQueue,
-        leaveQueue,
-        queueVideo,
-        emitPlay,
-        emitPause,
-        emitSeek,
-        passDJ,
-    } = useRoomSync({
-        socket,
-        roomId: Number(roomId),
-        userId: user?.id,
-        playerControls,
-    });
+   const { playback, playlist, queueVideo, emitPlay, emitPause, emitSeek, emitNextVideo } = useRoomSync({
+      socket,
+      roomId,
+      userId: socket?.id,
+      playerControls: playerControlsRef
+   });
 
-    // useRoom handles join/leave + user presence
-    const { users, joined, leave } = useRoom(socket, roomId, handleRoomState);
+   if (isLoading) {
+      return (
+         <div className="flex flex-col items-center justify-center h-full bg-[#0f0f0f] gap-4">
+            <div className="w-8 h-8 rounded-full border-[3px] border-[#2e2e2e] border-t-[#aa3bff] animate-spin" />
+            <p className="text-[#555] text-sm">Joining room…</p>
+         </div>
+      );
+   }
 
-    useEffect(() => {
-        fetch(`${API_URL}/api/rooms/${roomId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then((r) => r.json())
-            .then(setRoomInfo)
-            .catch(console.error);
-    }, [roomId, token]);
+   if (!roomState) {
+      return (
+         <div className="flex flex-col items-center justify-center h-full bg-[#0f0f0f] gap-4">
+            <p className="text-[#555] text-sm">Room not found</p>
+            <button
+               onClick={() => navigate("/dashboard")}
+               className="text-[#888] text-sm border border-[#2e2e2e] rounded-md px-3 py-1.5 bg-transparent cursor-pointer hover:border-[#444] transition-colors"
+            >
+               ← Back to dashboard
+            </button>
+         </div>
+      );
+   }
 
-    const handleLeave = () => {
-        leave();
-        navigate('/rooms');
-    };
+   return (
+      <div className="min-h-screen bg-[#0f0f0f] text-white">
 
-    return (
-        <div style={styles.page}>
-            <header style={styles.header}>
-                <button style={styles.backBtn} onClick={handleLeave}>← Back</button>
-                <span style={styles.roomTitle}>{roomInfo?.name ?? `Room #${roomId}`}</span>
-                <span style={styles.connStatus}>
-                    <span style={{ ...styles.dot, background: connected ? '#4ade80' : '#f87171' }} />
-                    {connected ? 'Connected' : 'Disconnected'}
-                </span>
-            </header>
+         {/* ── Header ── */}
+         <header className="sticky top-0 z-10 flex items-center gap-4 px-6 py-3.5 border-b border-[#1e1e1e] bg-[#0f0f0f]">
+            <button
+               onClick={() => navigate("/dashboard")}
+               className="text-[#888] text-sm border border-[#2e2e2e] rounded-md px-3 py-1.5 bg-transparent cursor-pointer hover:border-[#444] transition-colors"
+            >
+               ← Back
+            </button>
+            <span className="flex-1 text-base font-semibold">
+               {roomState.room.name}
+            </span>
+            <span className="flex items-center gap-1.5 text-xs text-[#888]">
+               <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`} />
+               {isConnected ? "Connected" : "Disconnected"}
+            </span>
+         </header>
 
-            <main style={styles.main}>
-                <div style={styles.left}>
-                    <VideoPlayer
-                        isDJ={isDJ}
-                        playback={playback}
-                        djQueue={djQueue}
-                        userId={user?.id}
-                        onReady={(controls) => { playerControlsRef.current = controls; }}
-                        onQueueVideo={queueVideo}
-                        onPlay={emitPlay}
-                        onPause={emitPause}
-                        onSeek={emitSeek}
-                        onPassDJ={passDJ}
-                        onJoinQueue={joinQueue}
-                        onLeaveQueue={leaveQueue}
-                    />
-                </div>
+         {/* ── Main layout ── */}
+         <main className="grid grid-cols-[1fr_260px] gap-6 p-6 max-w-[1200px] mx-auto items-start">
 
-                <aside style={styles.right}>
-                    <h3 style={styles.sectionTitle}>
-                        Listeners <span style={styles.badge}>{users.length}</span>
-                    </h3>
-                    {!joined ? (
-                        <p style={styles.muted}>Joining...</p>
-                    ) : users.length === 0 ? (
-                        <p style={styles.muted}>Just you</p>
-                    ) : (
-                        <div style={styles.userList}>
-                            {users.map((uid) => (
-                                <div key={uid} style={styles.userChip}>
-                                    <span style={styles.avatar}>{String(uid).slice(0, 2)}</span>
-                                    <span style={styles.uid}>
-                                        {String(uid) === String(user?.id) ? 'You' : `User ${uid}`}
-                                    </span>
-                                    {djQueue[0] === String(uid) && (
-                                        <span style={styles.djTag}>DJ</span>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </aside>
-            </main>
-        </div>
-    );
+            {/* ── Left: Video Player ── */}
+            <div>
+               <VideoPlayer
+                  playback={playback}
+                  playlist={playlist}
+                  userId={socket?.id}
+                  onPlayerReady={(controls) => { playerControlsRef.current = controls; }}
+                  onQueueVideo={queueVideo}
+                  onPlay={emitPlay}
+                  onPause={emitPause}
+                  onSeek={emitSeek}
+                  onNextVideo={emitNextVideo}
+               />
+            </div>
+
+            {/* ── Right: Sidebar ── */}
+            <aside className="flex flex-col gap-3">
+
+               {/* Listeners */}
+               <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded-lg p-4">
+                  <h3 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-[#555] mb-3">
+                     Listeners
+                     <span className="bg-[#2e2e2e] text-[#aaa] text-[11px] font-medium normal-case tracking-normal rounded-full px-2 py-0.5">
+                        {users.length}
+                     </span>
+                  </h3>
+                  {users.length === 0 ? (
+                     <p className="text-[#444] text-xs m-0">No one here yet</p>
+                  ) : (
+                     <div className="flex flex-col gap-1.5">
+                        {users.map((u) => {
+                           const initials = u.username
+                              ? u.username.slice(0, 2).toUpperCase()
+                              : String(u.userId).slice(0, 2);
+
+                           return (
+                              <div key={u.userId} className="flex items-center gap-2.5 px-2 py-1.5 bg-[#111] rounded-md">
+                                 <span className="w-7 h-7 rounded-full bg-[#aa3bff22] text-[#aa3bff] text-[10px] font-bold flex items-center justify-center shrink-0">
+                                    {initials}
+                                 </span>
+                                 <span className="text-[13px] text-[#ccc] flex-1">
+                                    {u.username ?? `User ${u.userId}`}
+                                 </span>
+                              </div>
+                           );
+                        })}
+                     </div>
+                  )}
+               </div>
+
+            </aside>
+         </main>
+      </div>
+   );
 }
-
-const styles = {
-    page: { minHeight: '100vh', background: '#0f0f0f', color: '#fff' },
-    header: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '16px',
-        padding: '14px 24px',
-        borderBottom: '1px solid #1e1e1e',
-    },
-    backBtn: {
-        background: 'transparent',
-        border: '1px solid #2e2e2e',
-        borderRadius: '6px',
-        color: '#888',
-        padding: '6px 12px',
-        fontSize: '13px',
-        cursor: 'pointer',
-    },
-    roomTitle: { flex: 1, fontSize: '16px', fontWeight: '600' },
-    connStatus: { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#888' },
-    dot: { width: '8px', height: '8px', borderRadius: '50%', display: 'inline-block' },
-    main: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 240px',
-        gap: '24px',
-        padding: '24px',
-        maxWidth: '1100px',
-        margin: '0 auto',
-        alignItems: 'start',
-    },
-    left: {},
-    right: {
-        background: '#1a1a1a',
-        border: '1px solid #2e2e2e',
-        borderRadius: '8px',
-        padding: '16px',
-    },
-    sectionTitle: {
-        margin: '0 0 12px',
-        fontSize: '13px',
-        fontWeight: '600',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        color: '#666',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-    },
-    badge: {
-        background: '#2e2e2e',
-        borderRadius: '10px',
-        padding: '1px 8px',
-        fontSize: '12px',
-        color: '#aaa',
-        fontWeight: '500',
-        textTransform: 'none',
-        letterSpacing: 0,
-    },
-    userList: { display: 'flex', flexDirection: 'column', gap: '8px' },
-    userChip: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '6px 8px',
-        background: '#111',
-        borderRadius: '6px',
-    },
-    avatar: {
-        width: '24px',
-        height: '24px',
-        borderRadius: '50%',
-        background: '#aa3bff44',
-        color: '#aa3bff',
-        fontSize: '10px',
-        fontWeight: '700',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textTransform: 'uppercase',
-        flexShrink: 0,
-    },
-    uid: { fontSize: '13px', color: '#ccc', flex: 1 },
-    djTag: {
-        fontSize: '10px',
-        fontWeight: '700',
-        color: '#aa3bff',
-        background: '#aa3bff22',
-        padding: '2px 6px',
-        borderRadius: '4px',
-    },
-    muted: { color: '#555', fontSize: '14px', margin: 0 },
-};

@@ -2,15 +2,34 @@ import React from "react";
 import LoginButton from "./LoginButton";
 import RegisterButton from "./RegisterButton";
 import { useAuth } from "../context/AuthContext";
-import LogoutButton from "./LogoutButton";
+import ProfileButton from "./ProfileButton";
+import { useGetUser } from "../hooks/useGetUser";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const Navbar = () => {
   const { isLoggedIn } = useAuth();
+  const { user, loading, fetchUser } = useGetUser();
+  const navigate = useNavigate();
+
+  // Refetch user data when logged in status changes to refresh avatar/profile changes
+  useEffect(() => {
+    if (isLoggedIn && fetchUser) {
+      fetchUser();
+    }
+  }, [isLoggedIn, fetchUser]);
+
+  const handleLogoClick = () => {
+    if (isLoggedIn) {
+      navigate("/dashboard");
+    } else {
+      navigate("/");
+    }
+  };
   return (
     <div className="drawer border-b border-border">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col">
-        {/* Navbar */}
         <div className="navbar bg-base-300 w-full">
           <div className="flex-none lg:hidden">
             <label
@@ -33,16 +52,17 @@ const Navbar = () => {
               </svg>
             </label>
           </div>
-          <a href="/" className="flex-1">
-            <div className="mx-2 px-2 text-2xl font-bold tracking-wider ">
+          <div onClick={handleLogoClick} className="flex-1 cursor-pointer">
+            <div className="mx-2 px-2 text-2xl font-bold tracking-wider">
               WiShuffle
             </div>
-          </a>
+          </div>
           <div className="hidden flex-none lg:block">
-            <ul className="menu menu-horizontal flex gap-4">
-              {/* Navbar menu content here */}
+            <ul className="menu menu-horizontal flex gap-4 items-center">
               {isLoggedIn ? (
-                <LogoutButton />
+                <li>
+                  <ProfileButton user={user} loading={loading} />
+                </li>
               ) : (
                 <>
                   <li>
@@ -64,12 +84,31 @@ const Navbar = () => {
           className="drawer-overlay"
         ></label>
         <ul className="menu bg-base-200 min-h-full w-80 p-4">
-          <li>
-            <button>no</button>
-          </li>
-          <li>
-            <button>hi</button>
-          </li>
+          {isLoggedIn ? (
+            <>
+              <li>
+                <button onClick={() => navigate("/dashboard")}>Dashboard</button>
+              </li>
+              <li>
+                <button onClick={() => navigate("/profile")}>Profile</button>
+              </li>
+              <li>
+                <button onClick={() => navigate("/friends")}>Friends</button>
+              </li>
+              <li>
+                <button onClick={() => navigate("/messages")}>Messages</button>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                <LoginButton />
+              </li>
+              <li>
+                <RegisterButton />
+              </li>
+            </>
+          )}
         </ul>
       </div>
     </div>

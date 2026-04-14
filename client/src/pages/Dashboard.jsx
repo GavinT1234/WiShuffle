@@ -3,7 +3,9 @@ import React from "react";
 import { useGetUser } from "../hooks/useGetUser";
 import LoadingRing from "../components/LoadingRing";
 import RoomSection from "../components/RoomSection";
+import { useNavigate } from "react-router-dom";
 const Dashboard = () => {
+  
   const { user, loading, error } = useGetUser();
 
   return (
@@ -13,7 +15,7 @@ const Dashboard = () => {
           <LoadingRing />
         ) : (
           <div className="text-2xl sm:text-3xl md:text-4xl font-bold ">
-            Welcome, {user.username}
+            Welcome, {user?.username || "User"}
           </div>
         )}
         <section>{error ? error : ""}</section>

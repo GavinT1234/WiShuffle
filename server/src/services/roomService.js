@@ -1,6 +1,6 @@
-import { getAll, getById, create, remove } from '../repositories/roomRepo.js';
+import { getAll, getById, create, remove, tagsEnum } from '../repositories/roomRepo.js';
 import { redis } from '../config/redis.js';
-
+import prisma from '../config/db.js';
 // CRUD
 
 export async function getAllRooms() {
@@ -39,26 +39,43 @@ export async function deleteRoom(id) {
 // Live State (Redis)
 
 export async function getRoomState(id) {
-  const [room, users, queue, currentSong, startedAt] = await Promise.all([
+  const [room, userIds, playlist] = await Promise.all([
     getById(id),
     redis.sMembers(`room:${id}:users`),
-    redis.lRange(`room:${id}:djQueue`, 0, -1),
-    redis.get(`room:${id}:currentSong`),
-    redis.get(`room:${id}:startedAt`),
+    redis.lRange(`room:${id}:playlist`, 0, -1),
   ]);
 
   if (!room) throw new Error('Room not found');
 
-  const elapsedSeconds = startedAt
-    ? (Date.now() - Number(startedAt)) / 1000
-    : 0;
+  // Hydrate user IDs → { userId, username } objects
+  const users = userIds.length
+      ? await prisma.user.findMany({
+        where: { id: { in: userIds.map(Number) } },
+        select: { id: true, username: true },
+      }).then((rows) =>
+          rows.map((u) => ({ userId: String(u.id), username: u.username }))
+      )
+      : [];
 
   return {
     room,
-    users, // array of userIds currently online
-    djQueue: queue, // ordered array of userIds waiting to DJ
-    currentSong: currentSong ? JSON.parse(currentSong) : null,
-    elapsedSeconds, // so joining clients can seek to right position
+    users,
+    playlist,
+  };
+}
+
+export async function getRoomsState() {
+  const [rooms] = await Promise.all([
+   getAllRooms(),
+  ]);
+
+  if (!rooms) throw new Error('Rooms not found');
+
+  // Hydrate user IDs → { userId, username } objects
+
+
+  return {
+    rooms,
   };
 }
 
@@ -72,10 +89,9 @@ export async function removeUserFromRoom(roomId, userId) {
   await redis.sRem(`room:${roomId}:users`, String(userId));
 }
 
-export async function getUsersInRoom(id) {
-  const userIds = await redis.sMembers(`room:${id}:users`);
+export async function getUsersInRoom(roomId) {
+  const userIds = await redis.sMembers(`room:${roomId}:users`);
   if (!userIds.length) return [];
-  // return UserRepository.findManyByIds(userIds);
 }
 
 export async function getListenerCountInRoom(id) {
@@ -119,11 +135,14 @@ export async function clearRoomState(id) {
   // Called when a room is deleted or the server restarts
   const keys = [
     `room:${id}:users`,
-    `room:${id}:djQueue`,
-    `room:${id}:currentSong`,
-    `room:${id}:startedAt`,
-    `room:${id}:votes`,
+    `room:${id}:playlist`,
+    `room:${id}:playback`,
   ];
 
   await Promise.all(keys.map((k) => redis.del(k)));
+}
+
+export async function getTags() {
+  const tags = await tagsEnum();
+  return tags;
 }

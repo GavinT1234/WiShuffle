@@ -1,32 +1,43 @@
 import express from 'express';
 import morgan from 'morgan';
-import cors from "cors";
-import { createServer } from "node:http";
-import { initSocket } from "./socket/index.js";
-import { connectRedis } from "./config/redis.js";
+import cors from 'cors';
+import { createServer } from 'node:http';
+import { initSocket } from './socket/index.js';
+import { connectRedis } from './config/redis.js';
 import roomRoutes from './routes/roomRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import playlistRoutes from './routes/playlistRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import friendRoutes from './routes/friendRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
+import youtubeRoutes from './routes/youtubeRoutes.js';
+
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(express.json());
 app.use(morgan('tiny'));
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  }),
+);
 
 // HTTP Server + WebSockets
 const server = createServer(app);
-const io = initSocket(server);
+const io = await initSocket(server);
 
 // Routes
 app.use('/api/rooms', roomRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/playlists', playlistRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/friends', friendRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/youtube', youtubeRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {
@@ -37,7 +48,9 @@ app.use((req, res, next) => {
 
 // Error Handler
 app.use((err, req, res, next) => {
-  console.log(err.stack); // change to console.error?
+  console.error('Error:', err.message);
+  console.error(err.stack);
+  
   if (!err.status) {
     err.status = 500;
     err.message = 'Internal Server Error';
@@ -46,5 +59,10 @@ app.use((err, req, res, next) => {
 });
 
 // Start
-await connectRedis();
-server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+try {
+  await connectRedis();
+  server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+} catch (error) {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+}
