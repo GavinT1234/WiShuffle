@@ -1,8 +1,7 @@
 import { createContext, useContext, useState } from "react";
-
 import { login as loginApi, register as registerApi } from "../api/auth";
-
 import { useNavigate } from "react-router-dom";
+import { getSocket } from "../lib/socket";
 
 const AuthContext = createContext(null);
 
@@ -23,7 +22,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await loginApi({ identifier, password });
 
-      localStorage.setItem("token", response.accessToken.accessToken);
+      // ⚡ Create/connect socket AFTER token exists
+      const socket = getSocket(token);
+      if (!socket.connected) {
+        socket.connect();
+      }
 
       setIsLoggedIn(true);
       navigate("/dashboard");
@@ -38,6 +41,9 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       localStorage.removeItem("token");
+      const token = localStorage.getItem("token");
+      const socket = getSocket(token);
+      if (socket) socket.disconnect();
       setIsLoggedIn(false);
       navigate("/");
     } catch (err) {
@@ -46,15 +52,13 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
+
   const register = async ({ username, email, password }) => {
     setLoading(true);
     setError(null);
     try {
       await registerApi({ username, email, password });
-      const response = await loginApi({ email, password }); // capture the response
-      localStorage.setItem("token", response.accessToken.accessToken);
-      setIsLoggedIn(true);
-      navigate("/dashboard");
+      await login({ email, password }); // reuse login logic
     } catch (err) {
       setError(err.message);
     } finally {
@@ -65,20 +69,20 @@ export const AuthProvider = ({ children }) => {
   const clearError = () => setError(null);
 
   return (
-    <AuthContext.Provider
-      value={{
-        isLoggedIn,
-        loading,
-        error,
-        login,
-        logout,
-        register,
-        clearError,
-        authHeader,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+      <AuthContext.Provider
+          value={{
+            isLoggedIn,
+            loading,
+            error,
+            login,
+            logout,
+            register,
+            clearError,
+            authHeader,
+          }}
+      >
+        {children}
+      </AuthContext.Provider>
   );
 };
 

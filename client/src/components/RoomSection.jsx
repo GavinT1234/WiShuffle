@@ -5,14 +5,18 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Modal from "./Modal";
 import CreateRoom from "./CreateRoom";
+import { useNavigate } from "react-router-dom";
 const RoomSection = () => {
+
+  const navigate = useNavigate();
+
   const { rooms, loading, error, fetchRooms } = useGetRooms();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selected, setSelected] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
   const selectedGenres = searchParams.getAll("genre");
-
+  console.log("rooms", rooms);
   const filtered = rooms.filter(
     (r) =>
       selectedGenres.length === 0 ||
@@ -75,8 +79,7 @@ const RoomSection = () => {
               <th className="w-[35%] md:w-[35%]">Name</th>
               <th className="md:w-[15%] hidden md:table-cell">
                 Listeners
-              </th>{" "}
-              {/* ✅ hidden on mobile */}
+              </th>{/*" "*/}
               <th>
                 <div className="flex  items-center justify-end md:justify-between">
                   <span className="hidden md:block">Options</span>
@@ -111,23 +114,24 @@ const RoomSection = () => {
                     {r.tags.length > 0 && (
                       <>
                         {/* mobile — first tag + count */}
-                        <div className="flex items-center gap-1 mt-1 md:hidden">
-                          <span className="badge badge-ghost badge-sm rounded-full text-xs">
+                        <div className="flex items-center gap-1 mt-1 md:hidden ">
+                          <span className="badge badge-ghost badge-sm rounded-full text-xs text-base-content/60">
+
                             #{r.tags[0].toLowerCase()}
                           </span>
                           {r.tags.length > 1 && (
-                            <span className="text-xs text-base-content/40">
+                            <span className="text-xs text-base-content/60">
                               +{r.tags.length - 1}
                             </span>
                           )}
                         </div>
 
                         {/* desktop — full tags with +more tooltip */}
-                        <div className="hidden md:flex gap-1 mt-2 flex-wrap">
+                        <div className="hidden md:flex gap-1 mt-2 flex-wrap ">
                           {visibleTags.map((t) => (
                             <span
                               key={t}
-                              className="badge badge-ghost badge-sm rounded-full text-xs"
+                              className="badge badge-ghost badge-sm rounded-full text-xs text-base-content/60"
                             >
                               #{t.toLowerCase()}
                             </span>
@@ -138,7 +142,7 @@ const RoomSection = () => {
                                 {remainingTags.map((t) => (
                                   <span
                                     key={t}
-                                    className="badge badge-ghost badge-sm rounded-full text-xs"
+                                    className="badge badge-ghost badge-sm rounded-full text-xs text-base-content/60"
                                   >
                                     #{t.toLowerCase()}
                                   </span>
@@ -151,15 +155,18 @@ const RoomSection = () => {
                       </>
                     )}
                   </td>
-                  <td className="hidden md:table-cell">{r.listenerCount}</td>{" "}
-                  {/* ✅ hidden on mobile */}
+                  <td className="hidden md:table-cell">{r.listenerCount}</td>{/*" "*/}
                   <td>
                     <div className="flex gap-2 items-center justify-end md:justify-start">
-                      <button className="btn btn-success btn-sm">JOIN</button>
+                      <button
+                        className="btn btn-success btn-sm"
+                        onClick={() => navigate(`/room/${r.id}`)}
+                      >
+                        JOIN
+                      </button>
                       <button className="btn btn-ghost btn-xs hidden md:block">
                         details
-                      </button>{" "}
-                      {/* ✅ hidden on mobile */}
+                      </button>{/*" "*/}
                     </div>
                   </td>
                 </tr>

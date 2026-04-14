@@ -10,13 +10,17 @@ import FriendsPage from "./pages/FriendsPage";
 import FriendProfilePage from "./pages/FriendProfilePage";
 import MessagesPage from "./pages/MessagesPage";
 
+import {SocketProvider} from "./context/SocketContext.jsx";
 import { AuthProvider } from "./context/AuthContext";
 import Dashboard from "./pages/Dashboard";
+import RoomPage from "./pages/RoomPage";
 function App() {
   return (
     <div className="h-screen flex flex-col">
       <BrowserRouter>
         <AuthProvider>
+
+            <SocketProvider>
           <Navbar />
           <div className="flex-1 overflow-y-auto">
             <Routes>
@@ -32,11 +36,12 @@ function App() {
                   </ProtectedRoutes>
                 }
               />
+
               <Route
-                path="/profile"
+                path="/room/:id"
                 element={
                   <ProtectedRoutes>
-                    <ProfilePage />
+                    <RoomPage />
                   </ProtectedRoutes>
                 }
               />
@@ -73,7 +78,9 @@ function App() {
                 }
               />
             </Routes>
+
           </div>
+            </SocketProvider>
         </AuthProvider>
       </BrowserRouter>
     </div>

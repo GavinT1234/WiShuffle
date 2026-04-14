@@ -1,20 +1,43 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
+
 const LoginPage = () => {
   const { login, loading, error, clearError } = useAuth();
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [reloadError, setReloadError] = useState("");
 
-  const handleLogin = (e) => {
+  const attemptedRef = useRef(false);
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     login({ identifier, password });
+    attemptedRef.current = true;
+    await login({ email, password });
   };
+
+  // Runs whenever `error` changes after a login attempt
+  useEffect(() => {
+    if (attemptedRef.current && error) {
+      sessionStorage.setItem("loginError", error);
+      window.location.reload();
+    }
+  }, [error]);
 
   useEffect(() => {
     clearError();
+
+    const stored = sessionStorage.getItem("loginError");
+    if (stored) {
+      setReloadError(stored);
+      sessionStorage.removeItem("loginError");
+    }
   }, []);
+
+  const displayError = reloadError || error;
+
   return (
     <div className="flex flex-col justify-center place-items-center h-full overflow-hidden">
       <form onSubmit={handleLogin}>
@@ -26,16 +49,22 @@ const LoginPage = () => {
             className="input"
             placeholder="Enter your email or username"
             onChange={(e) => setIdentifier(e.target.value)}
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <label className="label">Password</label>
           <input
             type="password"
             className="input"
             placeholder="Password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {error ? error : ""}
-          <button className="btn btn-neutral mt-4" disable={loading}>
+          {displayError && (
+            <p className="text-red-500 text-sm mt-2">{displayError}</p>
+          )}
+          <button className="btn btn-neutral mt-4" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
         </fieldset>

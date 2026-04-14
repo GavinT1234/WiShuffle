@@ -19,6 +19,7 @@ const Navbar = () => {
     }
   };
 
+  const { user, loading } = isLoggedIn ? useGetUser() : { user: null, loading: false };
   return (
     <div className="drawer border-b border-border">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
