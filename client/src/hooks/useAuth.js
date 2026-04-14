@@ -40,25 +40,17 @@ export function useAuth() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed');
 
-      // loginHandler: res.json({ accessToken }) where accessToken = { user, accessToken }
-      // Handle both shapes defensively
-      let tok;
-      if (typeof data.accessToken === 'string') {
-        tok = data.accessToken;
-      } else if (data.accessToken?.accessToken) {
-        tok = data.accessToken.accessToken;
-      } else {
-        throw new Error('Unexpected token format from server');
-      }
-      setToken(tok);
+      const token = data.accessToken.accessToken;
+      localStorage.setItem("token", token);
+      setToken(token);
 
       // fetch /me
       const meRes = await fetch(`${API_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${tok}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       const meData = await meRes.json();
       setUser(meData);
-      return { user: meData, token: tok };
+      return { user: meData, token: token };
     } catch (err) {
       setError(err.message);
       return null;

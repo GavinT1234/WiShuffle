@@ -1,49 +1,60 @@
-
 import { useState, useEffect, useRef } from 'react';
-import { useYoutubePlayer } from '../hooks/useYoutubePlayer';
+import { useYouTubePlayer } from '../hooks/useYouTubePlayer.js';
 
 const PLAYER_DIV_ID = 'yt-player-container';
 
 export function VideoPlayer({
+    isDJ,
     playback,
-    playlist,
+    djQueue,
     userId,
+    onReady,
+    // DJ actions
     onQueueVideo,
     onPlay,
     onPause,
     onSeek,
-    onNextVideo,
-    onPlayerReady,
+    onPassDJ,
+    onJoinQueue,
+    onLeaveQueue,
 }) {
     const [urlInput, setUrlInput] = useState('');
     const [titleInput, setTitleInput] = useState('');
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
     const [localPlaying, setLocalPlaying] = useState(false);
-    const videoEndedRef = useRef(false);
+    const progressInterval = useRef(null);
 
     const { ready, loadVideo, play, pause, seekTo, getCurrentTime, getDuration } =
-        useYoutubePlayer({
+        useYouTubePlayer({
             containerId: PLAYER_DIV_ID,
             onStateChange: (state) => {
-                console.log('YouTube player state:', state);
-                // 0 = ENDED, 1 = PLAYING, 2 = PAUSED
+                // YT.PlayerState: PLAYING=1, PAUSED=2, ENDED=0
                 if (state === 1) setLocalPlaying(true);
-                if (state === 2) setLocalPlaying(false);
-                // On video end, advance to next
-                if (state === 0) {
-                    console.log('🎬 Video ended, advancing to next');
-                    if (!videoEndedRef.current) {
-                        videoEndedRef.current = true;
-                        onNextVideo?.();
-                        // Reset flag after a short delay to prevent multiple fires
-                        setTimeout(() => { videoEndedRef.current = false; }, 1000);
-                    }
+                if (state === 2 || state === 0) setLocalPlaying(false);
+                if (state === 1) {
+                    setDuration(getDuration());
                 }
             },
         });
 
+    // Expose player controls upward via onReady callback
     useEffect(() => {
-        if (ready) onPlayerReady?.({ loadVideo, play, pause, seekTo, getCurrentTime, getDuration });
+        if (ready) onReady?.({ loadVideo, play, pause, seekTo, getCurrentTime, getDuration });
     }, [ready]);
+
+    // Progress bar ticker
+    useEffect(() => {
+        if (localPlaying) {
+            progressInterval.current = setInterval(() => {
+                setCurrentTime(getCurrentTime());
+                setDuration(getDuration());
+            }, 500);
+        } else {
+            clearInterval(progressInterval.current);
+        }
+        return () => clearInterval(progressInterval.current);
+    }, [localPlaying, getCurrentTime, getDuration]);
 
     const handleQueueVideo = (e) => {
         e.preventDefault();
@@ -54,7 +65,6 @@ export function VideoPlayer({
     };
 
     const handleSeekClick = (e) => {
-        const duration = getDuration?.();
         if (!duration) return;
         const rect = e.currentTarget.getBoundingClientRect();
         const ratio = (e.clientX - rect.left) / rect.width;
@@ -62,8 +72,8 @@ export function VideoPlayer({
         onSeek(pos);
     };
 
-    const currentTime = playback?.elapsedSeconds ?? 0;
-    const duration = getDuration?.() ?? 0;
+    const inQueue = djQueue.includes(String(userId));
+    const currentDJ = djQueue[0];
     const progressPct = duration ? (currentTime / duration) * 100 : 0;
 
     return (
@@ -74,19 +84,21 @@ export function VideoPlayer({
                 {!playback && (
                     <div style={styles.emptyOverlay}>
                         <p style={styles.emptyText}>
-                            {playlist.length === 0
-                                ? 'Queue is empty — add a video below to start playing'
-                                : 'Loading next video...'}
+                            {djQueue.length === 0
+                                ? 'No DJ yet — join the queue to play!'
+                                : isDJ
+                                ? 'You\'re the DJ — queue a video below'
+                                : `Waiting for DJ ${currentDJ ? `(User ${currentDJ})` : ''}...`}
                         </p>
                     </div>
                 )}
             </div>
 
-            {/* ── Progress bar (clickable by all) ── */}
+            {/* ── Progress bar (DJ can scrub, others can't) ── */}
             {playback && (
                 <div
-                    style={{ ...styles.progressTrack, cursor: 'pointer' }}
-                    onClick={handleSeekClick}
+                    style={{ ...styles.progressTrack, cursor: isDJ ? 'pointer' : 'default' }}
+                    onClick={isDJ ? handleSeekClick : undefined}
                 >
                     <div style={{ ...styles.progressFill, width: `${progressPct}%` }} />
                 </div>
@@ -102,57 +114,68 @@ export function VideoPlayer({
                 </div>
             )}
 
-            {/* ── Playback Controls (available to all) ── */}
-            <div style={styles.controlsPanel}>
-                <div style={styles.controls}>
-                    <button
-                        style={styles.btn}
-                        onClick={playback ? (localPlaying ? onPause : onPlay) : undefined}
-                        disabled={!playback}
-                    >
-                        {playback ? (localPlaying ? '⏸ Pause' : '▶ Play') : '▶ Play'}
-                    </button>
-                    {playlist.length > 0 && (
-                        <button style={{ ...styles.btn, ...styles.btnSecondary }} onClick={onNextVideo}>
-                            ⏭ Skip
+            {/* ── DJ Controls ── */}
+            {isDJ && (
+                <div style={styles.djPanel}>
+                    <p style={styles.djBadge}>🎧 You are the DJ</p>
+
+                    {/* Video input */}
+                    <form onSubmit={handleQueueVideo} style={styles.inputRow}>
+                        <input
+                            style={styles.input}
+                            placeholder="YouTube URL or video ID"
+                            value={urlInput}
+                            onChange={(e) => setUrlInput(e.target.value)}
+                        />
+                        <input
+                            style={{ ...styles.input, maxWidth: 160 }}
+                            placeholder="Title (optional)"
+                            value={titleInput}
+                            onChange={(e) => setTitleInput(e.target.value)}
+                        />
+                        <button style={styles.btn} type="submit">Load</button>
+                    </form>
+
+                    {/* Playback controls */}
+                    <div style={styles.controls}>
+                        <button
+                            style={styles.btn}
+                            onClick={localPlaying ? onPause : onPlay}
+                        >
+                            {localPlaying ? '⏸ Pause' : '▶ Play'}
+                        </button>
+                        <button style={{ ...styles.btn, ...styles.btnSecondary }} onClick={onPassDJ}>
+                            Pass DJ →
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Queue panel ── */}
+            <div style={styles.queuePanel}>
+                <div style={styles.queueHeader}>
+                    <span style={styles.queueTitle}>DJ Queue</span>
+                    {inQueue ? (
+                        <button style={{ ...styles.btn, ...styles.btnSecondary }} onClick={onLeaveQueue}>
+                            Leave Queue
+                        </button>
+                    ) : (
+                        <button style={styles.btn} onClick={onJoinQueue}>
+                            + Join Queue
                         </button>
                     )}
                 </div>
-
-                {/* Video input */}
-                <form onSubmit={handleQueueVideo} style={styles.inputRow}>
-                    <input
-                        style={styles.input}
-                        placeholder="YouTube URL or video ID"
-                        value={urlInput}
-                        onChange={(e) => setUrlInput(e.target.value)}
-                    />
-                    <input
-                        style={{ ...styles.input, maxWidth: 160 }}
-                        placeholder="Title (optional)"
-                        value={titleInput}
-                        onChange={(e) => setTitleInput(e.target.value)}
-                    />
-                    <button style={styles.btn} type="submit">+ Add to Queue</button>
-                </form>
-            </div>
-
-            {/* ── Playlist panel ── */}
-            <div style={styles.playlistPanel}>
-                <div style={styles.playlistHeader}>
-                    <span style={styles.playlistTitle}>
-                        Upcoming ({playlist.length})
-                    </span>
-                </div>
-                {playlist.length === 0 ? (
-                    <p style={styles.muted}>Queue is empty</p>
+                {djQueue.length === 0 ? (
+                    <p style={styles.muted}>No one in queue</p>
                 ) : (
-                    <ol style={styles.playlistList}>
-                        {playlist.map((videoId, i) => (
-                            <li key={`${videoId}-${i}`} style={styles.playlistItem}>
-                                <span style={styles.playlistPos}>{i + 1}.</span>
-                                <span style={styles.playlistName}>
-                                    {videoId}
+                    <ol style={styles.queueList}>
+                        {djQueue.map((uid, i) => (
+                            <li key={uid} style={styles.queueItem}>
+                                <span style={i === 0 ? styles.currentDJLabel : styles.queuePos}>
+                                    {i === 0 ? '🎧' : `${i + 1}.`}
+                                </span>
+                                <span style={styles.queueName}>
+                                    {uid === String(userId) ? 'You' : `User ${uid}`}
                                 </span>
                             </li>
                         ))}
@@ -237,7 +260,7 @@ const styles = {
         flexShrink: 0,
         marginLeft: '12px',
     },
-    controlsPanel: {
+    djPanel: {
         background: '#1a1a1a',
         border: '1px solid #2e2e2e',
         borderTop: 'none',
@@ -246,9 +269,11 @@ const styles = {
         flexDirection: 'column',
         gap: '12px',
     },
-    controls: {
-        display: 'flex',
-        gap: '8px',
+    djBadge: {
+        margin: 0,
+        fontSize: '13px',
+        color: '#aa3bff',
+        fontWeight: '600',
     },
     inputRow: {
         display: 'flex',
@@ -266,6 +291,10 @@ const styles = {
         fontSize: '13px',
         outline: 'none',
     },
+    controls: {
+        display: 'flex',
+        gap: '8px',
+    },
     btn: {
         padding: '7px 14px',
         background: '#aa3bff',
@@ -282,27 +311,27 @@ const styles = {
         border: '1px solid #2e2e2e',
         color: '#888',
     },
-    playlistPanel: {
+    queuePanel: {
         background: '#1a1a1a',
         border: '1px solid #2e2e2e',
         borderTop: 'none',
         borderRadius: '0 0 8px 8px',
         padding: '16px',
     },
-    playlistHeader: {
+    queueHeader: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: '12px',
     },
-    playlistTitle: {
+    queueTitle: {
         fontSize: '13px',
         fontWeight: '600',
         color: '#666',
         textTransform: 'uppercase',
         letterSpacing: '0.06em',
     },
-    playlistList: {
+    queueList: {
         listStyle: 'none',
         margin: 0,
         padding: 0,
@@ -310,22 +339,22 @@ const styles = {
         flexDirection: 'column',
         gap: '6px',
     },
-    playlistItem: {
+    queueItem: {
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
         fontSize: '13px',
     },
-    playlistPos: {
+    currentDJLabel: {
+        fontSize: '16px',
+    },
+    queuePos: {
         color: '#555',
         width: '20px',
         textAlign: 'center',
     },
-    playlistName: {
+    queueName: {
         color: '#ccc',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
     },
     muted: {
         color: '#555',

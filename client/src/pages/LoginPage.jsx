@@ -1,73 +1,162 @@
-import React from "react";
-import { useState, useEffect, useRef } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useState } from 'react';
 
-const LoginPage = () => {
-  const { login, loading, error, clearError } = useAuth();
+export function LoginPage({ onLogin, authHook }) {
+  const [mode, setMode] = useState('login'); // 'login' | 'register'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const { login, register, loading, error } = authHook;
 
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [reloadError, setReloadError] = useState("");
-
-  const attemptedRef = useRef(false);
-
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    attemptedRef.current = true;
-    await login({ identifier, password });
+    if (mode === 'login') {
+      const result = await login(email, password);
+      if (result) onLogin(result);
+    } else {
+      const result = await register(username, email, password);
+      if (result) {
+        // auto-login after register
+        const loginResult = await login(email, password);
+        if (loginResult) onLogin(loginResult);
+      }
+    }
   };
 
-  // Runs whenever `error` changes after a login attempt
-  useEffect(() => {
-    if (attemptedRef.current && error) {
-      sessionStorage.setItem("loginError", error);
-      window.location.reload();
-    }
-  }, [error]);
-
-  useEffect(() => {
-    clearError();
-
-    const stored = sessionStorage.getItem("loginError");
-    if (stored) {
-      setReloadError(stored);
-      sessionStorage.removeItem("loginError");
-    }
-  }, []);
-
-  const displayError = reloadError || error;
-
   return (
-    <div className="flex flex-col justify-center place-items-center h-full overflow-hidden">
-      <form onSubmit={handleLogin}>
-        <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-          <legend className="fieldset-legend">Login</legend>
-          <label className="label">Email or Username</label>
+    <div style={styles.page}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>WiShuffle</h1>
+        <p style={styles.subtitle}>Listen together</p>
+
+        <div style={styles.tabs}>
+          <button
+            style={{ ...styles.tab, ...(mode === 'login' ? styles.tabActive : {}) }}
+            onClick={() => setMode('login')}
+          >
+            Login
+          </button>
+          <button
+            style={{ ...styles.tab, ...(mode === 'register' ? styles.tabActive : {}) }}
+            onClick={() => setMode('register')}
+          >
+            Register
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} style={styles.form}>
+          {mode === 'register' && (
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          )}
           <input
-            type="text"
-            className="input"
-            placeholder="Enter your email or username"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
+            style={styles.input}
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
           />
-          <label className="label">Password</label>
           <input
+            style={styles.input}
             type="password"
-            className="input"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
-          {displayError && (
-            <p className="text-red-500 text-sm mt-2">{displayError}</p>
-          )}
-          <button className="btn btn-neutral mt-4" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+          {error && <p style={styles.error}>{error}</p>}
+          <button style={styles.button} type="submit" disabled={loading}>
+            {loading ? 'Loading...' : mode === 'login' ? 'Login' : 'Register'}
           </button>
-        </fieldset>
-      </form>
+        </form>
+      </div>
     </div>
   );
-};
+}
 
-export default LoginPage;
+const styles = {
+  page: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#0f0f0f',
+  },
+  card: {
+    background: '#1a1a1a',
+    border: '1px solid #2e2e2e',
+    borderRadius: '12px',
+    padding: '40px',
+    width: '100%',
+    maxWidth: '380px',
+  },
+  title: {
+    margin: '0 0 4px',
+    fontSize: '28px',
+    fontWeight: '700',
+    color: '#fff',
+    textAlign: 'center',
+  },
+  subtitle: {
+    margin: '0 0 28px',
+    color: '#666',
+    textAlign: 'center',
+    fontSize: '14px',
+  },
+  tabs: {
+    display: 'flex',
+    gap: '8px',
+    marginBottom: '24px',
+  },
+  tab: {
+    flex: 1,
+    padding: '8px',
+    border: '1px solid #2e2e2e',
+    borderRadius: '6px',
+    background: 'transparent',
+    color: '#888',
+    cursor: 'pointer',
+    fontSize: '14px',
+  },
+  tabActive: {
+    background: '#aa3bff22',
+    borderColor: '#aa3bff',
+    color: '#aa3bff',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  input: {
+    padding: '10px 14px',
+    background: '#111',
+    border: '1px solid #2e2e2e',
+    borderRadius: '6px',
+    color: '#fff',
+    fontSize: '14px',
+    outline: 'none',
+  },
+  error: {
+    color: '#ff6b6b',
+    fontSize: '13px',
+    margin: '0',
+  },
+  button: {
+    padding: '10px',
+    background: '#aa3bff',
+    border: 'none',
+    borderRadius: '6px',
+    color: '#fff',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    marginTop: '4px',
+  },
+};
