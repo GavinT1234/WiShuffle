@@ -15,12 +15,12 @@ const CTA = () => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-primary to-primary/80 py-16">
+    <div className="bg-gradient-to-r from-success to-success/80 py-16">
       <div className="max-w-4xl mx-auto px-4 text-center">
-        <h2 className="text-5xl font-bold text-primary-content mb-4">
+        <h2 className="text-5xl font-bold text-success-content mb-4">
           Ready to Join the Music Community?
         </h2>
-        <p className="text-xl text-primary-content/90 mb-8">
+        <p className="text-xl text-success-content/90 mb-8">
           Connect with friends and discover music together. Create your WiShuffle account today!
         </p>
         <button onClick={handleGetStarted} className="btn btn-lg btn-outline text-success-content border-success-content hover:bg-success-content hover:text-success">
