@@ -48,11 +48,11 @@ export async function playlistOrdering(parentId) {
 }
 
 export async function playlistContent(parentId) {
-    const playlistContent = await prisma.playlist.findMany({
+    const content = await prisma.playlist.findMany({
         where: { parentId },
         orderBy: { position: 'asc' }
     });
-    return playlistContent;
+    return content;
 }
 
 export async function create(playlistData) {
