@@ -90,17 +90,21 @@ export async function getFriends(userId) {
 
   // Normalize to show the friend's info (not the current user's)
   return friendships.map(friendship => {
-    if (friendship.initiatorId === userId) {
-      return {
-        id: friendship.id,
-        friend: friendship.receiver
-      };
-    } else {
-      return {
-        id: friendship.id,
-        friend: friendship.initiator
-      };
+    const friend = friendship.initiatorId === userId ? friendship.receiver : friendship.initiator;
+    
+    // Parse topSongs if it's a JSON string
+    if (friend.topSongs && typeof friend.topSongs === 'string') {
+      try {
+        friend.topSongs = JSON.parse(friend.topSongs);
+      } catch (err) {
+        friend.topSongs = null;
+      }
     }
+    
+    return {
+      id: friendship.id,
+      friend
+    };
   });
 }
 

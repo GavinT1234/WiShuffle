@@ -22,7 +22,7 @@ export function ProfilePage() {
       setDescription(user.description || '');
       setAvatarUrl(user.avatarUrl || '');
       setPreviewSrc(user.avatarUrl || '');
-      setTopSongs(user.topSongs || []);
+      setTopSongs(Array.isArray(user.topSongs) ? user.topSongs : []);
     }
   }, [user]);
 
@@ -57,7 +57,8 @@ export function ProfilePage() {
       return;
     }
     
-    const updatedSongs = [...topSongs, newSong];
+    const currentSongs = Array.isArray(topSongs) ? topSongs : [];
+    const updatedSongs = [...currentSongs, newSong];
     if (updatedSongs.length > 3) {
       setStatus('You can only have a maximum of 3 top songs');
       return;
@@ -69,7 +70,8 @@ export function ProfilePage() {
   };
 
   const removeSong = (index) => {
-    const updatedSongs = topSongs.filter((_, i) => i !== index);
+    const currentSongs = Array.isArray(topSongs) ? topSongs : [];
+    const updatedSongs = currentSongs.filter((_, i) => i !== index);
     setTopSongs(updatedSongs);
   };
 
@@ -197,7 +199,7 @@ export function ProfilePage() {
               <span className="label-text font-semibold">Top 3 Songs</span>
             </label>
             <div className="space-y-3">
-              {topSongs.map((song, index) => (
+              {Array.isArray(topSongs) && topSongs.map((song, index) => (
                 <div key={index} className="card bg-base-200 p-4">
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 space-y-1">
@@ -224,7 +226,7 @@ export function ProfilePage() {
               ))}
             </div>
 
-            {topSongs.length < 3 && (
+            {Array.isArray(topSongs) && topSongs.length < 3 && (
               <div className="card bg-base-200 p-4 space-y-3">
                 <h3 className="font-semibold">Add a new song</h3>
                 <input
