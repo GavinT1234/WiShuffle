@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 
 export function useRoomSync({ socket, roomId, userId, playerControls }) {
     const [playback, setPlayback] = useState(null);
-    const [djQueue, setDJQueue] = useState([]);
-    const [isDJ, setIsDJ] = useState(false);
+    const [playlist, setPlaylist] = useState([]);
+    const playerStateRef = useRef(null);
 
     useEffect(() => {
         if (!socket) {
@@ -61,17 +61,20 @@ export function useRoomSync({ socket, roomId, userId, playerControls }) {
 
         const onQueueUpdated = ({ queue, roomId: eventRoomId }) => {
             if (eventRoomId !== roomId) return;
-            setDJQueue(queue);
-            setIsDJ(queue[0] === String(userId));
+            setPlaylist(queue);
+            console.log('📋 Playlist updated:', queue);
         };
 
-        const onDJChanged = ({ djId, roomId: eventRoomId }) => {
+        const onQueueEmpty = ({ roomId: eventRoomId }) => {
             if (eventRoomId !== roomId) return;
-            setIsDJ(String(djId) === String(userId));
+            console.log('📭 Queue empty');
+            setPlaylist([]);
+            setPlayback(null);
+            playerControls.current?.stop?.();
         };
 
         const onError = ({ message }) => {
-            console.warn('[dj error]', message);
+            console.warn('[room error]', message);
         };
 
         // ✅ Each event registered exactly once
@@ -79,10 +82,9 @@ export function useRoomSync({ socket, roomId, userId, playerControls }) {
         socket.on('room:video_play', onVideoPlay);
         socket.on('room:video_pause', onVideoPause);
         socket.on('room:video_seek', onVideoSeek);
-        socket.on('dj:queue_updated', onQueueUpdated);
-        socket.on('dj:changed', onDJChanged);
-        socket.on('dj:status', ({ isDJ: amDJ }) => setIsDJ(amDJ));
-        socket.on('dj:error', onError);
+        socket.on('room:queue_updated', onQueueUpdated);
+        socket.on('room:queue_empty', onQueueEmpty);
+        socket.on('room:error', onError);
 
         console.log('✅ All socket listeners registered');
 
@@ -92,25 +94,46 @@ export function useRoomSync({ socket, roomId, userId, playerControls }) {
             socket.off('room:video_play', onVideoPlay);
             socket.off('room:video_pause', onVideoPause);
             socket.off('room:video_seek', onVideoSeek);
-            socket.off('dj:queue_updated', onQueueUpdated);
-            socket.off('dj:changed', onDJChanged);
-            socket.off('dj:status');
-            socket.off('dj:error', onError);
+            socket.off('room:queue_updated', onQueueUpdated);
+            socket.off('room:queue_empty', onQueueEmpty);
+            socket.off('room:error', onError);
         };
-    }, [socket, userId]);
+    }, [socket, roomId]);
 
-    const joinQueue = useCallback(() => socket?.emit('dj:join_queue', { roomId }), [socket, roomId]);
-    const leaveQueue = useCallback(() => socket?.emit('dj:leave_queue', { roomId }), [socket, roomId]);
     const queueVideo = useCallback((input, title) => {
-        console.log('📤 Emitting dj:queue_video:', { roomId, input, title });
-        socket?.emit('dj:queue_video', { roomId, input, title }, (response) => {
-            console.log('📥 dj:queue_video response:', response);
+        console.log('📤 Emitting room:queue_video:', { roomId, input, title });
+        socket?.emit('room:queue_video', { roomId, input, title }, (response) => {
+            console.log('📥 room:queue_video response:', response);
         });
     }, [socket, roomId]);
-    const emitPlay = useCallback(() => socket?.emit('dj:play', { roomId }), [socket, roomId]);
-    const emitPause = useCallback(() => socket?.emit('dj:pause', { roomId }), [socket, roomId]);
-    const emitSeek = useCallback((positionSeconds) => socket?.emit('dj:seek', { roomId, positionSeconds }), [socket, roomId]);
-    const passDJ = useCallback(() => socket?.emit('dj:next', { roomId }), [socket, roomId]);
 
-    return { playback, djQueue, isDJ, joinQueue, leaveQueue, queueVideo, emitPlay, emitPause, emitSeek, passDJ };
+    const emitPlay = useCallback(() => {
+        console.log('▶️ Emitting room:video_play');
+        socket?.emit('room:video_play', { roomId });
+    }, [socket, roomId]);
+
+    const emitPause = useCallback(() => {
+        console.log('⏸️ Emitting room:video_pause');
+        socket?.emit('room:video_pause', { roomId });
+    }, [socket, roomId]);
+
+    const emitSeek = useCallback((positionSeconds) => {
+        console.log('⏩ Emitting room:video_seek:', positionSeconds);
+        socket?.emit('room:video_seek', { roomId, positionSeconds });
+    }, [socket, roomId]);
+
+    const emitNextVideo = useCallback(() => {
+        console.log('⏭️ Emitting room:next_video - advancing queue');
+        socket?.emit('room:next_video', { roomId });
+    }, [socket, roomId]);
+
+    return {
+        playback,
+        playlist,
+        queueVideo,
+        emitPlay,
+        emitPause,
+        emitSeek,
+        emitNextVideo
+    };
 }
