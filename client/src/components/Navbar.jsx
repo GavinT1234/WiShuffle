@@ -15,7 +15,7 @@ const Navbar = () => {
     if (isLoggedIn) {
       navigate("/dashboard");
     } else {
-      navigate("/HomePage");
+      navigate("/");
     }
   };
 
