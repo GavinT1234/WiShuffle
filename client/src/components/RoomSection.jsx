@@ -79,7 +79,7 @@ const RoomSection = () => {
               <th className="w-[35%] md:w-[35%]">Name</th>
               <th className="md:w-[15%] hidden md:table-cell">
                 Listeners
-              </th>{" "}
+              </th>{/*" "*/}
               <th>
                 <div className="flex  items-center justify-end md:justify-between">
                   <span className="hidden md:block">Options</span>
@@ -155,7 +155,7 @@ const RoomSection = () => {
                       </>
                     )}
                   </td>
-                  <td className="hidden md:table-cell">{r.listenerCount}</td>{" "}
+                  <td className="hidden md:table-cell">{r.listenerCount}</td>{/*" "*/}
                   <td>
                     <div className="flex gap-2 items-center justify-end md:justify-start">
                       <button
@@ -166,7 +166,7 @@ const RoomSection = () => {
                       </button>
                       <button className="btn btn-ghost btn-xs hidden md:block">
                         details
-                      </button>{" "}
+                      </button>{/*" "*/}
                     </div>
                   </td>
                 </tr>

@@ -18,7 +18,8 @@ function loadYTScript() {
     return window._ytScriptLoading;
 }
 
-export function useYouTubePlayer({ containerId, onStateChange }) {
+export function useYoutubePlayer({ containerId, onStateChange }) {
+    
     const playerRef = useRef(null);
     const [ready, setReady] = useState(false);
     // Suppress echoing back events triggered by our own programmatic calls
@@ -29,27 +30,36 @@ export function useYouTubePlayer({ containerId, onStateChange }) {
 
         loadYTScript().then(() => {
             if (destroyed) return;
+            console.log('✅ YouTube script loaded, creating player in container:', containerId);
 
-            playerRef.current = new window.YT.Player(containerId, {
-                height: '100%',
-                width: '100%',
-                playerVars: {
-                    autoplay: 0,
-                    controls: 0,       // hide native controls — we draw our own
-                    modestbranding: 1,
-                    rel: 0,
-                    enablejsapi: 1,
-                },
-                events: {
-                    onReady: () => {
-                        if (!destroyed) setReady(true);
+            try {
+                playerRef.current = new window.YT.Player(containerId, {
+                    height: '100%',
+                    width: '100%',
+                    playerVars: {
+                        autoplay: 1,       // auto-play when video is loaded
+                        controls: 0,       // hide native controls — we draw our own
+                        modestbranding: 1,
+                        rel: 0,
+                        enablejsapi: 1,
                     },
-                    onStateChange: (event) => {
-                        if (isSyncing.current) return; // ignore our own commands
-                        onStateChange?.(event.data);
+                    events: {
+                        onReady: () => {
+                            console.log('🎬 YouTube player is ready');
+                            if (!destroyed) setReady(true);
+                        },
+                        onStateChange: (event) => {
+                            console.log('📊 Player state changed:', event.data);
+                            if (isSyncing.current) return; // ignore our own commands
+                            onStateChange?.(event.data);
+                        },
                     },
-                },
-            });
+                });
+            } catch (err) {
+                console.error('❌ Error creating YouTube player:', err);
+            }
+        }).catch(err => {
+            console.error('❌ Failed to load YouTube script:', err);
         });
 
         return () => {
@@ -65,12 +75,17 @@ export function useYouTubePlayer({ containerId, onStateChange }) {
     // ── Programmatic controls (all wrapped in isSyncing guard) ──────────────
 
     const loadVideo = useCallback((videoId, startSeconds = 0) => {
-        if (!playerRef.current) return;
+        if (!playerRef.current) {
+            console.error('❌ loadVideo: Player not initialized yet');
+            return;
+        }
         isSyncing.current = true;
         playerRef.current.loadVideoById({ videoId, startSeconds });
         // YT fires onStateChange during load; clear flag after brief delay
         setTimeout(() => { isSyncing.current = false; }, 1000);
+        console.log('📺 loadVideo called:', videoId, 'player ready:', !!playerRef.current);
     }, []);
+
 
     const play = useCallback(() => {
         if (!playerRef.current) return;
@@ -103,3 +118,4 @@ export function useYouTubePlayer({ containerId, onStateChange }) {
 
     return { ready, loadVideo, play, pause, seekTo, getCurrentTime, getDuration };
 }
+

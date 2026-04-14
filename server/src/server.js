@@ -8,6 +8,7 @@ import roomRoutes from './routes/roomRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import playlistRoutes from './routes/playlistRoutes.js';
 import userRoutes from './routes/userRoutes.js';  
+import youtubeRoutes from './routes/youtubeRoutes.js';
 
 
 const app = express();
@@ -32,6 +33,7 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/playlists', playlistRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/youtube', youtubeRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {
