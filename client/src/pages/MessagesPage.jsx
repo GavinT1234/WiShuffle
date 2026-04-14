@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetUser } from '../hooks/useGetUser';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
 export function MessagesPage() {
   const { partnerId } = useParams();
   const navigate = useNavigate();
@@ -36,7 +34,7 @@ export function MessagesPage() {
 
   const fetchConversations = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/messages/conversations`, {
+      const res = await fetch(`/api/messages/conversations`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -52,14 +50,14 @@ export function MessagesPage() {
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/messages/${currentPartner}`, {
+      const res = await fetch(`/api/messages/${currentPartner}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
         const data = await res.json();
         setMessages(data);
         // Mark as read
-        await fetch(`${API_URL}/api/messages/${currentPartner}/read`, {
+        await fetch(`/api/messages/${currentPartner}/read`, {
           method: 'PATCH',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -71,7 +69,7 @@ export function MessagesPage() {
 
   const fetchPartnerInfo = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/users/${currentPartner}`, {
+      const res = await fetch(`/api/users/${currentPartner}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -89,7 +87,7 @@ export function MessagesPage() {
 
     setSending(true);
     try {
-      const res = await fetch(`${API_URL}/api/messages`, {
+      const res = await fetch(`/api/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
 export function FriendProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -18,7 +16,7 @@ export function FriendProfilePage() {
 
   const fetchUserProfile = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/users/${userId}`, {
+      const res = await fetch(`/api/users/${userId}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (res.ok) {

@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetUser } from '../hooks/useGetUser';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
 export function ProfilePage() {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -82,7 +80,7 @@ export function ProfilePage() {
     setStatus('');
 
     try {
-      const res = await fetch(`${API_URL}/api/users/me`, {
+      const res = await fetch(`/api/users/me`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
