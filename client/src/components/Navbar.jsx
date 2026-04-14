@@ -7,8 +7,7 @@ import { useGetUser } from "../hooks/useGetUser";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-  const { isLoggedIn } = useAuth();
-  const { user, loading } = useGetUser();
+  const { user, loading } = isLoggedIn ? useGetUser() : { user: null, loading: false };
   const navigate = useNavigate();
 
   const handleLogoClick = () => {
@@ -18,7 +17,6 @@ const Navbar = () => {
       navigate("/");
     }
   };
-
   return (
     <div className="drawer border-b border-border">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />

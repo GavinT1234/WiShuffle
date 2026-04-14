@@ -2,7 +2,7 @@ const BASE_URL = "/api";
 
 export const request = async (endpoint, options = {}) => {
   try {
-    console.log(`URL: ${BASE_URL}${endpoint}`);
+
     const token = localStorage.getItem("token");
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...options,
@@ -12,13 +12,30 @@ export const request = async (endpoint, options = {}) => {
         ...(token && { Authorization: `Bearer ${token}` }),
       },
     });
+
+    if (endpoint === '/auth/me' && response.status === 401) {
+      throw new Error('Unauthorized');
+    }
+
     if (response.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-      return;
+      if (localStorage.getItem("token")) {
+        localStorage.removeItem("token");
+
+        const publicPaths = ['/login', '/register', '/'];
+        if (!publicPaths.includes(window.location.pathname)) {
+          window.location.href = '/login';
+        }
+      }
     }
     
     const text = await response.text();
+
+    if (!text) {
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return null;
+    }
 
     const data = JSON.parse(text);
 

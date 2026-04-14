@@ -3,7 +3,9 @@ import React from "react";
 import { useGetUser } from "../hooks/useGetUser";
 import LoadingRing from "../components/LoadingRing";
 import RoomSection from "../components/RoomSection";
+import { useNavigate } from "react-router-dom";
 const Dashboard = () => {
+  
   const { user, loading, error } = useGetUser();
 
   return (
