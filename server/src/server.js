@@ -48,7 +48,9 @@ app.use((req, res, next) => {
 
 // Error Handler
 app.use((err, req, res, next) => {
-  console.log(err.stack); // change to console.error?
+  console.error('Error:', err.message);
+  console.error(err.stack);
+  
   if (!err.status) {
     err.status = 500;
     err.message = 'Internal Server Error';
@@ -57,5 +59,10 @@ app.use((err, req, res, next) => {
 });
 
 // Start
-await connectRedis();
-server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+try {
+  await connectRedis();
+  server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+} catch (error) {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+}

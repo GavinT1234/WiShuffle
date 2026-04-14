@@ -63,14 +63,13 @@ const CreateRoom = ({ onClose, onSuccess }) => {
             onChange={(e) => setName(e.target.value)}
           />
           <GenreSelect selected={tags} onChange={setTags} /> {/* ✅ */}
-          <input
-            className="btn "
-            type="reset"
-            value="×"
-            onClick={() => {
-              setTags([]);
-            }}
-          />
+          <button
+            type="button"
+            className="btn"
+            onClick={onClose}
+          >
+            ×
+          </button>
           <button
             className="btn btn-neutral mt-4"
             disabled={!name.trim() || loading}
