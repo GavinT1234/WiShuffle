@@ -17,7 +17,7 @@ const Navbar = () => {
     if (isLoggedIn && fetchUser) {
       fetchUser();
     }
-  }, [isLoggedIn, fetchUser]);
+  }, [isLoggedIn]);
 
   const handleLogoClick = () => {
     if (isLoggedIn) {
