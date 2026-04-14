@@ -7,8 +7,8 @@ export async function registerHandler(req, res) {
 }
 
 export async function loginHandler(req, res) {
-  const { email, password } = req.body;
-  const accessToken = await login(email, password);
+  const { identifier, password } = req.body;
+  const accessToken = await login(identifier, password);
   res.status(200).json({ accessToken });
 }
 

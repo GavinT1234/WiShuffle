@@ -13,6 +13,8 @@ export function ProfilePage() {
   const [description, setDescription] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [previewSrc, setPreviewSrc] = useState('');
+  const [topSongs, setTopSongs] = useState([]);
+  const [newSong, setNewSong] = useState({ title: '', artist: '', url: '' });
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
 
@@ -22,6 +24,7 @@ export function ProfilePage() {
       setDescription(user.description || '');
       setAvatarUrl(user.avatarUrl || '');
       setPreviewSrc(user.avatarUrl || '');
+      setTopSongs(user.topSongs || []);
     }
   }, [user]);
 
@@ -50,6 +53,28 @@ export function ProfilePage() {
     reader.readAsDataURL(file);
   };
 
+  const addSong = () => {
+    if (!newSong.title.trim() || !newSong.artist.trim() || !newSong.url.trim()) {
+      setStatus('Please fill in all song fields');
+      return;
+    }
+    
+    const updatedSongs = [...topSongs, newSong];
+    if (updatedSongs.length > 3) {
+      setStatus('You can only have a maximum of 3 top songs');
+      return;
+    }
+    
+    setTopSongs(updatedSongs);
+    setNewSong({ title: '', artist: '', url: '' });
+    setStatus('');
+  };
+
+  const removeSong = (index) => {
+    const updatedSongs = topSongs.filter((_, i) => i !== index);
+    setTopSongs(updatedSongs);
+  };
+
   const saveProfile = async (e) => {
     e.preventDefault();
     if (!username.trim()) return;
@@ -67,6 +92,7 @@ export function ProfilePage() {
           username: username.trim(),
           description,
           avatarUrl: avatarUrl.trim(),
+          topSongs: topSongs.length > 0 ? topSongs : null,
         }),
       });
 
@@ -166,6 +192,73 @@ export function ProfilePage() {
               placeholder="Tell people a little about yourself"
               rows="4"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="label">
+              <span className="label-text font-semibold">Top 3 Songs</span>
+            </label>
+            <div className="space-y-3">
+              {topSongs.map((song, index) => (
+                <div key={index} className="card bg-base-200 p-4">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1 space-y-1">
+                      <p className="font-semibold">{song.title}</p>
+                      <p className="text-sm text-base-content/70">{song.artist}</p>
+                      <a 
+                        href={song.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-sm link link-primary"
+                      >
+                        Open in player
+                      </a>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeSong(index)}
+                      className="btn btn-sm btn-ghost"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {topSongs.length < 3 && (
+              <div className="card bg-base-200 p-4 space-y-3">
+                <h3 className="font-semibold">Add a new song</h3>
+                <input
+                  type="text"
+                  placeholder="Song title"
+                  className="input input-bordered w-full input-sm"
+                  value={newSong.title}
+                  onChange={(e) => setNewSong({ ...newSong, title: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Artist name"
+                  className="input input-bordered w-full input-sm"
+                  value={newSong.artist}
+                  onChange={(e) => setNewSong({ ...newSong, artist: e.target.value })}
+                />
+                <input
+                  type="url"
+                  placeholder="Song link URL"
+                  className="input input-bordered w-full input-sm"
+                  value={newSong.url}
+                  onChange={(e) => setNewSong({ ...newSong, url: e.target.value })}
+                />
+                <button
+                  type="button"
+                  onClick={addSong}
+                  className="btn btn-primary btn-sm w-full"
+                >
+                  Add Song
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-3">

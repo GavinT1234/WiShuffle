@@ -28,7 +28,7 @@ export const request = async (endpoint, options = {}) => {
         }
       }
     }
-
+    
     const text = await response.text();
 
     if (!text) {

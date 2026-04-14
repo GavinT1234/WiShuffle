@@ -16,13 +16,11 @@ export const AuthProvider = ({ children }) => {
     Authorization: `Bearer ${localStorage.getItem("token")}`,
   };
 
-  const login = async ({ email, password }) => {
+  const login = async ({ identifier, password }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await loginApi({ email, password });
-      const token = response.accessToken.accessToken;
-      localStorage.setItem("token", token);
+      const response = await loginApi({ identifier, password });
 
       // ⚡ Create/connect socket AFTER token exists
       const socket = getSocket(token);

@@ -7,6 +7,9 @@ import { connectRedis } from './config/redis.js';
 import roomRoutes from './routes/roomRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import playlistRoutes from './routes/playlistRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import friendRoutes from './routes/friendRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
 import userRoutes from './routes/userRoutes.js';  
 import youtubeRoutes from './routes/youtubeRoutes.js';
 
@@ -33,6 +36,8 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/playlists', playlistRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/friends', friendRoutes);
+app.use('/api/messages', messageRoutes);
 app.use('/api/youtube', youtubeRoutes);
 
 // 404 Handler
