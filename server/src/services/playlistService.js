@@ -1,4 +1,4 @@
-import { create, singlePlaylist, userPlaylists, update, playlistSongs, playlistOrdering, add, removeSong } from '../repositories/playlistRepo.js'
+import { create, singlePlaylist, userPlaylists, update, playlistSongs, add, removeSong, playlistOrdering, next, ownership, remove } from '../repositories/playlistRepo.js'
 
 export async function getPlaylists(ownerId) {
     const playlists = await userPlaylists(ownerId);
@@ -25,11 +25,21 @@ export async function getPlaylistSongs(id) {
     }
 }
 
+export async function getNext(id) {
+    const nextPos = await next(id);
+    if (nextPos) return nextPos;
+    else {
+        const error = new Error(`Playlist not found`);
+        error.status = 404;
+        throw error;
+    }
+}
+
 export async function getPlaylistOrdering(id) {
     const ordering = await playlistOrdering(id);
     if (ordering) return ordering;
     else {
-        const error = new Error(`Play;ist not found`);
+        const error = new Error(`Playlist not found`);
         error.status = 404;
         throw error;
     }
@@ -86,6 +96,16 @@ export async function getSongs(playlistId) {
     if (songs) return;
     else {
         const error = new Error(`Playlist not found`);
+        error.status = 404;
+        throw error;
+    }
+}
+
+export async function ownershipCheck(id) {
+    const item = await ownership(id);
+    if (item) return item;
+    else {
+        const error = new Error(`Item not found`);
         error.status = 404;
         throw error;
     }

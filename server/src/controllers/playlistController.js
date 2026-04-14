@@ -1,4 +1,4 @@
-import { addSong, createPlaylist, deletePlaylist, deleteSong, getPlaylist, getPlaylistOrdering, getPlaylists, getSongs, updatePlaylist } from '../services/playlistService.js'
+import { addSong, createPlaylist, deletePlaylist, deleteSong, getNext, getPlaylist, getPlaylistOrdering, getPlaylists, getPlaylistSongs, getSongs, updatePlaylist } from '../services/playlistService.js'
 
 export async function getPlaylistsHandler(req, res) {
     const playlists = await getPlaylists(req.user.id);
@@ -25,14 +25,19 @@ export async function getPlaylistOrderingHandler(req, res) {
 
 export async function createPlaylistHandler(req, res) {
     const { name, shuffle, parentId } = req.body;
-    const playlist = await createPlaylist({name, shuffle, parentId, ownerId: req.user.id});
+    let position = 0;
+    if (parentId) {
+        position = await getNext(parentId);
+    }
+    const playlist = await createPlaylist({name, shuffle, parentId, position, ownerId: req.user.id});
     res.status(200).json(playlist);
 }
 
 export async function addSongHandler(req, res) {
     const id = parseInt(req.params.id);
-    const {title, author, url} = req.body;
-    const song = await addSong({title, author, playlistId: id});
+    const position = await getNext(id);
+    const {name, author, url} = req.body;
+    const song = await addSong({name, author, url, isSong: true, parentId: id, position, ownerId: req.user.id});
     res.status(200).json(song);
 }
 
