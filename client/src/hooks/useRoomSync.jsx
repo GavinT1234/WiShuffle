@@ -97,7 +97,7 @@ export function useRoomSync({ socket, roomId, userId, playerControls }) {
             socket.off('dj:status');
             socket.off('dj:error', onError);
         };
-    }, [socket, userId]);
+    }, [socket, roomId, userId]);
 
     const joinQueue = useCallback(() => socket?.emit('dj:join_queue', { roomId }), [socket, roomId]);
     const leaveQueue = useCallback(() => socket?.emit('dj:leave_queue', { roomId }), [socket, roomId]);

@@ -11,62 +11,70 @@ export function registerRoomHandlers(io, socket) {
   // Join a room
   socket.on('room:join', async ({ roomId }, ack) => {
     console.log(`[Socket] User ${socket.user.id} joining room ${roomId}, socket rooms:`, [...socket.rooms]);
-    if (!roomId) return;
+    if (!roomId) {
+      if (ack) ack({ ok: false, error: 'Missing roomId' });
+      return;
+    }
     console.log(`[Socket] User ${socket.user.id} joining room ${roomId}`);
 
-    // If user was already in a room, leave first
-    if (socket.currentRoom && socket.currentRoom !== roomId) {
-      await leaveRoom(socket.currentRoom);
-    }
-
-    socket.join(`room:${roomId}`);
-    console.log(`[Socket] After join, socket rooms:`, [...socket.rooms]);
-    socket.currentRoom = roomId;
-
-    await addUserToRoom(roomId, socket.user.id);
-    const state = await getRoomState(roomId);
-
-    // Broadcast updated state to all users in the room (including joiner)
-    io.to(`room:${roomId}`).emit('room:state', state);
-
-    // Get current playback state and send it to the new user
     try {
-      const playbackData = await redis.hGetAll(`room:${roomId}:playback`);
-      const djQueue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
-
-      if (playbackData && playbackData.videoId) {
-        console.log(`📤 Sending current playback to new user:`, playbackData);
-
-        // Calculate elapsed time based on how long since the last state update
-        let elapsedSeconds = parseInt(playbackData.elapsedSeconds || '0');
-        const timestamp = parseInt(playbackData.timestamp || Date.now());
-        const timeSinceUpdate = (Date.now() - timestamp) / 1000;
-
-        // Only add elapsed time if the video is playing
-        if (playbackData.playState === 'playing') {
-          elapsedSeconds += timeSinceUpdate;
-        }
-
-        const payload = {
-          song: {
-            videoId: playbackData.videoId,
-            title: playbackData.title || playbackData.videoId,
-          },
-          elapsedSeconds: Math.floor(elapsedSeconds),
-          playState: playbackData.playState || 'paused',
-          roomId
-        };
-        socket.emit('room:video_load', payload);
+      // If user was already in a room, leave first
+      if (socket.currentRoom && socket.currentRoom !== roomId) {
+        await leaveRoom(socket.currentRoom);
       }
 
-      // Also send the DJ queue
-      socket.emit('dj:queue_updated', { queue: djQueue, roomId });
-    } catch (err) {
-      console.error('Error fetching playback state:', err);
-    }
+      socket.join(`room:${roomId}`);
+      console.log(`[Socket] After join, socket rooms:`, [...socket.rooms]);
+      socket.currentRoom = roomId;
 
-    // Ack the joiner with current state
-    if (ack) ack({ ok: true, state });
+      await addUserToRoom(roomId, socket.user.id);
+      const state = await getRoomState(roomId);
+
+      // Broadcast updated state to all users in the room (including joiner)
+      io.to(`room:${roomId}`).emit('room:state', state);
+
+      // Get current playback state and send it to the new user
+      try {
+        const playbackData = await redis.hGetAll(`room:${roomId}:playback`);
+        const djQueue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
+
+        if (playbackData && playbackData.videoId) {
+          console.log(`📤 Sending current playback to new user:`, playbackData);
+
+          // Calculate elapsed time based on how long since the last state update
+          let elapsedSeconds = parseInt(playbackData.elapsedSeconds || '0');
+          const timestamp = parseInt(playbackData.timestamp || Date.now());
+          const timeSinceUpdate = (Date.now() - timestamp) / 1000;
+
+          // Only add elapsed time if the video is playing
+          if (playbackData.playState === 'playing') {
+            elapsedSeconds += timeSinceUpdate;
+          }
+
+          const payload = {
+            song: {
+              videoId: playbackData.videoId,
+              title: playbackData.title || playbackData.videoId,
+            },
+            elapsedSeconds: Math.floor(elapsedSeconds),
+            playState: playbackData.playState || 'paused',
+            roomId
+          };
+          socket.emit('room:video_load', payload);
+        }
+
+        // Also send the DJ queue
+        socket.emit('dj:queue_updated', { queue: djQueue, roomId });
+      } catch (err) {
+        console.error('Error fetching playback state:', err);
+      }
+
+      // Ack the joiner with current state
+      if (ack) ack({ ok: true, state });
+    } catch (error) {
+      console.error('Error in room:join:', error);
+      if (ack) ack({ ok: false, error: error.message });
+    }
   });
 
   // Leave a room manually
@@ -121,8 +129,12 @@ export function registerRoomHandlers(io, socket) {
 
       const newQueue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
 
-      // Broadcast to room
-      io.emit('dj:queue_updated', { queue: newQueue, roomId });
+      // Broadcast to room only
+      io.to(`room:${roomId}`).emit('dj:queue_updated', { queue: newQueue, roomId });
+
+      // Broadcast updated room state
+      const state = await getRoomState(roomId);
+      io.to(`room:${roomId}`).emit('room:state', state);
 
       // Tell this user if they're now DJ
       const isDJ = newQueue[0] === userId;
@@ -147,7 +159,11 @@ export function registerRoomHandlers(io, socket) {
 
       const newQueue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
 
-      io.emit('dj:queue_updated', { queue: newQueue, roomId });
+      io.to(`room:${roomId}`).emit('dj:queue_updated', { queue: newQueue, roomId });
+
+      // Broadcast updated room state
+      const state = await getRoomState(roomId);
+      io.to(`room:${roomId}`).emit('room:state', state);
 
       console.log(`✅ User ${userId} left queue. Remaining: ${newQueue.length}`);
 
@@ -158,7 +174,7 @@ export function registerRoomHandlers(io, socket) {
   });
 
   // ── Queue Video (DJ only) ──
-  socket.on('dj:queue_video', async ({ roomId, input, title }) => {
+  socket.on('dj:queue_video', async ({ roomId, input, title }, ack) => {
     try {
       console.log(`🎵 Received dj:queue_video from ${socket.id} in room ${roomId}:`, { input, title });
 
@@ -171,6 +187,7 @@ export function registerRoomHandlers(io, socket) {
       if (queue[0] !== userId) {
         console.log(`❌ User ${userId} is not DJ (DJ is ${queue[0]})`);
         socket.emit('dj:error', { message: 'Only DJ can queue videos' });
+        if (ack) ack({ ok: false, error: 'Only DJ can queue videos' });
         return;
       }
 
@@ -181,6 +198,7 @@ export function registerRoomHandlers(io, socket) {
       if (!videoId) {
         console.error(`❌ Could not extract video ID from: ${input}`);
         socket.emit('dj:error', { message: 'Please enter a valid YouTube video URL or ID' });
+        if (ack) ack({ ok: false, error: 'Invalid YouTube URL' });
         return;
       }
 
@@ -205,16 +223,25 @@ export function registerRoomHandlers(io, socket) {
         roomId  // Include roomId so clients can filter
       };
 
-      console.log(`📢 Broadcasting room:video_load to all connected clients`);
+      console.log(`📢 Broadcasting room:video_load to room ${roomId}`);
 
-      // Broadcast to ALL clients (they'll filter by roomId)
-      io.emit('room:video_load', payload);
+      // Send immediately to the DJ
+      socket.emit('room:video_load', payload);
 
+      // Broadcast to all other users in the room
+      socket.broadcast.to(`room:${roomId}`).emit('room:video_load', payload);
+
+      // Also broadcast updated room state for redundancy
+      const state = await getRoomState(roomId);
+      io.to(`room:${roomId}`).emit('room:state', state);
+
+      if (ack) ack({ ok: true });
       console.log(`✅ Broadcast emitted`);
 
     } catch (error) {
       console.error('❌ Queue video error:', error);
       socket.emit('dj:error', { message: error.message });
+      if (ack) ack({ ok: false, error: error.message });
     }
   });
 
@@ -231,7 +258,7 @@ export function registerRoomHandlers(io, socket) {
       await redis.hSet(`room:${roomId}:playback`, 'playState', 'playing');
       await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
-      io.emit('room:video_play', { roomId });
+      io.to(`room:${roomId}`).emit('room:video_play', { roomId });
       console.log(`▶️  Playing in room ${roomId}`);
 
     } catch (error) {
@@ -252,7 +279,7 @@ export function registerRoomHandlers(io, socket) {
       await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
       await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
-      io.emit('room:video_pause', { roomId });
+      io.to(`room:${roomId}`).emit('room:video_pause', { roomId });
       console.log(`⏸️  Paused in room ${roomId}`);
 
     } catch (error) {
@@ -273,7 +300,7 @@ export function registerRoomHandlers(io, socket) {
       await redis.hSet(`room:${roomId}:playback`, 'elapsedSeconds', positionSeconds.toString());
       await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
-      io.emit('room:video_seek', { positionSeconds, roomId });
+      io.to(`room:${roomId}`).emit('room:video_seek', { positionSeconds, roomId });
       console.log(`⏩ Seeked to ${positionSeconds}s in room ${roomId}`);
 
     } catch (error) {
@@ -299,8 +326,12 @@ export function registerRoomHandlers(io, socket) {
 
       const newQueue = await redis.lRange(`room:${roomId}:djQueue`, 0, -1);
 
-      io.emit('dj:queue_updated', { queue: newQueue, roomId });
-      io.emit('dj:changed', { djId: newQueue[0], roomId });
+      io.to(`room:${roomId}`).emit('dj:queue_updated', { queue: newQueue, roomId });
+      io.to(`room:${roomId}`).emit('dj:changed', { djId: newQueue[0], roomId });
+
+      // Broadcast updated room state
+      const state = await getRoomState(roomId);
+      io.to(`room:${roomId}`).emit('room:state', state);
 
       console.log(`🔄 DJ passed from ${currentDJ} to ${newQueue[0]} in room ${roomId}`);
 
