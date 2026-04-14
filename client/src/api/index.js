@@ -13,9 +13,11 @@ export const request = async (endpoint, options = {}) => {
       },
     });
     if (response.status === 401) {
-      window.location.href = "/";
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+      return;
     }
-
+    
     const text = await response.text();
 
     const data = JSON.parse(text);

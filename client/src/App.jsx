@@ -6,6 +6,9 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import ProfilePage from "./pages/ProfilePage";
+import FriendsPage from "./pages/FriendsPage";
+import FriendProfilePage from "./pages/FriendProfilePage";
+import MessagesPage from "./pages/MessagesPage";
 
 import { AuthProvider } from "./context/AuthContext";
 import Dashboard from "./pages/Dashboard";
@@ -34,6 +37,38 @@ function App() {
                 element={
                   <ProtectedRoutes>
                     <ProfilePage />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path="/profile/:userId"
+                element={
+                  <ProtectedRoutes>
+                    <FriendProfilePage />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path="/friends"
+                element={
+                  <ProtectedRoutes>
+                    <FriendsPage />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path="/messages"
+                element={
+                  <ProtectedRoutes>
+                    <MessagesPage />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path="/messages/:partnerId"
+                element={
+                  <ProtectedRoutes>
+                    <MessagesPage />
                   </ProtectedRoutes>
                 }
               />
