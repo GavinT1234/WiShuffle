@@ -34,10 +34,12 @@ export function useRoom(roomId) {
         console.log('   After join, socket.rooms:', socket.rooms);
         if (resp?.ok && resp.state) {
           applyState(resp.state);
+          setIsLoading(false);
         } else {
           console.error("[useRoom] join failed:", resp?.error);
+          // Set a timeout to allow fallback to "Room not found" state
+          setIsLoading(false);
         }
-        setIsLoading(false);
       });
     };
 

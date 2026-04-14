@@ -15,17 +15,14 @@ export default function RoomPage() {
    const { socket, isConnected } = useSocket();
    const { roomState, users, isLoading } = useRoom(roomId);
 
-   //console.log('🔌 RoomPage socket:', socket?.id);
    const playerControlsRef = useRef(null);
 
-   // ─── Placeholder: swap when useRoomSync is ready ─────────────────────────
-   const { playback, djQueue, isDJ, joinQueue, leaveQueue,
-      emitPlay, emitPause, emitSeek, passDJ, queueVideo,
-      loadVideo, localPlaying  // expose these too
-   } = useRoomSync({ socket, roomId, userId: socket?.id, playerControls: playerControlsRef });
-   // const isDJ = false;
-   // const djQueue = [];
-   // ─────────────────────────────────────────────────────────────────────────
+   const { playback, playlist, queueVideo, emitPlay, emitPause, emitSeek, emitNextVideo } = useRoomSync({
+      socket,
+      roomId,
+      userId: socket?.id,
+      playerControls: playerControlsRef
+   });
 
    if (isLoading) {
       return (
@@ -73,41 +70,18 @@ export default function RoomPage() {
          {/* ── Main layout ── */}
          <main className="grid grid-cols-[1fr_260px] gap-6 p-6 max-w-[1200px] mx-auto items-start">
 
-            {/* ── Left: Video Player placeholder ── */}
+            {/* ── Left: Video Player ── */}
             <div>
-               {/* TODO: swap with <VideoPlayer /> once built 
-                <div className="w-full aspect-video bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl flex flex-col items-center justify-center gap-3">
-                   <span className="text-4xl text-[#2e2e2e]">▶</span>
-                   <p className="text-sm font-semibold text-[#444] m-0">Video Player</p>
-                   <p className="text-xs text-[#333] m-0">
-                      Coming soon — drop in &lt;VideoPlayer /&gt; here
-                   </p>
-                   {isDJ && (
-                       <div className="flex gap-3 mt-3">
-                          {["⏮", "⏸", "⏭"].map((icon) => (
-                              <button
-                                  key={icon}
-                                  className="bg-[#2e2e2e] border-none rounded-md text-[#aaa] px-3.5 py-2 text-base cursor-pointer hover:bg-[#3e3e3e] transition-colors"
-                              >
-                                 {icon}
-                              </button>
-                          ))}
-                       </div>
-                   )}
-                </div>*/}
                <VideoPlayer
-                  isDJ={isDJ}
                   playback={playback}
-                  djQueue={djQueue}
+                  playlist={playlist}
                   userId={socket?.id}
                   onPlayerReady={(controls) => { playerControlsRef.current = controls; }}
                   onQueueVideo={queueVideo}
                   onPlay={emitPlay}
                   onPause={emitPause}
                   onSeek={emitSeek}
-                  onPassDJ={passDJ}
-                  onJoinQueue={joinQueue}
-                  onLeaveQueue={leaveQueue}
+                  onNextVideo={emitNextVideo}
                />
             </div>
 
@@ -130,7 +104,6 @@ export default function RoomPage() {
                            const initials = u.username
                               ? u.username.slice(0, 2).toUpperCase()
                               : String(u.userId).slice(0, 2);
-                           const isCurrentDJ = djQueue[0] === String(u.userId);
 
                            return (
                               <div key={u.userId} className="flex items-center gap-2.5 px-2 py-1.5 bg-[#111] rounded-md">
@@ -140,43 +113,10 @@ export default function RoomPage() {
                                  <span className="text-[13px] text-[#ccc] flex-1">
                                     {u.username ?? `User ${u.userId}`}
                                  </span>
-                                 {isCurrentDJ && (
-                                    <span className="text-[10px] font-bold text-[#aa3bff] bg-[#aa3bff22] px-1.5 py-0.5 rounded">
-                                       DJ
-                                    </span>
-                                 )}
                               </div>
                            );
                         })}
                      </div>
-                  )}
-               </div>
-
-               {/* DJ Queue */}
-               <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded-lg p-4">
-                  <h3 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-[#555] mb-3">
-                     DJ Queue
-                     <span className="bg-[#2e2e2e] text-[#aaa] text-[11px] font-medium normal-case tracking-normal rounded-full px-2 py-0.5">
-                        {djQueue.length}
-                     </span>
-                  </h3>
-                  {/* TODO: wire up joinQueue / leaveQueue from useRoomSync */}
-                  {/* <p className="text-[#444] text-xs m-0">Queue coming soon</p> */}
-                  {djQueue.length === 0 ? (
-                     <p className="text-[#444] text-xs m-0">No DJs yet</p>
-                  ) : (
-                     <ol className="list-none m-0 p-0 flex flex-col gap-1.5">
-                        {djQueue.map((userId, i) => (
-                           <li key={userId} className="flex items-center gap-2.5 px-2 py-1.5 bg-[#111] rounded-md text-[13px]">
-                              <span className="text-[#555] w-5">
-                                 {i === 0 ? '🎧' : `${i + 1}.`}
-                              </span>
-                              <span className="text-[#ccc]">
-                                 {userId === socket?.id ? 'You' : `User ${userId.slice(0, 8)}`}
-                              </span>
-                           </li>
-                        ))}
-                     </ol>
                   )}
                </div>
 
