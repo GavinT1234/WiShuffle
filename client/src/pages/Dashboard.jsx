@@ -3,6 +3,8 @@ import React from "react";
 import { useGetUser } from "../hooks/useGetUser";
 import LoadingRing from "../components/LoadingRing";
 import RoomSection from "../components/RoomSection";
+import { CreatePlaylistModal } from "../components/CreatePlaylistModal";
+import { SongSearchModal } from "../components/SongSearchModal";
 import { useNavigate } from "react-router-dom";
 const Dashboard = () => {
   
@@ -16,6 +18,8 @@ const Dashboard = () => {
         ) : (
           <div className="text-2xl sm:text-3xl md:text-4xl font-bold ">
             Welcome, {user.username}
+             <CreatePlaylistModal onConfirm={(playlist) => console.log(playlist)} />
+             <SongSearchModal playlistId="123" onSongsAdded={(songs) => console.log(songs)} />
           </div>
         )}
         <section>{error ? error : ""}</section>
