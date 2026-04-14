@@ -47,3 +47,22 @@ export async function updateUser(id, updatedData) {
         throw error;
     }
 }
+
+export async function searchUsersByUsername(username, excludeUserId = null) {
+    const where = {
+        username: {
+            contains: username,
+            mode: 'insensitive'
+        }
+    };
+
+    if (excludeUserId) {
+        where.id = { not: excludeUserId };
+    }
+
+    return prisma.user.findMany({
+        where,
+        omit: { password: true },
+        take: 10
+    });
+}

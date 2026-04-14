@@ -5,17 +5,17 @@ const FeaturesSection = () => {
     {
       title: "Create Rooms",
       description: "Start a listening room and invite friends to share music in real-time",
-      icon: "🎵",
+      icon: "🎧",
     },
     {
       title: "Connect with Friends",
       description: "Add friends, see their profiles, and discover their favorite tracks",
-      icon: "👥",
+      icon: "🗣️",
     },
     {
       title: "Share Your Top Songs",
       description: "Showcase your favorite songs and let others know what you love",
-      icon: "⭐",
+      icon: "😁",
     },
     {
       title: "Direct Messaging",

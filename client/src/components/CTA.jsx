@@ -21,7 +21,7 @@ const CTA = () => {
           Ready to Join the Music Community?
         </h2>
         <p className="text-xl text-primary-content/90 mb-8">
-          Connect with friends and discover music together. Create your WiShuffle account today.
+          Connect with friends and discover music together. Create your WiShuffle account today!
         </p>
         <button onClick={handleGetStarted} className="btn btn-lg btn-outline text-primary-content border-primary-content hover:bg-primary-content hover:text-primary">
           {isLoggedIn ? "Go to Dashboard" : "Get Started Now"}

@@ -17,11 +17,11 @@ export const AuthProvider = ({ children }) => {
     Authorization: `Bearer ${localStorage.getItem("token")}`,
   };
 
-  const login = async ({ email, password }) => {
+  const login = async ({ identifier, password }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await loginApi({ email, password });
+      const response = await loginApi({ identifier, password });
 
       localStorage.setItem("token", response.accessToken.accessToken);
 

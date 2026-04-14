@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useFriends } from '../hooks/useFriends';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export function FriendsPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
+  const { searchUsers: searchUsersAPI, sendFriendRequest, loading: friendsLoading, error: friendsError } = useFriends();
   
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -15,13 +17,20 @@ export function FriendsPage() {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [status, setStatus] = useState('');
-  const [activeTab, setActiveTab] = useState('friends'); // 'friends', 'pending', 'sent', 'search'
+  const [activeTab, setActiveTab] = useState('friends');
+  const [sentRequestIds, setSentRequestIds] = useState(new Set());
 
   useEffect(() => {
     fetchFriends();
     fetchPendingRequests();
     fetchSentRequests();
   }, []);
+
+  useEffect(() => {
+    if (friendsError) {
+      setStatus(friendsError);
+    }
+  }, [friendsError]);
 
   const fetchFriends = async () => {
     try {
@@ -61,6 +70,8 @@ export function FriendsPage() {
       if (res.ok) {
         const data = await res.json();
         setSentRequests(data);
+        const ids = new Set(data.map(req => req.receiverId));
+        setSentRequestIds(ids);
       }
     } catch (error) {
       console.error('Failed to fetch sent requests:', error);
@@ -75,13 +86,31 @@ export function FriendsPage() {
 
     setSearching(true);
     try {
-      // This endpoint should be created to search users by username
-      // For now, we'll show a placeholder
-      setStatus('User search feature coming soon');
+      const results = await searchUsersAPI(searchUsername);
+      if (results && results.length > 0) {
+        setSearchResults(results);
+        setStatus('');
+      } else {
+        setSearchResults([]);
+        setStatus('No users found');
+      }
     } catch (error) {
       console.error('Search failed:', error);
+      setStatus('Search failed');
     } finally {
       setSearching(false);
+    }
+  };
+
+  const handleAddFriend = async (userId) => {
+    const result = await sendFriendRequest(userId);
+    if (result.success) {
+      setSentRequestIds(prev => new Set([...prev, userId]));
+      setStatus('Friend request sent!');
+      fetchSentRequests();
+      setTimeout(() => setStatus(''), 3000);
+    } else {
+      setStatus(friendsError || 'Failed to send friend request');
     }
   };
 
@@ -357,10 +386,11 @@ export function FriendsPage() {
                 className="input input-bordered flex-1"
                 value={searchUsername}
                 onChange={(e) => setSearchUsername(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && searchUsers()}
               />
               <button
                 onClick={searchUsers}
-                disabled={searching}
+                disabled={searching || friendsLoading}
                 className="btn btn-primary"
               >
                 {searching ? 'Searching...' : 'Search'}
@@ -368,27 +398,43 @@ export function FriendsPage() {
             </div>
             {searchResults.length > 0 && (
               <div className="mt-6 space-y-4">
-                {searchResults.map((user) => (
-                  <div key={user.id} className="card bg-base-100 p-4 flex flex-row items-center gap-4">
-                    <div className="avatar">
-                      <div className="w-12 h-12 rounded-full bg-base-300 flex items-center justify-center">
-                        {user.avatarUrl ? (
-                          <img
-                            src={user.avatarUrl}
-                            alt={user.username}
-                            className="w-full h-full object-cover rounded-full"
-                          />
-                        ) : (
-                          <span>{user.username[0]?.toUpperCase()}</span>
+                {searchResults.map((user) => {
+                  const isAlreadyFriend = friends.some(f => f.friend.id === user.id);
+                  const hasRequestSent = sentRequestIds.has(user.id);
+                  
+                  return (
+                    <div key={user.id} className="card bg-base-100 p-4 flex flex-row items-center gap-4">
+                      <div className="avatar">
+                        <div className="w-12 h-12 rounded-full bg-base-300 flex items-center justify-center">
+                          {user.avatarUrl ? (
+                            <img
+                              src={user.avatarUrl}
+                              alt={user.username}
+                              className="w-full h-full object-cover rounded-full"
+                            />
+                          ) : (
+                            <span>{user.username[0]?.toUpperCase()}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold">{user.username}</p>
+                        {user.description && (
+                          <p className="text-sm text-base-content/70 line-clamp-1">{user.description}</p>
                         )}
                       </div>
+                      <button
+                        onClick={() => handleAddFriend(user.id)}
+                        disabled={friendsLoading || isAlreadyFriend || hasRequestSent}
+                        className={`btn btn-sm ${
+                          isAlreadyFriend ? 'btn-disabled' : hasRequestSent ? 'btn-outline' : 'btn-primary'
+                        }`}
+                      >
+                        {isAlreadyFriend ? 'Already Friends' : hasRequestSent ? 'Request Sent' : 'Add Friend'}
+                      </button>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-semibold">{user.username}</p>
-                    </div>
-                    <button className="btn btn-sm btn-primary">Add Friend</button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

@@ -4,12 +4,12 @@ import { useAuth } from "../context/AuthContext";
 const LoginPage = () => {
   const { login, loading, error, clearError } = useAuth();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
-    login({ email, password });
+    login({ identifier, password });
   };
 
   useEffect(() => {
@@ -20,12 +20,12 @@ const LoginPage = () => {
       <form onSubmit={handleLogin}>
         <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
           <legend className="fieldset-legend">Login</legend>
-          <label className="label">Email</label>
+          <label className="label">Email or Username</label>
           <input
-            type="email"
+            type="text"
             className="input"
-            placeholder="Email"
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email or username"
+            onChange={(e) => setIdentifier(e.target.value)}
           />
           <label className="label">Password</label>
           <input
