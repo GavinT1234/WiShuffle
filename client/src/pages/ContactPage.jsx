@@ -49,9 +49,9 @@ export function ContactPage() {
               <div>
                 <h3 className="font-semibold mb-2">Social Media</h3>
                 <div className="flex gap-4">
-                  <a href="#" className="link text-primary">Twitter</a>
-                  <a href="#" className="link text-primary">Instagram</a>
-                  <a href="#" className="link text-primary">Discord</a>
+                  <a href="#" className="link text-success">Twitter</a>
+                  <a href="#" className="link text-success">Instagram</a>
+                  <a href="#" className="link text-success">Discord</a>
                 </div>
               </div>
             </div>
@@ -118,7 +118,7 @@ export function ContactPage() {
                 ></textarea>
               </div>
 
-              <button type="submit" className="btn btn-primary w-full">
+              <button type="submit" className="btn btn-success w-full">
                 Send Message
               </button>
 

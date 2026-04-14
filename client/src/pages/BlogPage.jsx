@@ -50,7 +50,7 @@ Don't just stick to your usual playlists – venture into your friends' recommen
                 <p className="text-sm text-base-content/70">{post.date}</p>
                 <p className="py-4">{post.excerpt}</p>
                 <details className="cursor-pointer">
-                  <summary className="text-primary font-semibold hover:underline">Read More</summary>
+                  <summary className="text-success font-semibold hover:underline">Read More</summary>
                   <p className="mt-4 whitespace-pre-wrap">{post.content}</p>
                 </details>
               </div>

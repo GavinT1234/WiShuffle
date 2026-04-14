@@ -207,7 +207,7 @@ export function ProfilePage() {
                         href={song.url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-sm link link-primary"
+                        className="text-sm link link-success"
                       >
                         Open in player
                       </a>
@@ -251,7 +251,7 @@ export function ProfilePage() {
                 <button
                   type="button"
                   onClick={addSong}
-                  className="btn btn-primary btn-sm w-full"
+                  className="btn btn-success btn-sm w-full"
                 >
                   Add Song
                 </button>
@@ -270,7 +270,7 @@ export function ProfilePage() {
             <button 
               type="submit" 
               disabled={saving}
-              className="btn btn-primary"
+              className="btn btn-success"
             >
               {saving ? 'Saving...' : 'Save changes'}
             </button>

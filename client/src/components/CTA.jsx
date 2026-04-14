@@ -23,7 +23,7 @@ const CTA = () => {
         <p className="text-xl text-primary-content/90 mb-8">
           Connect with friends and discover music together. Create your WiShuffle account today!
         </p>
-        <button onClick={handleGetStarted} className="btn btn-lg btn-outline text-primary-content border-primary-content hover:bg-primary-content hover:text-primary">
+        <button onClick={handleGetStarted} className="btn btn-lg btn-outline text-success-content border-success-content hover:bg-success-content hover:text-success">
           {isLoggedIn ? "Go to Dashboard" : "Get Started Now"}
         </button>
       </div>

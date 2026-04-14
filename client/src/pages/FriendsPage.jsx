@@ -228,7 +228,7 @@ export function FriendsPage() {
                 <p className="text-base-content/70">You don't have any friends yet.</p>
                 <button
                   onClick={() => setActiveTab('search')}
-                  className="btn btn-primary mt-4"
+                  className="btn btn-success mt-4"
                 >
                   Add a friend
                 </button>
