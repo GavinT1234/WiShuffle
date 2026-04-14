@@ -53,28 +53,28 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2">
               <li>
-                <a
-                  href="#about"
+                <button
+                  onClick={() => navigate("/about")}
                   className="link link-hover text-base-content/70 hover:text-base-content"
                 >
                   About Us
-                </a>
+                </button>
               </li>
               <li>
-                <a
-                  href="#blog"
+                <button
+                  onClick={() => navigate("/blog")}
                   className="link link-hover text-base-content/70 hover:text-base-content"
                 >
                   Blog
-                </a>
+                </button>
               </li>
               <li>
-                <a
-                  href="#contact"
+                <button
+                  onClick={() => navigate("/contact")}
                   className="link link-hover text-base-content/70 hover:text-base-content"
                 >
                   Contact
-                </a>
+                </button>
               </li>
             </ul>
           </div>
@@ -84,28 +84,28 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Legal</h4>
             <ul className="space-y-2">
               <li>
-                <a
-                  href="#privacy"
+                <button
+                  onClick={() => navigate("/privacy")}
                   className="link link-hover text-base-content/70 hover:text-base-content"
                 >
                   Privacy Policy
-                </a>
+                </button>
               </li>
               <li>
-                <a
-                  href="#terms"
+                <button
+                  onClick={() => navigate("/terms")}
                   className="link link-hover text-base-content/70 hover:text-base-content"
                 >
                   Terms of Service
-                </a>
+                </button>
               </li>
               <li>
-                <a
-                  href="#cookies"
+                <button
+                  onClick={() => navigate("/cookies")}
                   className="link link-hover text-base-content/70 hover:text-base-content"
                 >
                   Cookie Policy
-                </a>
+                </button>
               </li>
             </ul>
           </div>

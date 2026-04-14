@@ -36,14 +36,14 @@ const HowItWorks = () => {
           {steps.map((step, index) => (
             <div key={index} className="relative">
               <div className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white font-bold text-2xl mb-4">
+                <div className="w-16 h-16 rounded-full bg-success flex items-center justify-center text-white font-bold text-2xl mb-4">
                   {step.number}
                 </div>
                 <h3 className="text-xl font-semibold text-center mb-2">{step.title}</h3>
                 <p className="text-center text-base-content/70">{step.description}</p>
               </div>
               {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-8 left-full w-full h-1 bg-primary/30 -ml-8"></div>
+                <div className="hidden lg:block absolute top-8 left-full w-full h-1 bg-success/30 -ml-8"></div>
               )}
             </div>
           ))}

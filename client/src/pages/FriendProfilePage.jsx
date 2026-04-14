@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
 export function FriendProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -18,7 +16,7 @@ export function FriendProfilePage() {
 
   const fetchUserProfile = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/users/${userId}`, {
+      const res = await fetch(`/api/users/${userId}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (res.ok) {
@@ -55,7 +53,7 @@ export function FriendProfilePage() {
         <main className="max-w-2xl mx-auto px-4 py-8">
           <div className="card bg-base-200 p-8 text-center">
             <p className="text-error mb-4">{error}</p>
-            <button onClick={() => navigate('/friends')} className="btn btn-primary">
+            <button onClick={() => navigate('/friends')} className="btn btn-success">
               Back to Friends
             </button>
           </div>
@@ -100,7 +98,7 @@ export function FriendProfilePage() {
 
             <button
               onClick={messageUser}
-              className="btn btn-primary"
+              className="btn btn-success"
             >
               Send Message
             </button>
@@ -116,7 +114,7 @@ export function FriendProfilePage() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex gap-4 flex-1">
                         <div className="flex-shrink-0">
-                          <div className="w-12 h-12 rounded bg-primary flex items-center justify-center text-primary-content font-bold">
+                          <div className="w-12 h-12 rounded bg-success flex items-center justify-center text-success-content font-bold">
                             {index + 1}
                           </div>
                         </div>

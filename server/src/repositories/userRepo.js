@@ -1,5 +1,18 @@
 import prisma from '../config/db.js';
 
+// Helper function to parse topSongs if it's a JSON string
+export function parseUserTopSongs(user) {
+    if (!user) return user;
+    if (user.topSongs && typeof user.topSongs === 'string') {
+        try {
+            user.topSongs = JSON.parse(user.topSongs);
+        } catch (err) {
+            user.topSongs = null;
+        }
+    }
+    return user;
+}
+
 export async function createUser(data) {
     try {
         const newUser = await prisma.user.create({ data, omit: { password: true } });

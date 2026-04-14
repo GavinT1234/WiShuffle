@@ -9,6 +9,12 @@ import ProfilePage from "./pages/ProfilePage";
 import FriendsPage from "./pages/FriendsPage";
 import FriendProfilePage from "./pages/FriendProfilePage";
 import MessagesPage from "./pages/MessagesPage";
+import AboutPage from "./pages/AboutPage";
+import BlogPage from "./pages/BlogPage";
+import ContactPage from "./pages/ContactPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
+import CookiePage from "./pages/CookiePage";
 import {SocketProvider} from "./context/SocketContext.jsx";
 import { AuthProvider } from "./context/AuthContext";
 import Dashboard from "./pages/Dashboard";
@@ -26,6 +32,12 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/cookies" element={<CookiePage />} />
 
               <Route
                 path="/dashboard"

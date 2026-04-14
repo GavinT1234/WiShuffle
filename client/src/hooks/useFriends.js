@@ -1,26 +1,16 @@
 import { useState } from 'react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+import { request } from '../api/index.js';
 
 export const useFriends = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const token = localStorage.getItem('token');
 
   const searchUsers = async (username) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/users/search?username=${encodeURIComponent(username)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return data;
-      } else {
-        setError('Failed to search users');
-        return [];
-      }
+      const data = await request(`/users/search?username=${encodeURIComponent(username)}`);
+      return data;
     } catch (err) {
       console.error('Search failed:', err);
       setError(err.message);
@@ -34,25 +24,14 @@ export const useFriends = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/friends/request`, {
+      const data = await request(`/friends/request`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ receiverId }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        return { success: true, data };
-      } else {
-        const errorData = await res.json();
-        setError(errorData.message || 'Failed to send friend request');
-        return { success: false };
-      }
+      return { success: true, data };
     } catch (err) {
-      console.error('Failed to send friend request:', err);
-      setError(err.message);
+      const errorMessage = err.message || 'Failed to send friend request';
+      setError(errorMessage);
       return { success: false };
     } finally {
       setLoading(false);
@@ -63,16 +42,10 @@ export const useFriends = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/friends/request/${requestId}/accept`, {
+      await request(`/friends/request/${requestId}/accept`, {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        return { success: true };
-      } else {
-        setError('Failed to accept friend request');
-        return { success: false };
-      }
+      return { success: true };
     } catch (err) {
       console.error('Failed:', err);
       setError(err.message);
@@ -86,16 +59,10 @@ export const useFriends = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/friends/request/${requestId}`, {
+      await request(`/friends/request/${requestId}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        return { success: true };
-      } else {
-        setError('Failed to reject friend request');
-        return { success: false };
-      }
+      return { success: true };
     } catch (err) {
       console.error('Failed:', err);
       setError(err.message);
@@ -109,16 +76,10 @@ export const useFriends = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/friends/${friendId}`, {
+      await request(`/friends/${friendId}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        return { success: true };
-      } else {
-        setError('Failed to remove friend');
-        return { success: false };
-      }
+      return { success: true };
     } catch (err) {
       console.error('Failed:', err);
       setError(err.message);

@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetUser } from '../hooks/useGetUser';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
 export function ProfilePage() {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -24,7 +22,7 @@ export function ProfilePage() {
       setDescription(user.description || '');
       setAvatarUrl(user.avatarUrl || '');
       setPreviewSrc(user.avatarUrl || '');
-      setTopSongs(user.topSongs || []);
+      setTopSongs(Array.isArray(user.topSongs) ? user.topSongs : []);
     }
   }, [user]);
 
@@ -59,7 +57,8 @@ export function ProfilePage() {
       return;
     }
     
-    const updatedSongs = [...topSongs, newSong];
+    const currentSongs = Array.isArray(topSongs) ? topSongs : [];
+    const updatedSongs = [...currentSongs, newSong];
     if (updatedSongs.length > 3) {
       setStatus('You can only have a maximum of 3 top songs');
       return;
@@ -71,7 +70,8 @@ export function ProfilePage() {
   };
 
   const removeSong = (index) => {
-    const updatedSongs = topSongs.filter((_, i) => i !== index);
+    const currentSongs = Array.isArray(topSongs) ? topSongs : [];
+    const updatedSongs = currentSongs.filter((_, i) => i !== index);
     setTopSongs(updatedSongs);
   };
 
@@ -82,7 +82,7 @@ export function ProfilePage() {
     setStatus('');
 
     try {
-      const res = await fetch(`${API_URL}/api/users/me`, {
+      const res = await fetch(`/api/users/me`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -199,7 +199,7 @@ export function ProfilePage() {
               <span className="label-text font-semibold">Top 3 Songs</span>
             </label>
             <div className="space-y-3">
-              {topSongs.map((song, index) => (
+              {Array.isArray(topSongs) && topSongs.map((song, index) => (
                 <div key={index} className="card bg-base-200 p-4">
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 space-y-1">
@@ -209,7 +209,7 @@ export function ProfilePage() {
                         href={song.url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-sm link link-primary"
+                        className="text-sm link link-success"
                       >
                         Open in player
                       </a>
@@ -226,7 +226,7 @@ export function ProfilePage() {
               ))}
             </div>
 
-            {topSongs.length < 3 && (
+            {Array.isArray(topSongs) && topSongs.length < 3 && (
               <div className="card bg-base-200 p-4 space-y-3">
                 <h3 className="font-semibold">Add a new song</h3>
                 <input
@@ -253,7 +253,7 @@ export function ProfilePage() {
                 <button
                   type="button"
                   onClick={addSong}
-                  className="btn btn-primary btn-sm w-full"
+                  className="btn btn-success btn-sm w-full"
                 >
                   Add Song
                 </button>
@@ -272,7 +272,7 @@ export function ProfilePage() {
             <button 
               type="submit" 
               disabled={saving}
-              className="btn btn-primary"
+              className="btn btn-success"
             >
               {saving ? 'Saving...' : 'Save changes'}
             </button>
