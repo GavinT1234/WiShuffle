@@ -7,6 +7,7 @@ import { useGetUser } from "../hooks/useGetUser";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const { isLoggedIn } = useAuth();
   const { user, loading } = isLoggedIn ? useGetUser() : { user: null, loading: false };
   const navigate = useNavigate();
 

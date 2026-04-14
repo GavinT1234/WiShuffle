@@ -45,6 +45,14 @@ function App() {
                 }
               />
               <Route
+                path="/profile"
+                element={
+                  <ProtectedRoutes>
+                    <ProfilePage />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
                 path="/profile/:userId"
                 element={
                   <ProtectedRoutes>

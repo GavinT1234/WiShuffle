@@ -68,7 +68,7 @@ const CreateRoom = ({ onClose, onSuccess }) => {
             type="reset"
             value="×"
             onClick={() => {
-              setSelected([]);
+              setTags([]);
             }}
           />
           <button
