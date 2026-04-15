@@ -16,11 +16,11 @@ export const AuthProvider = ({ children }) => {
     Authorization: `Bearer ${localStorage.getItem("token")}`,
   };
 
-  const login = async ({ email, password }) => {
+  const login = async ({ identifier, password }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await loginApi({ email, password });
+      const response = await loginApi({ identifier, password });
       const token = response.accessToken.accessToken;
       localStorage.setItem("token", token);
 
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       await registerApi({ username, email, password });
-      await login({ email, password }); // reuse login logic
+      await login({ identifier: email, password }); // reuse login logic
     } catch (err) {
       setError(err.message);
     } finally {

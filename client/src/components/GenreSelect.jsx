@@ -1,7 +1,7 @@
 import React from "react";
 import { useCreateRoom } from "../hooks/useCreateRoom";
 import { useState } from "react";
-import LoadingRing from "./LoadingRing";
+import LoadingRing from "../components/LoadingRing";
 
 const GENRES = [
   "HIPHOP",
@@ -32,7 +32,7 @@ const GenreSelect = ({ selected, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const filtered = GENRES.filter((g) =>
-    g.toLowerCase().includes(query.toLowerCase()),
+    g.toLowerCase().includes(query.toLowerCase())
   );
 
   const toggleGenre = (genre) => {

@@ -5,6 +5,7 @@ import pg from 'pg';
 
 const { Pool } = pg;
 
+
 const dbUrl = new URL(process.env.DATABASE_URL);
 
 // Create connection pool with optimized settings

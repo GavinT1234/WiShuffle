@@ -1,7 +1,7 @@
 import React from "react";
 import { useCreateRoom } from "../hooks/useCreateRoom";
 import { useState } from "react";
-import LoadingRing from "./LoadingRing";
+import LoadingRing from "../components/LoadingRing";
 import GenreSelect from "./GenreSelect";
 
 const CreateRoom = ({ onClose, onSuccess }) => {

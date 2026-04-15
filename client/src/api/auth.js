@@ -1,9 +1,9 @@
 import { request } from "./index";
 
-export const login = async ({ email, password }) => {
+export const login = async ({ identifier, password }) => {
   return await request("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ identifier, password }),
   });
 };
 

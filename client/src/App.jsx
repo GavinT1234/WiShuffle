@@ -56,6 +56,46 @@ function App() {
                   </ProtectedRoutes>
                 }
               />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoutes>
+                    <ProfilePage />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path="/profile/:userId"
+                element={
+                  <ProtectedRoutes>
+                    <FriendProfilePage />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path="/friends"
+                element={
+                  <ProtectedRoutes>
+                    <FriendsPage />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path="/messages"
+                element={
+                  <ProtectedRoutes>
+                    <MessagesPage />
+                  </ProtectedRoutes>
+                }
+              />
+              <Route
+                path="/messages/:partnerId"
+                element={
+                  <ProtectedRoutes>
+                    <MessagesPage />
+                  </ProtectedRoutes>
+                }
+              />
             </Routes>
 
           </div>
