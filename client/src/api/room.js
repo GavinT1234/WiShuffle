@@ -74,3 +74,7 @@ export const deleteRoom = async (roomId) => {
     method: "DELETE",
   });
 };
+
+export const getTags = async () => {
+  return await request(`/rooms/tags`);
+}
