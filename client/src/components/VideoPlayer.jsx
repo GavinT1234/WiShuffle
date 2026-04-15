@@ -62,7 +62,10 @@ export function VideoPlayer({
         onSeek(pos);
     };
 
-    const currentTime = playback?.elapsedSeconds ?? 0;
+
+    // Use actual player time if available, otherwise fallback to playback state
+    const playerCurrentTime = ready ? (getCurrentTime?.() ?? 0) : 0;
+    const currentTime = ready && playerCurrentTime >= 0 ? playerCurrentTime : (playback?.elapsedSeconds ?? 0);
     const duration = getDuration?.() ?? 0;
     const progressPct = duration ? (currentTime / duration) * 100 : 0;
 
