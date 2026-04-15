@@ -22,7 +22,7 @@ const HeroSection = () => {
           <p className="text-xl py-6 leading-relaxed">
             Discover a new way to share music with friends. Create listening rooms, connect with music lovers, and explore each other's favorite tracks. Build your music community and discover what your friends are listening to.
           </p>
-          <button onClick={handleGetStarted} className="btn btn-primary btn-lg">
+          <button onClick={handleGetStarted} className="btn btn-success btn-lg">
             Get Started
           </button>
         </div>

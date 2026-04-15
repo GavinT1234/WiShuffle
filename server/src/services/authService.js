@@ -38,6 +38,14 @@ export async function login(email, password) {
 
 function sanitizeUser(user) {
   const { password, ...safe } = user;
+  // Parse topSongs if it's a JSON string
+  if (safe.topSongs && typeof safe.topSongs === 'string') {
+    try {
+      safe.topSongs = JSON.parse(safe.topSongs);
+    } catch (err) {
+      safe.topSongs = null;
+    }
+  }
   return safe;
 }
 

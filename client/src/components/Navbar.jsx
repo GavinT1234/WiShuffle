@@ -5,11 +5,19 @@ import { useAuth } from "../context/AuthContext";
 import ProfileButton from "./ProfileButton";
 import { useGetUser } from "../hooks/useGetUser";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const Navbar = () => {
   const { isLoggedIn } = useAuth();
-  const { user, loading } = isLoggedIn ? useGetUser() : { user: null, loading: false };
+  const { user, loading, fetchUser } = useGetUser();
   const navigate = useNavigate();
+
+  // Refetch user data when logged in status changes to refresh avatar/profile changes
+  useEffect(() => {
+    if (isLoggedIn && fetchUser) {
+      fetchUser();
+    }
+  }, [isLoggedIn]);
 
   const handleLogoClick = () => {
     if (isLoggedIn) {

@@ -68,3 +68,9 @@ export const seekVideo = async (roomId, seconds) => {
 export const getPlaylist = async (roomId) => {
   return await request(`/rooms/${roomId}/playlist`);
 };
+
+export const deleteRoom = async (roomId) => {
+  return await request(`/rooms/${roomId}`, {
+    method: "DELETE",
+  });
+};

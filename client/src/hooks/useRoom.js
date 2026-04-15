@@ -28,8 +28,15 @@ export function useRoom(roomId) {
       hasJoinedRef.current = true;
       setIsLoading(true);
 
+      // Set a timeout for the room:join callback (10 seconds)
+      const timeoutId = setTimeout(() => {
+        console.error("[useRoom] room:join timeout - server didn't respond");
+        setIsLoading(false);
+      }, 10000);
+
       console.log('📤 Emitting room:join for roomId:', roomId, 'socket.id:', socket.id);
       socket.emit("room:join", { roomId }, (resp) => {
+        clearTimeout(timeoutId);
         console.log('✅ room:join response:', resp);
         console.log('   After join, socket.rooms:', socket.rooms);
         if (resp?.ok && resp.state) {
@@ -37,7 +44,6 @@ export function useRoom(roomId) {
           setIsLoading(false);
         } else {
           console.error("[useRoom] join failed:", resp?.error);
-          // Set a timeout to allow fallback to "Room not found" state
           setIsLoading(false);
         }
       });

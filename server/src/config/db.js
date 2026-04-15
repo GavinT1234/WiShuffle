@@ -11,7 +11,7 @@ const dbUrl = new URL(process.env.DATABASE_URL);
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false,
+    rejectUnauthorized: false
   },
   max: 20,
   idleTimeoutMillis: 30000,
@@ -29,7 +29,7 @@ pool.on('error', (err) => {
 const adapter = new PrismaPg(pool);
 
 // Create Prisma Client with error logging
-const prisma = new PrismaClient({
+const prisma = new PrismaClient({ 
   adapter,
   //log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error']
 });

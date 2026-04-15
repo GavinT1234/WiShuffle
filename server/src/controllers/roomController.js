@@ -7,37 +7,58 @@ import {
 } from '../services/roomService.js';
 
 import { extractVideoId, getVideoDetails } from '../services/youtubeService.js';
+import { redis } from '../config/redis.js';
 
-export async function getAllRoomsHandler(req, res) {
-  let rooms = await getAllRooms();
-  res.status(200).json(rooms);
+export async function getAllRoomsHandler(req, res, next) {
+  try {
+    let rooms = await getAllRooms();
+    res.status(200).json(rooms);
+  } catch (error) {
+    next(error);
+  }
 }
 
-export async function getRoomByIdHandler(req, res) {
-  const id = parseInt(req.params.id);
-  const room = await getRoomById(id);
-  res.status(200).json(room);
+export async function getRoomByIdHandler(req, res, next) {
+  try {
+    const id = parseInt(req.params.id);
+    const room = await getRoomById(id);
+    res.status(200).json(room);
+  } catch (error) {
+    next(error);
+  }
 }
 
-export async function createRoomHandler(req, res) {
-  const { name, tags } = req.body;
-  const newRoom = await createRoom({
-    name,
-    tags,
-    ownerId: req.user.id,
-  });
-  res.status(201).json(newRoom);
+export async function createRoomHandler(req, res, next) {
+  try {
+    const { name, tags } = req.body;
+    const newRoom = await createRoom({
+      name,
+      tags,
+      ownerId: req.user.id,
+    });
+    res.status(201).json(newRoom);
+  } catch (error) {
+    next(error);
+  }
 }
 
-export async function deleteRoomHandler(req, res) {
-  const id = parseInt(req.params.id);
-  await deleteRoom(id);
-  res.status(204).send();
+export async function deleteRoomHandler(req, res, next) {
+  try {
+    const id = parseInt(req.params.id);
+    await deleteRoom(id);
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
 }
 
-export async function getTagsHandler(req, res) {
-  const tags = await getTags();
-  res.status(200).json(tags);
+export async function getTagsHandler(req, res, next) {
+  try {
+    const tags = await getTags();
+    res.status(200).json(tags);
+  } catch (error) {
+    next(error);
+  }
 }
 
 export async function addVideoToQueueHandler(req, res) {

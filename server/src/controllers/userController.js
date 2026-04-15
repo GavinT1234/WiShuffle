@@ -1,4 +1,4 @@
-import { updateUser, findUserById, searchUsersByUsername } from '../repositories/userRepo.js';
+import { updateUser, findUserById, searchUsersByUsername, parseUserTopSongs } from '../repositories/userRepo.js';
 
 export async function updateProfileHandler(req, res) {
     const userId = req.user.id;
@@ -9,12 +9,15 @@ export async function updateProfileHandler(req, res) {
             username,
             description,
             avatarUrl,
-            topSongs: topSongs ? JSON.stringify(topSongs) : undefined,
+            topSongs: topSongs ? JSON.stringify(topSongs) : null,
         });
 
         if (!updatedUser) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        // Parse topSongs before returning
+        parseUserTopSongs(updatedUser);
 
         res.status(200).json(updatedUser);
     } catch (error) {
@@ -35,6 +38,9 @@ export async function getUserProfileHandler(req, res) {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        // Parse topSongs before returning
+        parseUserTopSongs(user);
 
         res.status(200).json(user);
     } catch (error) {

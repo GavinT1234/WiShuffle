@@ -1,22 +1,23 @@
 import express from 'express';
-import { addSongHandler, createPlaylistHandler, deletePlaylistHandler, deleteSongHandler, getPlaylistHandler, getPlaylistOrderingHandler, getPlaylistsHandler, getPlaylistSongsHandler, updatePlaylistHandler } from '../controllers/playlistController.js'
+import { addSongHandler, createPlaylistHandler, deletePlaylistHandler, deleteSongHandler, getPlaylistContentHandler, getPlaylistHandler, getPlaylistOrderingHandler, getPlaylistsHandler, getPlaylistSongsHandler, updatePlaylistHandler } from '../controllers/playlistController.js'
 import { authenticate } from '../middleware/authenticate.js';
 import { authorizeOwnership, authorizeParentOwnership } from '../middleware/authorizeOwnership.js';
-import { validateParent, validatePlaylist } from '../middleware/validator.js';
+import { validateParent, validatePlaylist } from '../middleware/playlistValidators.js';
 
 const router = express.Router();
 
 // Playlists
 router.get('/', authenticate, getPlaylistsHandler);
-router.get('/:id', authenticate, authorizeOwnership, validatePlaylist, getPlaylistHandler);
+router.get('/:id', authenticate, authorizeOwnership('playlist'), validatePlaylist, getPlaylistHandler);
+router.get('/:id/all', authenticate, authorizeOwnership('playlist'), validatePlaylist, getPlaylistContentHandler);
 router.post('/', authenticate, authorizeParentOwnership, validateParent, createPlaylistHandler);
-router.put('/:id', authenticate, authorizeOwnership, updatePlaylistHandler);
-router.delete('/:id', authenticate, authorizeOwnership, deletePlaylistHandler);
+router.put('/:id', authenticate, authorizeOwnership('playlist'), updatePlaylistHandler);
+router.delete('/:id', authenticate, authorizeOwnership('playlist'), deletePlaylistHandler);
 router.get('/:id/order', getPlaylistOrderingHandler);
 
 // Songs
-router.get('/:id/songs', authenticate, authorizeOwnership, validatePlaylist, getPlaylistSongsHandler);
-router.post('/:id/songs', authenticate, authorizeOwnership, addSongHandler);
-router.delete('/songs/:id', authenticate, authorizeOwnership, deleteSongHandler);
+router.get('/:id/songs', authenticate, authorizeOwnership('playlist'), validatePlaylist, getPlaylistSongsHandler);
+router.post('/:id/songs', authenticate, authorizeOwnership('playlist'), addSongHandler);
+router.delete('/songs/:id', authenticate, authorizeOwnership('playlist'), deleteSongHandler);
 
 export default router;

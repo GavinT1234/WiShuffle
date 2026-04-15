@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFriends } from '../hooks/useFriends';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
 export function FriendsPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -34,7 +32,7 @@ export function FriendsPage() {
 
   const fetchFriends = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/friends`, {
+      const res = await fetch(`/api/friends`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -48,7 +46,7 @@ export function FriendsPage() {
 
   const fetchPendingRequests = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/friends/requests/pending`, {
+      const res = await fetch(`/api/friends/requests/pending`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -64,7 +62,7 @@ export function FriendsPage() {
 
   const fetchSentRequests = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/friends/requests/sent`, {
+      const res = await fetch(`/api/friends/requests/sent`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -116,7 +114,7 @@ export function FriendsPage() {
 
   const acceptRequest = async (requestId) => {
     try {
-      const res = await fetch(`${API_URL}/api/friends/request/${requestId}/accept`, {
+      const res = await fetch(`/api/friends/request/${requestId}/accept`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -133,7 +131,7 @@ export function FriendsPage() {
 
   const rejectRequest = async (requestId) => {
     try {
-      const res = await fetch(`${API_URL}/api/friends/request/${requestId}`, {
+      const res = await fetch(`/api/friends/request/${requestId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -149,7 +147,7 @@ export function FriendsPage() {
 
   const removeFriend = async (friendId) => {
     try {
-      const res = await fetch(`${API_URL}/api/friends/${friendId}`, {
+      const res = await fetch(`/api/friends/${friendId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -230,7 +228,7 @@ export function FriendsPage() {
                 <p className="text-base-content/70">You don't have any friends yet.</p>
                 <button
                   onClick={() => setActiveTab('search')}
-                  className="btn btn-primary mt-4"
+                  className="btn btn-success mt-4"
                 >
                   Add a friend
                 </button>

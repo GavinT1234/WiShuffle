@@ -15,9 +15,11 @@ export function registerRoomHandlers(io, socket) {
       if (ack) ack({ ok: false, error: 'Missing roomId' });
       return;
     }
-    console.log(`[Socket] User ${socket.user.id} joining room ${roomId}`);
 
+    let state = null;
     try {
+      console.log(`[Socket] User ${socket.user.id} joining room ${roomId}`);
+
       // If user was already in a room, leave first
       if (socket.currentRoom && socket.currentRoom !== roomId) {
         await leaveRoom(socket.currentRoom);
@@ -28,7 +30,7 @@ export function registerRoomHandlers(io, socket) {
       socket.currentRoom = roomId;
 
       await addUserToRoom(roomId, socket.user.id);
-      const state = await getRoomState(roomId);
+      state = await getRoomState(roomId);
 
       // Broadcast updated state to all users in the room (including joiner)
       io.to(`room:${roomId}`).emit('room:state', state);
@@ -67,13 +69,20 @@ export function registerRoomHandlers(io, socket) {
         socket.emit('room:queue_updated', { queue: playlist, roomId });
       } catch (err) {
         console.error('Error fetching playback state:', err);
+        // Don't let playback state errors prevent room:join from completing
       }
 
       // Ack the joiner with current state
-      if (ack) ack({ ok: true, state });
+      if (ack) {
+        console.log(`[Socket] Sending ack for room:join`);
+        ack({ ok: true, state });
+      }
     } catch (error) {
       console.error('Error in room:join:', error);
-      if (ack) ack({ ok: false, error: error.message });
+      if (ack) {
+        console.log(`[Socket] Sending error ack for room:join:`, error.message);
+        ack({ ok: false, error: error.message });
+      }
     }
   });
 

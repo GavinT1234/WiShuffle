@@ -17,9 +17,7 @@ const Dashboard = () => {
           <LoadingRing />
         ) : (
           <div className="text-2xl sm:text-3xl md:text-4xl font-bold ">
-            Welcome, {user.username}
-             <CreatePlaylistModal onConfirm={(playlist) => console.log(playlist)} />
-             <SongSearchModal playlistId="123" onSongsAdded={(songs) => console.log(songs)} />
+            Welcome, {user?.username || "User"}
           </div>
         )}
         <section>{error ? error : ""}</section>
