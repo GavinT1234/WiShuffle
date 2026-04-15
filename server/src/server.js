@@ -12,7 +12,6 @@ import friendRoutes from './routes/friendRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import youtubeRoutes from './routes/youtubeRoutes.js';
 
-
 const app = express();
 const PORT = process.env.PORT || 4000;
 

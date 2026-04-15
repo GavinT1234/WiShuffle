@@ -1,7 +1,7 @@
 import React from "react";
 import { useCreateRoom } from "../hooks/useCreateRoom";
 import { useState } from "react";
-import LoadingRing from "../components/LoadingRing";
+import LoadingRing from "./LoadingRing";
 import GenreSelect from "./GenreSelect";
 
 const CreateRoom = ({ onClose, onSuccess }) => {
@@ -62,13 +62,13 @@ const CreateRoom = ({ onClose, onSuccess }) => {
             placeholder="Name"
             onChange={(e) => setName(e.target.value)}
           />
-          <GenreSelect selected={tags} onChange={setTags} /> {/* ✅ */}
+          <GenreSelect selected={tags} onChange={setTags} />
           <input
             className="btn "
             type="reset"
             value="×"
             onClick={() => {
-              setSelected([]);
+              setTags([]);
             }}
           />
           <button

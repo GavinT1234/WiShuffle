@@ -20,8 +20,9 @@ const RoomSection = () => {
   const filtered = rooms.filter(
     (r) =>
       selectedGenres.length === 0 ||
-      selectedGenres.some((g) => r.tags.includes(g))
+      selectedGenres.some((g) => r.tags.includes(g)),
   );
+
   if (loading) {
     return <LoadingRing />;
   }
