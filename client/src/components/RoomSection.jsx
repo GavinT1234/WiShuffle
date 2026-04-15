@@ -1,272 +1,323 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useGetRooms } from "../hooks/useGetRooms";
 import LoadingRing from "./LoadingRing";
-import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Modal from "./Modal";
 import CreateRoom from "./CreateRoom";
-import { useNavigate } from "react-router-dom";
-import { deleteRoom } from "../api/room";
+import { deleteRoom, getTags } from "../api/room";
 import { useAuth } from "../context/AuthContext";
 
-const RoomSection = () => {
+const UsersIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+);
+const PlusIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+);
+const FilterIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+  </svg>
+);
+const ChevronRight = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <polyline points="9 18 15 12 9 6"/>
+  </svg>
+);
+const XIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
+const MusicIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+    <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+  </svg>
+);
+
+const initials = (name = "") => name[0]?.toUpperCase() ?? "?";
+
+const AVATAR_COLORS = [
+  "bg-violet-500","bg-pink-500","bg-amber-500","bg-emerald-500",
+  "bg-sky-500","bg-rose-500","bg-indigo-500","bg-teal-500",
+];
+const avatarColor = (name = "") =>
+  AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+
+
+  <div className="group bg-base-100 border border-base-200 rounded-2xl p-4 flex gap-3 items-center hover:border-primary/30 hover:shadow-md transition-all duration-200">
+    {/* Avatar */}
+    <div className={`${avatarColor(room.owner.username)} shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
+      {initials(room.owner.username)}
+    </div>
+
+    {/* Info */}
+    <div className="flex-1 min-w-0">
+      <div className="flex items-center gap-2 flex-wrap">
+        <p className="font-semibold text-sm text-base-content leading-tight truncate">{room.name}</p>
+        <span className="text-xs text-base-content/40">{room.owner.username}</span>
+      </div>
+      {room.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1.5">
+          {room.tags.map((t) => (
+            <span key={t} className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 leading-none">
+              {t.toLowerCase()}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+
+    {/* Listeners */}
+    <span className="shrink-0 hidden sm:flex items-center gap-1 text-xs text-base-content/50 bg-base-200 rounded-full px-2.5 py-1">
+      <UsersIcon /> {room.listenerCount}
+    </span>
+
+    {/* Actions */}
+    <div className="shrink-0 flex items-center gap-2">
+      <button
+        className="btn btn-ghost btn-xs text-base-content/50"
+        onClick={() => onDetails(room)}
+      >
+        Details
+      </button>
+      <button
+        className="btn btn-success btn-sm rounded-xl"
+        onClick={onJoin}
+      >
+        Join
+      </button>
+    </div>
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DETAILS MODAL CONTENT
+═══════════════════════════════════════════════════════════════════════ */
+const RoomDetails = ({ room, user, isDeleting, onClose, onJoin, onDelete }) => (
+  <div className="bg-base-100 rounded-2xl w-full max-w-sm overflow-hidden">
+    {/* Hero strip */}
+    <div className={`${avatarColor(room.owner.username)} p-6 flex items-center gap-4`}>
+      <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white text-2xl font-bold shadow">
+        {initials(room.owner.username)}
+      </div>
+      <div className="text-white">
+        <h2 className="text-lg font-bold leading-tight">{room.name}</h2>
+        <p className="text-sm opacity-75">by {room.owner.username}</p>
+      </div>
+    </div>
+
+    {/* Body */}
+    <div className="p-5 space-y-4">
+      {/* Stats row */}
+      <div className="flex gap-3">
+        <div className="flex-1 bg-base-200 rounded-xl p-3 text-center">
+          <p className="text-xl font-bold text-base-content">{room.listenerCount}</p>
+          <p className="text-xs text-base-content/40 mt-0.5">listeners</p>
+        </div>
+        <div className="flex-1 bg-base-200 rounded-xl p-3 text-center">
+          <p className="text-xl font-bold text-base-content">{room.tags.length}</p>
+          <p className="text-xs text-base-content/40 mt-0.5">genres</p>
+        </div>
+      </div>
+
+ 
+      {room.tags.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-base-content/40 uppercase tracking-widest mb-2">Genres</p>
+          <div className="flex flex-wrap gap-1.5">
+            {room.tags.map((t) => (
+              <span key={t} className="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                {t.toLowerCase()}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+
+
+    <div className="px-5 pb-5 flex gap-2">
+      <button className="btn btn-ghost flex-1 btn-sm" onClick={onClose}>Close</button>
+      <button className="btn btn-success flex-1 btn-sm" onClick={onJoin}>Join Room</button>
+      {user?.id === room.ownerId && (
+        <button
+          className="btn btn-error btn-outline btn-sm"
+          onClick={onDelete}
+          disabled={isDeleting}
+        >
+          {isDeleting ? <span className="loading loading-spinner loading-xs" /> : "Delete"}
+        </button>
+      )}
+    </div>
+  </div>
+);
+
 
   const navigate = useNavigate();
   const { user } = useAuth();
-
   const { rooms, loading, error, fetchRooms } = useGetRooms();
   const [searchParams, setSearchParams] = useSearchParams();
+
   const [selected, setSelected] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [detailsRoom, setDetailsRoom] = useState(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [genres, setGenres] = useState([]);
+
+  useEffect(() => {
+    getTags().then(setGenres).catch(console.error);
+  }, []);
+
+  // Sync selected from URL on mount
+  useEffect(() => {
+    setSelected(searchParams.getAll("genre"));
+  }, []);
 
   const selectedGenres = searchParams.getAll("genre");
-  console.log("rooms", rooms);
+
   const filtered = rooms.filter(
     (r) =>
       selectedGenres.length === 0 ||
       selectedGenres.some((g) => r.tags.includes(g))
   );
-  if (loading) {
-    return <LoadingRing />;
-  }
 
-  if (error) {
-    return error;
-  }
-
-  const handleChange = (e) => {
-    const { checked, value } = e.target;
-
+  const handleTagToggle = (genre) => {
     const next = new URLSearchParams(searchParams);
     next.delete("genre");
-
-    const updatedSelected = checked
-      ? [...selected, value]
-      : selected.filter((item) => item !== value);
-
-    updatedSelected.forEach((genre) => next.append("genre", genre));
-    setSelected(updatedSelected);
+    const updated = selected.includes(genre)
+      ? selected.filter((g) => g !== genre)
+      : [...selected, genre];
+    updated.forEach((g) => next.append("genre", g));
+    setSelected(updated);
     setSearchParams(next);
+  };
+
+  const handleClearFilters = () => {
+    setSelected([]);
+    setSearchParams({});
   };
 
   const handleDeleteRoom = async (roomId) => {
     if (!window.confirm("Are you sure you want to delete this room?")) return;
-    
     setIsDeleting(true);
     try {
       await deleteRoom(roomId);
-      setIsDetailsOpen(false);
       setDetailsRoom(null);
       fetchRooms();
-    } catch (error) {
-      console.error("Failed to delete room:", error);
+    } catch {
       alert("Failed to delete room");
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const handleDetailsClick = (room) => {
-    setDetailsRoom(room);
-    setIsDetailsOpen(true);
-  };
-
-  const GENRES = [
-    "HIPHOP",
-    "RNB",
-    "POP",
-    "RAP",
-    "ROCK",
-    "ELECTRONIC",
-    "JAZZ",
-    "CLASSICAL",
-    "REGGAE",
-    "LATIN",
-    "COUNTRY",
-    "METAL",
-    "INDIE",
-    "SOUL",
-    "FUNK",
-    "LOFI",
-    "AFROBEATS",
-    "KPOP",
-    "EDM",
-    "HOUSE",
-    "TRAP",
-  ];
+  if (loading) return <LoadingRing />;
+  if (error) return <p className="text-error text-center mt-10">{error}</p>;
 
   return (
-    <div className="flex flex-col lg:flex-row justify-center gap-6 p-4 w-full">
-      <div className="overflow-x-auto lg:w-[70%]">
-        <table className="table w-full">
-          <thead>
-            <tr className="bg-base-200 text-xs text-base-content/50 uppercase">
-              <th className="w-[40%] sm:w-[20%]">Host</th>
-              <th className="w-[35%] md:w-[35%]">Name</th>
-              <th className="md:w-[15%] hidden md:table-cell">
-                Listeners
-              </th>{/*" "*/}
-              <th>
-                <div className="flex  items-center justify-end md:justify-between">
-                  <span className="hidden md:block">Options</span>
-                  <button
-                    onClick={() => setIsOpen(true)}
-                    className="btn border border-secondary btn-sm"
-                  >
-                    + Create Room
-                  </button>
-                  <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-                    <CreateRoom
-                      onClose={() => setIsOpen(false)}
-                      onSuccess={fetchRooms}
-                    />
-                  </Modal>
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((r) => {
-              const visibleTags = r.tags.slice(0, 5);
-              const remaining = r.tags.length - 5;
-              const remainingTags = r.tags.slice(5);
-              return (
-                <tr key={r.id}>
-                  <td>
-                    <div className="font-medium">{r.owner.username}</div>
-                  </td>
-                  <td className="max-w-0">
-                    {r.name}
-                    {r.tags.length > 0 && (
-                      <>
-                        {/* mobile — first tag + count */}
-                        <div className="flex items-center gap-1 mt-1 md:hidden ">
-                          <span className="badge badge-ghost badge-sm rounded-full text-xs text-base-content/60">
+    <div className="max-w-screen-2xl mx-auto px-4 lg:px-10 py-6 w-full">
 
-                            #{r.tags[0].toLowerCase()}
-                          </span>
-                          {r.tags.length > 1 && (
-                            <span className="text-xs text-base-content/60">
-                              +{r.tags.length - 1}
-                            </span>
-                          )}
-                        </div>
+    
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+            <MusicIcon />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold leading-tight">Rooms</h1>
+            <p className="text-xs text-base-content/40">{filtered.length} available</p>
+          </div>
+        </div>
 
-                        {/* desktop — full tags with +more tooltip */}
-                        <div className="hidden md:flex gap-1 mt-2 flex-wrap ">
-                          {visibleTags.map((t) => (
-                            <span
-                              key={t}
-                              className="badge badge-ghost badge-sm rounded-full text-xs text-base-content/60"
-                            >
-                              #{t.toLowerCase()}
-                            </span>
-                          ))}
-                          {remaining > 0 && (
-                            <span className="tooltip rounded-full text-xs text-base-content/40">
-                              <div className="tooltip-content flex flex-wrap gap-1 max-w-xs p-1 shadow-lg bg-base-300">
-                                {remainingTags.map((t) => (
-                                  <span
-                                    key={t}
-                                    className="badge badge-ghost badge-sm rounded-full text-xs text-base-content/60"
-                                  >
-                                    #{t.toLowerCase()}
-                                  </span>
-                                ))}
-                              </div>
-                              +{remaining} more
-                            </span>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </td>
-                  <td className="hidden md:table-cell">{r.listenerCount}</td>{/*" "*/}
-                  <td>
-                    <div className="flex gap-2 items-center justify-end md:justify-start">
-                      <button
-                        className="btn btn-success btn-sm"
-                        onClick={() => navigate(`/room/${r.id}`)}
-                      >
-                        JOIN
-                      </button>
-                      <button 
-                        className="btn btn-ghost btn-xs hidden md:block"
-                        onClick={() => handleDetailsClick(r)}
-                      >
-                        details
-                      </button>{/*" "*/}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <button
+          onClick={() => setIsCreateOpen(true)}
+          className="btn btn-primary btn-sm gap-1.5 rounded-xl shadow-sm"
+        >
+          <PlusIcon /> Create
+        </button>
       </div>
-      <div className="bg-base-content/10 w-full lg:w-[30%] min-h-50 p-4">
-        <div>
-          <h1 className="font-medium mb-4">Filter tags:</h1>
-          <form className="flex gap-2 flex-wrap">
-            {GENRES.map((genre) => (
-              <input
+
+     
+      <div className="mb-5">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="flex items-center gap-1 text-xs font-semibold text-base-content/40 uppercase tracking-widest">
+            <FilterIcon /> Genres
+          </span>
+          {selected.length > 0 && (
+            <button
+              onClick={handleClearFilters}
+              className="flex items-center gap-1 text-xs text-error hover:underline ml-auto"
+            >
+              <XIcon /> Clear {selected.length}
+            </button>
+          )}
+        </div>
+
+  
+        <div className="flex flex-wrap gap-1.5">
+          {genres.map((genre) => {
+            const active = selected.includes(genre);
+            return (
+              <button
                 key={genre}
-                className="btn"
-                type="checkbox"
-                name="frameworks"
-                checked={selected.includes(genre)}
-                value={genre}
-                aria-label={`#${genre.toLowerCase()}`}
-                onChange={handleChange}
-              />
-            ))}
-            <input
-              className="btn btn-square"
-              type="reset"
-              value="×"
-              onClick={() => {
-                setSelected([]);
-                setSearchParams({});
-              }}
-            />
-          </form>
+                onClick={() => handleTagToggle(genre)}
+                className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-all duration-150 ${
+                  active
+                    ? "bg-primary text-primary-content border-primary shadow-sm"
+                    : "bg-base-100 text-base-content/60 border-base-200 hover:border-primary/30 hover:text-base-content"
+                }`}
+              >
+                {genre.toLowerCase()}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <Modal isOpen={isDetailsOpen} onClose={() => setIsDetailsOpen(false)}>
+  
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-base-content/30">
+          <MusicIcon />
+          <p className="text-base font-medium mt-3">No rooms found</p>
+          <p className="text-sm mt-1">Try different genres or create one</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {filtered.map((r) => (
+            <RoomCard
+              key={r.id}
+              room={r}
+              onDetails={setDetailsRoom}
+              onJoin={() => navigate(`/room/${r.id}`)}
+            />
+          ))}
+        </div>
+      )}
+
+      
+      <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)}>
+        <CreateRoom
+          onClose={() => setIsCreateOpen(false)}
+          onSuccess={fetchRooms}
+        />
+      </Modal>
+
+      {/* ── Details Modal ── */}
+      <Modal isOpen={!!detailsRoom} onClose={() => setDetailsRoom(null)}>
         {detailsRoom && (
-          <div className="bg-base-100 p-6 rounded-lg max-w-md">
-            <h2 className="text-2xl font-bold mb-4">{detailsRoom.name}</h2>
-            <div className="space-y-2 mb-4">
-              <p><span className="font-semibold">Host:</span> {detailsRoom.owner.username}</p>
-              <p><span className="font-semibold">Listeners:</span> {detailsRoom.listenerCount}</p>
-              {detailsRoom.tags.length > 0 && (
-                <p>
-                  <span className="font-semibold">Tags:</span> {detailsRoom.tags.join(", ")}
-                </p>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <button
-                className="btn btn-secondary flex-1"
-                onClick={() => setIsDetailsOpen(false)}
-              >
-                Close
-              </button>
-              {user?.id === detailsRoom.ownerId && (
-                <button
-                  className="btn btn-error"
-                  onClick={() => handleDeleteRoom(detailsRoom.id)}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? "Deleting..." : "Delete"}
-                </button>
-              )}
-            </div>
-          </div>
+          <RoomDetails
+            room={detailsRoom}
+            user={user}
+            isDeleting={isDeleting}
+            onClose={() => setDetailsRoom(null)}
+            onJoin={() => navigate(`/room/${detailsRoom.id}`)}
+            onDelete={() => handleDeleteRoom(detailsRoom.id)}
+          />
         )}
       </Modal>
     </div>
