@@ -1,0 +1,15 @@
+{
+  "name": "wishuffle",
+  "version": "1.0.0",
+  "description": "Collaborative music room",
+  "scripts": {
+    "install:server": "cd server && npm install",
+    "prisma:generate": "cd server && npx prisma generate",
+    "postinstall": "npm run install:server && npm run prisma:generate",
+    "start": "cd server && node src/server.js"
+  },
+  "engines": {
+    "node": ">=18.x",
+    "npm": ">=9.x"
+  }
+}
