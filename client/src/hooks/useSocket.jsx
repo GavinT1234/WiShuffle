@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 
-const SERVER_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+//const SERVER_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+//const SOCKET_URL = import.meta.env.DEV ? "http://localhost:4000" : undefined;
 
 export function useSocket(token) {
     const socketRef = useRef(null);
@@ -10,8 +11,8 @@ export function useSocket(token) {
     useEffect(() => {
         if (!token) return;
 
-        const socket = io(SERVER_URL, {
-            extraHeaders: { authentication: token },
+        const socket = io({
+            auth: { token },
             autoConnect: true,
         });
 
