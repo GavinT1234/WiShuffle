@@ -13,7 +13,7 @@ router.get('/:id/all', authenticate, authorizeOwnership('playlist'), validatePla
 router.post('/', authenticate, authorizeParentOwnership, validateParent, createPlaylistHandler);
 router.put('/:id', authenticate, authorizeOwnership('playlist'), updatePlaylistHandler);
 router.delete('/:id', authenticate, authorizeOwnership('playlist'), deletePlaylistHandler);
-router.get('/:id/order', getPlaylistOrderingHandler);
+router.get('/:id/order', validatePlaylist, getPlaylistOrderingHandler);
 
 // Songs
 router.get('/:id/songs', authenticate, authorizeOwnership('playlist'), validatePlaylist, getPlaylistSongsHandler);

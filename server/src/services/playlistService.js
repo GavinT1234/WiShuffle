@@ -1,4 +1,4 @@
-import { create, singlePlaylist, userPlaylists, update, playlistSongs, add, removeSong, playlistOrdering, next, ownership, remove, playlistContent } from '../repositories/playlistRepo.js'
+import { create, singlePlaylist, userPlaylists, update, playlistSongs, add, removeSong, playlistOrdering, next, parent, pos, ownership, remove, playlistContent } from '../repositories/playlistRepo.js'
 
 export async function getPlaylists(ownerId) {
     const playlists = await userPlaylists(ownerId);
@@ -45,16 +45,6 @@ export async function getNext(id) {
     }
 }
 
-export async function getPlaylistOrdering(id) {
-    const ordering = await playlistOrdering(id);
-    if (ordering) return ordering;
-    else {
-        const error = new Error(`Playlist not found`);
-        error.status = 404;
-        throw error;
-    }
-}
-
 export async function createPlaylist(playlistData) {
     
     const playlist = await create(playlistData);
@@ -71,7 +61,8 @@ export async function addSong(songData) {
     }
 }
 
-export async function updatePlaylist(id, playlistData) {
+export async function updatePlaylist(id, playlistData, direction) {
+    await positionHelper(id, playlistData, direction)
     const playlist = await update(id, playlistData);
     if (playlist) return playlist;
     else {
@@ -81,9 +72,27 @@ export async function updatePlaylist(id, playlistData) {
     }
 }
 
+export async function getPlaylistOrdering(id) {
+    const ordering = await playlistOrdering(id);
+    if (ordering) return ordering;
+    else {
+        const error = new Error(`Playlist not found`);
+        error.status = 404;
+        throw error;
+    }
+}
+
 export async function deletePlaylist(id) {
-    const playlist = await remove(id);
-    if (playlist) return;
+    const parentId = await parent(id);
+    console.log(parentId);
+    const order = await getPlaylistOrdering(parentId);
+    console.log(order.length);
+    const playlist = await updatePlaylist(id, { position: order.length});
+    console.log(playlist);
+    if (playlist) {
+        await remove(id);
+        return playlist;
+    }
     else {
         const error = new Error(`Playlist not found`);
         error.status = 404;
@@ -118,5 +127,46 @@ export async function ownershipCheck(id) {
         const error = new Error(`Item not found`);
         error.status = 404;
         throw error;
+    }
+}
+
+async function positionHelper(id, playlistData, direction) {
+    console.log(direction);
+    let { position } = playlistData;
+    if (position) {
+        const parentId = await parent(id);
+        const currentPos = await pos(id);
+        const currentState = await playlistOrdering(parentId);
+        const lastPos = currentState.length;
+        // if (position > lastPos) {console.log('bigger!'); position = lastPos};
+        if (direction === -1 || ((position < currentPos) && (direction === undefined))) {
+            const node = currentState[position - 1];
+            if (position === node.position) {
+                console.log(position);
+                await updatePlaylist(node.id, {position: position + 1}, -1);
+                return;
+            }
+            // for (let i = position; i < lastPos - 1; i++) {
+            //     const node = currentState[i];
+            //     if (position === node.position) {
+            //         await updatePlaylist(node.id, {position: position + 1}, -1);
+            //         break;
+            //     }
+            // }
+        }
+        else if (direction === 1 || ((position > currentPos) && (direction === undefined))) {
+            const node = currentState[position - 1];
+            if (position === node.position) {
+                await updatePlaylist(node.id, {position: position - 1}, 1);
+                return;
+            }
+            // for (let i = lastPos - 1; i >= 0; i--) {
+            //     const node = currentState[i];
+            //     if (position === node.position) {
+            //         await updatePlaylist(node.id, {position: position - 1}, 1);
+            //         break;
+            //     }
+            // }
+        }
     }
 }

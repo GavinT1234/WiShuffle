@@ -96,9 +96,9 @@ export async function addSongHandler(req, res, next) {
 
 export async function updatePlaylistHandler(req, res, next) {
     try {
-        const id = req.params.id;
-        const {name, shuffle} = req.body;
-        const playlist = await updatePlaylist(id, {name, shuffle});
+        const id = parseInt(req.params.id);
+        const {name, shuffle, position} = req.body;
+        const playlist = await updatePlaylist(id, {name, shuffle, position});
         res.status(200).json(playlist);
     } catch (error) {
         next(error);
