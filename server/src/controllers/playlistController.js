@@ -67,7 +67,7 @@ export async function createPlaylistHandler(req, res, next) {
             position = await getNext(parentId);
         }
         const playlist = await createPlaylist({name, shuffle, parentId, position, ownerId: req.user.id});
-        res.status(200).json(playlist);
+        res.status(201).json(playlist);
     } catch (error) {
         next(error);
     }
@@ -97,7 +97,7 @@ export async function addSongHandler(req, res, next) {
             throw error;
         }
         const song = await addSong({name, author, url, isSong: true, parentId: id, position, ownerId: req.user.id});
-        res.status(200).json(song);
+        res.status(201).json(song);
     } catch (error) {
         next(error);
     }
