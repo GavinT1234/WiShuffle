@@ -1,97 +1,41 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/HomePage";
-import Navbar from "./components/Navbar";
-import LoginPage from "./pages/LoginPage";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { UserProvider } from "./context/UserContext.jsx";
+import { SocketProvider } from "./context/SocketContext.jsx";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import MainLayout from "./layouts/MainLayout";
+
+// pages
+import LoginPage    from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import ProtectedRoutes from "./components/ProtectedRoutes";
-import ProfilePage from "./pages/ProfilePage";
-import FriendsPage from "./pages/FriendsPage";
-import FriendProfilePage from "./pages/FriendProfilePage";
-import MessagesPage from "./pages/MessagesPage";
-import {SocketProvider} from "./context/SocketContext.jsx";
-import { AuthProvider } from "./context/AuthContext";
-import Dashboard from "./pages/Dashboard";
-import RoomPage from "./pages/RoomPage";
-function App() {
-  return (
-    <div className="h-screen flex flex-col">
-      <BrowserRouter>
-        <AuthProvider>
+import Dashboard    from "./pages/Dashboard";
+import RoomPage     from "./pages/RoomPage";
+import NotFound     from "./pages/NotFound";
 
-            <SocketProvider>
-          <Navbar />
-          <div className="flex-1 overflow-y-auto">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+const App = () => (
+  <BrowserRouter>
+    <UserProvider>               {/* auth state — outermost, no deps */}
+      <SocketProvider>            {/* socket connects after user is known */}
+        <Routes>
 
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoutes>
-                    <Dashboard />
-                  </ProtectedRoutes>
-                }
-              />
+          {/* public routes */}
+          <Route path="/login"    element={<LoginPage />}    />
+          <Route path="/register" element={<RegisterPage />} />
 
-              <Route
-                path="/room/:id"
-                element={
-                  <ProtectedRoutes>
-                    <RoomPage />
-                  </ProtectedRoutes>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoutes>
-                    <ProfilePage />
-                  </ProtectedRoutes>
-                }
-              />
-              <Route
-                path="/profile/:userId"
-                element={
-                  <ProtectedRoutes>
-                    <FriendProfilePage />
-                  </ProtectedRoutes>
-                }
-              />
-              <Route
-                path="/friends"
-                element={
-                  <ProtectedRoutes>
-                    <FriendsPage />
-                  </ProtectedRoutes>
-                }
-              />
-              <Route
-                path="/messages"
-                element={
-                  <ProtectedRoutes>
-                    <MessagesPage />
-                  </ProtectedRoutes>
-                }
-              />
-              <Route
-                path="/messages/:partnerId"
-                element={
-                  <ProtectedRoutes>
-                    <MessagesPage />
-                  </ProtectedRoutes>
-                }
-              />
-            </Routes>
+          {/* protected routes — all share MainLayout */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<MainLayout />}>
+              <Route index             element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<Dashboard />}                   />
+              <Route path="/room/:id"   element={<RoomPage />}                    />
+            </Route>
+          </Route>
 
-          </div>
-            </SocketProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </div>
-  );
-}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </SocketProvider>
+    </UserProvider>
+  </BrowserRouter>
+);
 
 export default App;

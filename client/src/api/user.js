@@ -1,7 +1,3 @@
-import { request } from "./index";
+import api from './index.js'
 
-export const getUser = async () => {
-  const response = await request("/auth/me");
-
-  return response;
-};
+export const getUser = () => api.get("/auth/me");

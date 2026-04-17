@@ -1,51 +1,26 @@
-const BASE_URL = "/api";
+import axios from "axios";
 
-export const request = async (endpoint, options = {}) => {
-  try {
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL + '/api' ?? "http://localhost:4000/api",
+});
 
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-    });
+// Attach token to every request automatically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
-    if (endpoint === '/auth/me' && response.status === 401) {
-      throw new Error('Unauthorized');
+// Auto-logout on 401 (expired token)
+api.interceptors.response.use(
+  (res) => res.data,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.assign("/login");
     }
-
-    if (response.status === 401) {
-      if (localStorage.getItem("token")) {
-        localStorage.removeItem("token");
-
-        const publicPaths = ['/login', '/register', '/'];
-        if (!publicPaths.includes(window.location.pathname)) {
-          window.location.href = '/login';
-        }
-      }
-    }
-    
-    const text = await response.text();
-
-    if (!text) {
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-      return null;
-    }
-
-    const data = JSON.parse(text);
-
-    if (!response.ok) {
-      throw new Error(data.error || data.message || "Something went wrong");
-    }
-
-    return data;
-  } catch (error) {
-    console.log("API request error:", error);
-    throw error;
+    return Promise.reject(err.response?.data?.message ?? err.message);
   }
-};
+);
+
+export default api;

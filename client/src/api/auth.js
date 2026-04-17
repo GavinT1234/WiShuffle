@@ -1,21 +1,3 @@
-import { request } from "./index";
+import api from './index.js'
 
-export const login = async ({ identifier, password }) => {
-  return await request("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ identifier, password }),
-  });
-};
-
-export const logout = async () => {
-  return await request("/auth/logout", {
-    method: "POST",
-  });
-};
-
-export const register = async ({ username, email, password }) => {
-  return await request("/auth/register", {
-    method: "POST",
-    body: JSON.stringify({ username, email, password }),
-  });
-};
+export const loginRequest = (creds) => api.post("/auth/login", creds);

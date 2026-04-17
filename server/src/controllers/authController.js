@@ -12,8 +12,8 @@ export async function registerHandler(req, res, next) {
 
 export async function loginHandler(req, res, next) {
   try {
-    const { identifier, password } = req.body;
-    const accessToken = await login(identifier, password);
+    const { email, password } = req.body;
+    const accessToken = await login(email, password);
     res.status(200).json({ accessToken });
   } catch (error) {
     next(error);
