@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import { GetVideoDetails } from 'youtube-search-api';
 
 const youtube = google.youtube({
   version: 'v3',
@@ -20,6 +21,39 @@ export const extractVideoId = (url) => {
   
   return null;
 };
+export async function getVideoInfo(videoId) {
+  try {
+    console.log(`📹 Fetching info for video: ${videoId}`);
+    
+    // Fetch the YouTube page
+    const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`);
+    const html = await response.text();
+    
+    // Extract title from HTML
+    const titleMatch = html.match(/<title>(.+?)<\/title>/);
+    let title = videoId; // Fallback to ID
+    
+    if (titleMatch && titleMatch[1]) {
+      // Remove " - YouTube" suffix
+      title = titleMatch[1].replace(/ - YouTube$/, '').trim();
+    }
+
+    const videoInfo = {
+      videoId,
+      title,
+    };
+
+    console.log(`Got video info: ${videoInfo.title}`);
+    return videoInfo;
+    
+  } catch (error) {
+    console.error(`Error fetching video info for ${videoId}:`, error);
+    return {
+      videoId,
+      title: videoId, // Fallback to ID on error
+    };
+  }
+}
 
 // Get video details
 export const getVideoDetails = async (videoId) => {
@@ -104,3 +138,40 @@ export default {
   parseDuration,
   formatDuration
 };
+
+/*
+export async function getVideoInfo(videoId) {
+  try {
+    console.log(`📹 Fetching info for video: ${videoId}`);
+    
+    const info = await GetVideoDetails(videoId);
+    
+    if (!info || !info.title) {
+      console.warn(`⚠️ No info found for ${videoId}`);
+      return {
+        videoId,
+        title: videoId, // Fallback to ID
+      };
+    }
+
+    const videoInfo = {
+      videoId,
+      title: info.title,
+      thumbnail: info.thumbnail?.thumbnails?.[0]?.url || null,
+      duration: info.lengthSeconds || null,
+      channelTitle: info.channel?.name || null,
+    };
+
+    console.log(`✅ Got video info: ${videoInfo.title}`);
+    return videoInfo;
+    
+  } catch (error) {
+    console.error(`❌ Error fetching video info for ${videoId}:`, error);
+    // Return basic info on error
+    return {
+      videoId,
+      title: videoId,
+    };
+  }
+}
+*/
