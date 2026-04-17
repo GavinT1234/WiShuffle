@@ -1,23 +1,24 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useYoutubePlayer } from '../hooks/useYoutubePlayer';
+import { YoutubeSearch } from './YoutubeSearch';
 
 const PLAYER_DIV_ID = 'yt-player-container';
 
 export function VideoPlayer({
-    playback,
-    playlist,
-    userId,
-    onQueueVideo,
-    onPlay,
-    onPause,
-    onSeek,
-    onNextVideo,
-    onPlayerReady,
-}) {
+                                playback,
+                                playlist,
+                                userId,
+                                onQueueVideo,
+                                onPlay,
+                                onPause,
+                                onSeek,
+                                onNextVideo,
+                                onPlayerReady,
+                            }) {
     const [urlInput, setUrlInput] = useState('');
     const [titleInput, setTitleInput] = useState('');
-    const [localPlaying, setLocalPlaying] = useState(false);
+    //const [localPlaying, setLocalPlaying] = useState(false);
     const videoEndedRef = useRef(false);
 
     const { ready, loadVideo, play, pause, seekTo, getCurrentTime, getDuration } =
@@ -26,7 +27,7 @@ export function VideoPlayer({
             onStateChange: (state) => {
                 console.log('YouTube player state:', state);
                 // 0 = ENDED, 1 = PLAYING, 2 = PAUSED
-                if (state === 1) setLocalPlaying(true);
+                //if (state === 1) setLocalPlaying(true);
                 //if (state === 2) setLocalPlaying(false);
                 // On video end, advance to next
                 if (state === 0) {
@@ -62,12 +63,18 @@ export function VideoPlayer({
         onSeek(pos);
     };
 
+    const isPlaying = playback?.playState === 'playing';
 
     // Use actual player time if available, otherwise fallback to playback state
     const playerCurrentTime = ready ? (getCurrentTime?.() ?? 0) : 0;
     const currentTime = ready && playerCurrentTime >= 0 ? playerCurrentTime : (playback?.elapsedSeconds ?? 0);
     const duration = getDuration?.() ?? 0;
     const progressPct = duration ? (currentTime / duration) * 100 : 0;
+
+    const handleSearchSelect = (videoId, title) => {
+        console.log('Selected from search:', videoId, title);
+        onQueueVideo(videoId, title);
+    };
 
     return (
         <div style={styles.wrapper}>
@@ -100,10 +107,10 @@ export function VideoPlayer({
                 <div style={styles.controls}>
                     <button
                         style={styles.btn}
-                        onClick={playback ? (localPlaying ? onPause : onPlay) : undefined}
+                        onClick={playback ? (isPlaying ? onPause : onPlay) : undefined}
                         disabled={!playback}
                     >
-                        {playback ? (localPlaying ? '⏸ Pause' : '▶ Play') : '▶ Play'}
+                        {playback ? (isPlaying ? '⏸ Pause' : '▶ Play') : '▶ Play'}
                     </button>
                     {playlist.length > 0 && (
                         <button style={{ ...styles.btn, ...styles.btnSecondary }} onClick={onNextVideo}>
@@ -111,6 +118,9 @@ export function VideoPlayer({
                         </button>
                     )}
                 </div>
+
+                {/* Youtube Search */}
+                <YoutubeSearch onSelectVideo={handleSearchSelect} />
 
                 {/* Video input */}
                 <form onSubmit={handleQueueVideo} style={styles.inputRow}>
@@ -324,5 +334,13 @@ const styles = {
         color: '#555',
         fontSize: '13px',
         margin: 0,
+    },
+    divider: {
+        textAlign: 'center',
+        fontSize: '11px',
+        color: '#555',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        margin: '4px 0',
     },
 };
