@@ -97,16 +97,16 @@ export function VideoPlayer({
 
             {/* ── Playback Controls (available to all) ── */}
             <div style={styles.controlsPanel}>
-                <div style={styles.controls}>
+                <div >
                     <button
-                        style={styles.btn}
+                        className="btn btn-success"
                         onClick={playback ? (localPlaying ? onPause : onPlay) : undefined}
                         disabled={!playback}
                     >
                         {playback ? (localPlaying ? '⏸ Pause' : '▶ Play') : '▶ Play'}
                     </button>
                     {playlist.length > 0 && (
-                        <button style={{ ...styles.btn, ...styles.btnSecondary }} onClick={onNextVideo}>
+                        <button className="btn btn-ghost" onClick={onNextVideo}>
                             ⏭ Skip
                         </button>
                     )}
@@ -126,7 +126,7 @@ export function VideoPlayer({
                         value={titleInput}
                         onChange={(e) => setTitleInput(e.target.value)}
                     />
-                    <button style={styles.btn} type="submit">+ Add to Queue</button>
+                    <button className="btn btn-success" type="submit">+ Add to Queue</button>
                 </form>
             </div>
 
@@ -259,17 +259,7 @@ const styles = {
         fontSize: '13px',
         outline: 'none',
     },
-    btn: {
-        padding: '7px 14px',
-        background: '#aa3bff',
-        border: 'none',
-        borderRadius: '6px',
-        color: '#fff',
-        fontSize: '13px',
-        fontWeight: '600',
-        cursor: 'pointer',
-        whiteSpace: 'nowrap',
-    },
+
     btnSecondary: {
         background: 'transparent',
         border: '1px solid #2e2e2e',

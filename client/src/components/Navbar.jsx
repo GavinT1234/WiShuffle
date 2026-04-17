@@ -99,6 +99,9 @@ const Navbar = () => {
                 <button onClick={() => navigate("/dashboard")}>Dashboard</button>
               </li>
               <li>
+                <button onClick={() => navigate("/playlists")}>Playlists</button>
+              </li>
+              <li>
                 <button onClick={() => navigate("/profile")}>Profile</button>
               </li>
               <li>
