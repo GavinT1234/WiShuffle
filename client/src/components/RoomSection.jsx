@@ -6,6 +6,7 @@ import Modal from "./Modal";
 import CreateRoom from "./CreateRoom";
 import { deleteRoom, getTags } from "../api/room";
 import { useAuth } from "../context/AuthContext";
+import {useGetUser} from "../hooks/useGetUser.js";
 
 const UsersIcon = () => (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -140,8 +141,11 @@ const RoomDetails = ({ room, user, isDeleting, onClose, onJoin, onDelete }) => (
 
       <div className="px-4 sm:px-5 pb-4 sm:pb-5 flex gap-2">
         <button className="btn btn-ghost flex-1 btn-sm" onClick={onClose}>Close</button>
+         {console.log("user", user)}
+         {console.log("userid", user?.id)}
+         {console.log("ownerid", room.owner.id)}
         <button className="btn btn-success flex-1 btn-sm" onClick={onJoin}>Join Room</button>
-        {user?.id === room.ownerId && (
+        {user?.id === room.owner.id && (
             <button
                 className="btn btn-error btn-outline btn-sm"
                 onClick={onDelete}
@@ -156,7 +160,7 @@ const RoomDetails = ({ room, user, isDeleting, onClose, onJoin, onDelete }) => (
 
 const RoomSection = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useGetUser();
   const { rooms, loading, error, fetchRooms } = useGetRooms();
   const [searchParams, setSearchParams] = useSearchParams();
 

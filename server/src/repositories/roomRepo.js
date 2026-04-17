@@ -3,7 +3,7 @@ import { Genre } from '../generated/prisma/index.js';
 
 export async function getAll() {
   const rooms = await prisma.room.findMany({
-    include: { owner: { select: { username: true, avatarUrl: true } } },
+    include: { owner: { select: { username: true, avatarUrl: true, id: true } } },
   });
   //console.log(rooms);
   return rooms;
