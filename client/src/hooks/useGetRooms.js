@@ -20,7 +20,7 @@ export const useGetRooms = () => {
     setError(null);
     try {
       const rooms = await getAllRooms();
-      console.log(rooms);
+      //console.log(rooms);
       setRooms(rooms);
     } catch (err) {
       setError(err.message);

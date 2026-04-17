@@ -2,7 +2,7 @@ import { request } from "./index";
 
 export const getAllRooms = async () => {
   const response = await request("/rooms/");
-  console.log(response);
+  //console.log(response);
   return response;
 };
 
@@ -11,7 +11,7 @@ export const createRoom = async ({ name, tags = [] }) => {
     method: "POST",
     body: JSON.stringify({ name, tags }),
   });
-  console.log(response);
+  //console.log(response);
   return response;
 };
 
