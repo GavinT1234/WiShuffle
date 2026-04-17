@@ -1,24 +1,17 @@
-import React from "react";
-import { useCreateRoom } from "../hooks/useCreateRoom";
 import { useState } from "react";
-import LoadingRing from "../components/LoadingRing";
+import { useCreateRoom } from "../hooks/useCreateRoom";
 import GenreSelect from "./GenreSelect";
 
-const CreateRoom = ({ onClose, onSuccess }) => {
-  const { room, loading, error, create } = useCreateRoom();
+const XIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+);
 
+const CreateRoom = ({ onClose, onSuccess }) => {
+  const { loading, create } = useCreateRoom();
   const [name, setName] = useState("");
   const [tags, setTags] = useState([]);
-
-  const handleChange = (t) => {
-    const { checked, value } = t.target;
-
-    const updatedSelected = checked
-      ? [...tags, value]
-      : tags.filter((tag) => tag !== value);
-
-    setTags(updatedSelected);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,58 +20,50 @@ const CreateRoom = ({ onClose, onSuccess }) => {
     onSuccess();
     onClose();
   };
-  const GENRES = [
-    "HIPHOP",
-    "RNB",
-    "POP",
-    "RAP",
-    "ROCK",
-    "ELECTRONIC",
-    "JAZZ",
-    "CLASSICAL",
-    "REGGAE",
-    "LATIN",
-    "COUNTRY",
-    "METAL",
-    "INDIE",
-    "SOUL",
-    "FUNK",
-    "LOFI",
-    "AFROBEATS",
-    "KPOP",
-    "EDM",
-    "HOUSE",
-    "TRAP",
-  ];
+
   return (
-    <div className="flex place-items-center justify-center">
-      <form onSubmit={handleSubmit}>
-        <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-          <legend className="fieldset-legend">Create Room</legend>
-          <label className="label">Room Name</label>
-          <input
-            type="text"
-            className="input"
-            placeholder="Name"
-            onChange={(e) => setName(e.target.value)}
-          />
-          <GenreSelect selected={tags} onChange={setTags} /> {/* ✅ */}
+      <div className="bg-base-100 rounded-2xl w-full max-w-sm">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-base-200">
+          <h2 className="text-base font-semibold">Create a room</h2>
           <button
-            type="button"
-            className="btn"
-            onClick={onClose}
+              type="button"
+              onClick={onClose}
+              className="btn btn-ghost btn-xs btn-circle text-base-content/40"
           >
-            ×
+            <XIcon />
           </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-base-content/50 uppercase tracking-widest">
+              Room name
+            </label>
+            <input
+                type="text"
+                className="input input-sm w-full"
+                placeholder="e.g. Late night jazz"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-base-content/50 uppercase tracking-widest">
+              Genres
+            </label>
+            <GenreSelect selected={tags} onChange={setTags} />
+          </div>
+
           <button
-            className="btn btn-neutral mt-4"
-            disabled={!name.trim() || loading}
+              type="submit"
+              className="btn btn-primary btn-sm w-full mt-1"
+              disabled={!name.trim() || loading}
           >
-            {loading ? <LoadingRing /> : "Create Room"}
+            {loading ? <span className="loading loading-spinner loading-xs" /> : "Create room"}
           </button>
-        </fieldset>
-      </form>
-    </div>
+        </form>
+      </div>
   );
 };
 
