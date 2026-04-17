@@ -15,6 +15,12 @@ export const createRoom = async ({ name, tags = [] }) => {
   return response;
 };
 
+export const updateRoom = async (roomId, data) => {
+  return await request(`/rooms/${roomId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+};
 export const getRoom = async (roomId) => {
   return await request(`/rooms/${roomId}`);
 };

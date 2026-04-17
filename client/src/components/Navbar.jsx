@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 const Navbar = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, logout } = useAuth();
   const { user, loading, fetchUser } = useGetUser();
   const navigate = useNavigate();
 
@@ -26,6 +26,16 @@ const Navbar = () => {
       navigate("/");
     }
   };
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  const closeSidebar = () => {
+    document.getElementById("my-drawer-2").checked = false;
+  };
+
+
   return (
     <div className="drawer border-b border-border">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
@@ -94,32 +104,31 @@ const Navbar = () => {
         ></label>
         <ul className="menu bg-base-200 min-h-full w-80 p-4">
           {isLoggedIn ? (
-            <>
-              <li>
-                <button onClick={() => navigate("/dashboard")}>Dashboard</button>
-              </li>
-              <li>
-                <button onClick={() => navigate("/playlists")}>Playlists</button>
-              </li>
-              <li>
-                <button onClick={() => navigate("/profile")}>Profile</button>
-              </li>
-              <li>
-                <button onClick={() => navigate("/friends")}>Friends</button>
-              </li>
-              <li>
-                <button onClick={() => navigate("/messages")}>Messages</button>
-              </li>
-            </>
+              <>
+                <li>
+                  <button onClick={() => { navigate("/dashboard"); closeSidebar(); }}>Dashboard</button>
+                </li>
+                <li>
+                  <button onClick={() => { navigate("/playlists"); closeSidebar(); }}>Playlists</button>
+                </li>
+                <li>
+                  <button onClick={() => { navigate("/profile"); closeSidebar(); }}>Profile</button>
+                </li>
+                <li>
+                  <button onClick={() => { navigate("/friends"); closeSidebar(); }}>Friends</button>
+                </li>
+                <li>
+                  <button onClick={() => { navigate("/messages"); closeSidebar(); }}>Messages</button>
+                </li>
+                <li>
+                  <button onClick={() => { handleLogout(); closeSidebar(); }}>Logout</button>
+                </li>
+              </>
           ) : (
-            <>
-              <li>
-                <LoginButton />
-              </li>
-              <li>
-                <RegisterButton />
-              </li>
-            </>
+              <>
+                <li><LoginButton /></li>
+                <li><RegisterButton /></li>
+              </>
           )}
         </ul>
       </div>

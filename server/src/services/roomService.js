@@ -27,8 +27,9 @@ export async function createRoom(roomData) {
 }
 
 export async function updateRoom(id, roomData) {
-  const result = edit(id, roomData);
-  if (result) return;
+  const result = await edit({ id, ...roomData });
+  if (result)
+    return result;
   else {
     const error = new Error(`Room ${id} not found`);
     error.status = 404;

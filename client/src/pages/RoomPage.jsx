@@ -52,7 +52,7 @@ export default function RoomPage() {
 
    return (
        <div className="min-h-screen bg-[#0f0f0f] text-white flex flex-col">
-          <header className="sticky top-0 z-10 flex items-center gap-3 px-4 sm:px-6 py-3 border-b border-[#1e1e1e] bg-[#0f0f0f]">
+          <header className="sticky top-0 z-1 flex items-center gap-3 px-4 sm:px-6 py-3 border-b border-[#1e1e1e] bg-[#0f0f0f]">
              <button
                  onClick={() => navigate("/dashboard")}
                  className="text-[#888] text-sm border border-[#2e2e2e] rounded-md px-2.5 py-1.5 bg-transparent cursor-pointer hover:border-[#444] transition-colors shrink-0"

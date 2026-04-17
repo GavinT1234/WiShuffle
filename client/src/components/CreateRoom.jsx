@@ -57,7 +57,7 @@ const CreateRoom = ({ onClose, onSuccess }) => {
 
           <button
               type="submit"
-              className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] btn-sm w-full mt-1"
+              className={`btn ${!name.trim() || loading ? 'btn-disabled text-base-content/20' : 'bg-[#aa3bff] border-[#aa3bff] text-white'} hover:bg-[#8b28cc] hover:border-[#8b28cc] btn-sm w-full mt-1`}
               disabled={!name.trim() || loading}
           >
             {loading ? <span className="loading loading-spinner loading-xs" /> : "Create room"}

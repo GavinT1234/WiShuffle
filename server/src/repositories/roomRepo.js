@@ -39,21 +39,19 @@ export async function create(data) {
 }
 
 export async function edit(data) {
-  const { name, tags } = data;
+  const { name, tags, id } = data;
 
   const newRoom = await prisma.room.update({
-    where: {id},
+    where: { id },
     data: {
-      name,
-      tags: {
-        set: tags.map((t) => Genre[t]),
-      },
+      ...(name !== undefined && { name }),
+      ...(tags !== undefined && {
+        tags: { set: tags.map((t) => Genre[t]) },
+      }),
     },
     include: {
       owner: {
-        select: {
-          username: true,
-        },
+        select: { username: true },
       },
     },
   });
