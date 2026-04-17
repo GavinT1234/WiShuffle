@@ -91,7 +91,8 @@ function CreatePlaylistModal({ parentId, onClose, onSubmit, saving }) {
           <label className="flex items-center gap-3 cursor-pointer">
             <input
                 type="checkbox"
-                className="toggle toggle-sm toggle-primary"
+                className="toggle toggle-sm"
+                style={{'--toggle-bg': '#aa3bff', '--toggle-border-color': '#aa3bff'}}
                 checked={shuffle}
                 onChange={(e) => setShuffle(e.target.checked)}
             />
@@ -99,7 +100,7 @@ function CreatePlaylistModal({ parentId, onClose, onSubmit, saving }) {
           </label>
           <button
               type="submit"
-              className="btn btn-primary btn-sm w-full"
+              className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] btn-sm w-full"
               disabled={!name.trim() || saving}
           >
             {saving ? <span className="loading loading-spinner loading-xs"/> : "Create"}
@@ -136,7 +137,8 @@ function EditPlaylistModal({ playlist, onClose, onSubmit, saving }) {
           <label className="flex items-center gap-3 cursor-pointer">
             <input
                 type="checkbox"
-                className="toggle toggle-sm toggle-primary"
+                className="toggle toggle-sm"
+                style={{'--toggle-bg': '#aa3bff', '--toggle-border-color': '#aa3bff'}}
                 checked={shuffle}
                 onChange={(e) => setShuffle(e.target.checked)}
             />
@@ -144,7 +146,7 @@ function EditPlaylistModal({ playlist, onClose, onSubmit, saving }) {
           </label>
           <button
               type="submit"
-              className="btn btn-primary btn-sm w-full"
+              className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] btn-sm w-full"
               disabled={!name.trim() || saving}
           >
             {saving ? <span className="loading loading-spinner loading-xs"/> : "Save changes"}
@@ -207,7 +209,7 @@ function AddSongModal({ playlistId, onClose, onSubmit, saving }) {
           </div>
           <button
               type="submit"
-              className="btn btn-primary btn-sm w-full"
+              className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] btn-sm w-full"
               disabled={!url.trim() || saving}
           >
             {saving ? <span className="loading loading-spinner loading-xs"/> : "Add song"}
@@ -307,7 +309,7 @@ function PlaylistView({ playlist, onBack, actions }) {
               <PlusIcon/> <span className="hidden sm:inline">Subplaylist</span>
             </button>
             <button
-                className="btn btn-primary btn-sm rounded-xl gap-1.5"
+                className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] btn-sm rounded-xl gap-1.5"
                 onClick={() => setShowAddSong(true)}
             >
               <PlusIcon/> Add song
@@ -466,7 +468,7 @@ export default function PlaylistsPage() {
             </p>
           </div>
           <button
-              className="btn btn-primary btn-sm rounded-xl gap-1.5"
+              className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] btn-sm rounded-xl gap-1.5"
               onClick={() => setShowCreate(true)}
           >
             <PlusIcon/> New playlist

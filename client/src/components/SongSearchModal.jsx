@@ -96,7 +96,7 @@ export const SongSearchModal = ({ playlistId, onSongsAdded }) => {
                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                    />
                    <button
-                       className={`btn btn-primary ${loading ? "loading" : ""}`}
+                       className={`btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] ${loading ? "loading" : ""}`}
                        onClick={handleSearch}
                        disabled={loading}
                    >
@@ -168,7 +168,7 @@ export const SongSearchModal = ({ playlistId, onSongsAdded }) => {
                       <button className="btn btn-ghost" onClick={handleClose}>Cancel</button>
                    </form>
                    <button
-                       className="btn btn-primary"
+                       className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc]"
                        onClick={handleConfirm}
                        disabled={addedSongs.length === 0}
                    >
@@ -201,7 +201,7 @@ const SongItem = ({ song, added, onToggle, removeMode = false }) => (
 
        <button
            onClick={onToggle}
-           className={`btn btn-xs ${added ? "btn-success btn-outline" : "btn-primary btn-outline"}`}
+           className={`btn btn-xs btn-outline`} style={{borderColor: added ? '#aa3bff' : '#aa3bff', color: added ? '#aa3bff' : '#aa3bff'}}
        >
           {removeMode ? "✕ Remove" : added ? "✓ Added" : "+ Add"}
        </button>

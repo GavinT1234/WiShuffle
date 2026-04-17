@@ -2,7 +2,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useRoom } from "../hooks/useRoom";
 import { useSocket } from "../context/SocketContext";
 import { VideoPlayer } from "../components/VideoPlayer";
+import { RoomMessages } from "../components/RoomMessages";
 import { useRoomSync } from "../hooks/useRoomSync";
+import { useGetUser } from "../hooks/useGetUser";
 import { useRef, useState } from "react";
 
 export default function RoomPage() {
@@ -12,6 +14,7 @@ export default function RoomPage() {
 
    const { socket, isConnected } = useSocket();
    const { roomState, users, isLoading } = useRoom(roomId);
+   const { user: currentUser } = useGetUser();
 
    const playerControlsRef = useRef(null);
    const [showListeners, setShowListeners] = useState(false);
@@ -70,7 +73,7 @@ export default function RoomPage() {
              </button>
 
              <span className="hidden sm:flex items-center gap-1.5 text-xs text-[#888] shrink-0">
-          <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`} />
+          <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-[#aa3bff]" : "bg-red-400"}`} />
                 {isConnected ? "Connected" : "Disconnected"}
         </span>
           </header>
@@ -131,7 +134,7 @@ export default function RoomPage() {
                    </div>
 
                    <div className="flex items-center gap-1.5 text-xs text-[#666] mb-3 lg:hidden">
-                      <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? "bg-[#aa3bff]" : "bg-red-400"}`} />
                       {isConnected ? "Connected" : "Disconnected"}
                    </div>
 
@@ -157,6 +160,12 @@ export default function RoomPage() {
                        </div>
                    )}
                 </div>
+
+                <RoomMessages 
+                   socket={socket} 
+                   roomId={roomId} 
+                   userId={currentUser?.id}
+                />
              </aside>
           </main>
        </div>

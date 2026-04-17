@@ -91,7 +91,7 @@ const RoomCard = ({ room, onDetails, onJoin }) => (
           Details
         </button>
         <button
-            className="btn btn-success btn-sm rounded-xl"
+            className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] btn-sm rounded-xl"
             onClick={onJoin}
         >
           Join
@@ -129,7 +129,7 @@ const RoomDetails = ({ room, user, isDeleting, onClose, onJoin, onDelete }) => (
               <p className="text-xs font-semibold text-base-content/40 uppercase tracking-widest mb-2">Genres</p>
               <div className="flex flex-wrap gap-1.5">
                 {room.tags.map((t) => (
-                    <span key={t} className="text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    <span key={t} className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#aa3bff22] text-[#aa3bff] border border-[#aa3bff]">
                 {t.toLowerCase()}
               </span>
                 ))}
@@ -140,7 +140,7 @@ const RoomDetails = ({ room, user, isDeleting, onClose, onJoin, onDelete }) => (
 
       <div className="px-4 sm:px-5 pb-4 sm:pb-5 flex gap-2">
         <button className="btn btn-ghost flex-1 btn-sm" onClick={onClose}>Close</button>
-        <button className="btn btn-success flex-1 btn-sm" onClick={onJoin}>Join Room</button>
+        <button className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] flex-1 btn-sm" onClick={onJoin}>Join Room</button>
         {user?.id === room.ownerId && (
             <button
                 className="btn btn-error btn-outline btn-sm"
@@ -230,7 +230,7 @@ const RoomSection = () => {
 
           <button
               onClick={() => setIsCreateOpen(true)}
-              className="btn btn-primary btn-sm gap-1.5 rounded-xl"
+              className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] btn-sm gap-1.5 rounded-xl"
           >
             <PlusIcon /> <span className="hidden xs:inline">Create</span>
           </button>
