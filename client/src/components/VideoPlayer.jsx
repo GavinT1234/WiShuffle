@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useYoutubePlayer } from '../hooks/useYoutubePlayer';
 import { YoutubeSearch } from './YoutubeSearch';
 import { PlaylistImportModal } from './PlaylistImportModal';
-import { PlayFill, PauseFill, SkipForwardFill, PlusCircleFill, Download } from 'react-bootstrap-icons';
+import { PlayFill, PauseFill, SkipForwardFill, PlusCircleFill, MusicNoteList } from 'react-bootstrap-icons';
 
 const PLAYER_DIV_ID = 'yt-player-container';
 
@@ -153,7 +153,7 @@ export function VideoPlayer({
                         style={{ ...styles.btn, marginLeft: 'auto' }}
                         onClick={() => setShowImportModal(true)}
                     >
-                        <Download size={16} style={{ marginRight: '6px' }} />
+                        <MusicNoteList size={16} style={{ marginRight: '6px' }} />
                         Import Playlist
                     </button>
                 </div>
