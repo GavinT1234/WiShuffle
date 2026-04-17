@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useYoutubePlayer } from '../hooks/useYoutubePlayer';
 import { YoutubeSearch } from './YoutubeSearch';
+import { PlayFill, PauseFill, SkipForwardFill, PlusCircleFill } from 'react-bootstrap-icons';
 
 const PLAYER_DIV_ID = 'yt-player-container';
 
@@ -110,11 +111,29 @@ export function VideoPlayer({
                         onClick={playback ? (isPlaying ? onPause : onPlay) : undefined}
                         disabled={!playback}
                     >
-                        {playback ? (isPlaying ? '⏸ Pause' : '▶ Play') : '▶ Play'}
+                        {playback ? (
+                            isPlaying ? (
+                                <>
+                                    <PauseFill size={16} />
+                                    Pause
+                                </>
+                            ) : (
+                                <>
+                                    <PlayFill size={16} />
+                                    Play
+                                </>
+                            )
+                        ) : (
+                            <>
+                                <PlayFill size={16} /> Play
+
+                            </>
+                        )}
                     </button>
                     {playlist.length > 0 && (
                         <button style={{ ...styles.btn, ...styles.btnSecondary }} onClick={onNextVideo}>
-                            ⏭ Skip
+                            <SkipForwardFill size={16} style={{ marginRight: '6px' }} />
+                            Skip
                         </button>
                     )}
                 </div>
@@ -130,7 +149,10 @@ export function VideoPlayer({
                         value={urlInput}
                         onChange={(e) => setUrlInput(e.target.value)}
                     />
-                    <button style={styles.btn} type="submit">+ Add to Queue</button>
+                    <button style={styles.btn} type="submit">
+                        <PlusCircleFill size={16} style={{ marginRight: '6px' }} />
+                        Add to Queue
+                    </button>
                 </form>
             </div>
 
@@ -145,14 +167,20 @@ export function VideoPlayer({
                     <p style={styles.muted}>Queue is empty</p>
                 ) : (
                     <ol style={styles.playlistList}>
-                        {playlist.map((videoId, i) => (
-                            <li key={`${videoId}-${i}`} style={styles.playlistItem}>
-                                <span style={styles.playlistPos}>{i + 1}.</span>
-                                <span style={styles.playlistName}>
-                                    {videoId}
-                                </span>
-                            </li>
-                        ))}
+                        {playlist.map((item, i) => {
+                            // ✅ Handle both old format (string) and new format (object)
+                            const videoId = typeof item === 'string' ? item : item.videoId;
+                            const title = typeof item === 'string' ? item : item.title;
+
+                            return (
+                                <li key={`${videoId}-${i}`} style={styles.playlistItem}>
+                                    <span style={styles.playlistPos}>{i + 1}.</span>
+                                    <span style={styles.playlistName}>
+                                        {title}
+                                    </span>
+                                </li>
+                            );
+                        })}
                     </ol>
                 )}
             </div>
@@ -273,6 +301,9 @@ const styles = {
         fontWeight: '600',
         cursor: 'pointer',
         whiteSpace: 'nowrap',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
     },
     btnSecondary: {
         background: 'transparent',
@@ -336,5 +367,16 @@ const styles = {
         textTransform: 'uppercase',
         letterSpacing: '0.05em',
         margin: '4px 0',
+    },
+    iconBtn: {
+        padding: '10px 12px',
+        background: '#aa3bff',
+        border: 'none',
+        borderRadius: '6px',
+        color: '#fff',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 };
