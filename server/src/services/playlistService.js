@@ -1,4 +1,4 @@
-import { create, singlePlaylist, userPlaylists, update, playlistSongs, add, removeSong, playlistOrdering, next, parent, pos, ownership, remove, playlistContent } from '../repositories/playlistRepo.js'
+import { create, singlePlaylist, userPlaylists, update, playlistSongs, add, removeSong, playlistOrdering, next, parent, pos, idAt, ownership, remove, playlistContent } from '../repositories/playlistRepo.js'
 
 export async function getPlaylists(ownerId) {
     const playlists = await userPlaylists(ownerId);
@@ -61,8 +61,8 @@ export async function addSong(songData) {
     }
 }
 
-export async function updatePlaylist(id, playlistData, direction) {
-    await positionHelper(id, playlistData, direction)
+export async function updatePlaylist(id, playlistData, orderPayload) {
+    await positionHelper(id, playlistData, orderPayload)
     const playlist = await update(id, playlistData);
     if (playlist) return playlist;
     else {
@@ -84,11 +84,8 @@ export async function getPlaylistOrdering(id) {
 
 export async function deletePlaylist(id) {
     const parentId = await parent(id);
-    console.log(parentId);
     const order = await getPlaylistOrdering(parentId);
-    console.log(order.length);
     const playlist = await updatePlaylist(id, { position: order.length});
-    console.log(playlist);
     if (playlist) {
         await remove(id);
         return playlist;
@@ -130,43 +127,76 @@ export async function ownershipCheck(id) {
     }
 }
 
-async function positionHelper(id, playlistData, direction) {
-    console.log(direction);
+export async function seedPlaylist(id, ownerId) {
+    const seeds = [
+        {name: 'Icelandic Arpeggios', author: 'Div Kid', url: 'https://www.youtube.com/watch?v=pxoq8jEGbBo'},
+        {name: 'You WON!', author: 'You WON!', url: 'https://www.youtube.com/watch?v=iJJKKLy6ezQ'},
+        {name: 'Young And Beautiful (DH Orchestral Version)', author: 'Lana Del Rey', url: 'https://www.youtube.com/watch?v=nyBxaEsjaSg'},
+        {name: 'Bagger 288!', author: 'Rathergood', url: 'https://www.youtube.com/watch?v=azEvfD4C6ow'},
+        [
+            {name: 'Faded (Interlude)', author: 'Alan Walker', url: 'https://www.youtube.com/watch?v=nIPgx1b02gM'},
+            {name: 'Faded', author: 'Alan Walker', url: 'https://www.youtube.com/watch?v=60ItHLz5WEA'}
+        ],
+        {name: 'Stuck In The Air ', author: 'The Tower', url: 'https://www.youtube.com/watch?v=Fpe3YOTlXac'},
+        {name: 'D-E-C-A-D-E', author: 'Sheet Music Boss', url: 'https://www.youtube.com/watch?v=tD4_iPsWD7k'},
+        {name: 'Never Gonna Give You Up', author: 'Rick Astley', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'},
+        // {name: '', author: '', url: ''},
+        // {name: '', author: '', url: ''},
+        // {name: '', author: '', url: ''},
+        // {name: '', author: '', url: ''},
+        // {name: '', author: '', url: ''},
+        // {name: '', author: '', url: ''},
+        // {name: '', author: '', url: ''},
+        // {name: '', author: '', url: ''},
+        // {name: '', author: '', url: ''},
+    ];
+    const seedlist = [];
+    for (const seed of seeds) {
+        if (Array.isArray(seed)) {
+            const position = await next(id);
+            console.log(position);
+            const subplaylist = await create({name:`Subplaylist ${Math.floor(8999 * Math.random()) + 1000}`, shuffle: false, parentId: id, position, ownerId});
+            for (const sed of seed) {
+                const position = await next(subplaylist.id);
+            console.log(position);
+                const song = await add({parentId: subplaylist.id, isSong: true, position, ownerId, ...sed});
+            }
+            seedlist.push(subplaylist);
+        }
+        else {
+            const position = await next(id);
+            console.log(position);
+            const song = await add({parentId: id, isSong: true, position: await next(id), ownerId, ...seed});
+            seedlist.push(song);
+        }
+    }
+    console.log(seedlist);
+    return seedlist;
+}
+
+async function positionHelper(id, playlistData, order) {
     let { position } = playlistData;
+    const {direction, origin} = order ? order : {direction: null, origin: null};
+    // console.log(136, 'payload:', order);
     if (position) {
         const parentId = await parent(id);
         const currentPos = await pos(id);
-        const currentState = await playlistOrdering(parentId);
-        const lastPos = currentState.length;
-        // if (position > lastPos) {console.log('bigger!'); position = lastPos};
-        if (direction === -1 || ((position < currentPos) && (direction === undefined))) {
-            const node = currentState[position - 1];
-            if (position === node.position) {
-                console.log(position);
-                await updatePlaylist(node.id, {position: position + 1}, -1);
-                return;
+        // console.log(140, 'direction:', direction, 'new position', position, 'current position', currentPos);
+        if (direction === -1 || ((position < currentPos) && (direction === null))) {
+            const boot = await idAt(parentId, position);
+            // console.log(143, 'bool pos:', boot ? boot.position : null, 'origin:', origin);
+            if (boot && boot.position !== origin) {
+                await updatePlaylist(boot.id, {position: position + 1}, order || {direction: -1, origin: currentPos});
             }
-            // for (let i = position; i < lastPos - 1; i++) {
-            //     const node = currentState[i];
-            //     if (position === node.position) {
-            //         await updatePlaylist(node.id, {position: position + 1}, -1);
-            //         break;
-            //     }
-            // }
+            return;
         }
-        else if (direction === 1 || ((position > currentPos) && (direction === undefined))) {
-            const node = currentState[position - 1];
-            if (position === node.position) {
-                await updatePlaylist(node.id, {position: position - 1}, 1);
-                return;
+        else if (direction === 1 || ((position > currentPos) && (direction === null))) {
+            const boot = await idAt(parentId, position);
+            // console.log(151, 'bool pos:', boot ? boot.position : null, 'origin:', origin);
+            if (boot && boot.position !== origin) {
+                await updatePlaylist(boot.id, {position: position - 1}, order || {direction: 1, origin: currentPos});
             }
-            // for (let i = lastPos - 1; i >= 0; i--) {
-            //     const node = currentState[i];
-            //     if (position === node.position) {
-            //         await updatePlaylist(node.id, {position: position - 1}, 1);
-            //         break;
-            //     }
-            // }
+            return;
         }
     }
 }

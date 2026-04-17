@@ -1,4 +1,4 @@
-import { addSong, createPlaylist, deletePlaylist, deleteSong, getNext, getPlaylist, getPlaylistContent, getPlaylistOrdering, getPlaylists, getPlaylistSongs, getSongs, updatePlaylist } from '../services/playlistService.js'
+import { addSong, createPlaylist, deletePlaylist, deleteSong, getNext, getPlaylist, getPlaylistContent, getPlaylistOrdering, getPlaylists, getPlaylistSongs, getSongs, seedPlaylist, updatePlaylist } from '../services/playlistService.js'
 import { extractVideoId, getVideoDetails } from '../services/youtubeService.js';
 
 export async function getPlaylistsHandler(req, res, next) {
@@ -130,6 +130,17 @@ export async function getSongsHandler(req, res, next) {
         const id = parseInt(req.params.id);
         const songs = await getSongs(id);
         res.status(200).json(songs);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function seedPlaylistHandler(req, res, next) {
+    try {
+        const id = parseInt(req.params.id);
+        const ownerId = req.user.id;
+        const seedlist = await seedPlaylist(id, ownerId);
+        res.status(201).json(seedlist);
     } catch (error) {
         next(error);
     }

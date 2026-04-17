@@ -100,8 +100,15 @@ export async function playlistOrdering(parentId) {
         where: {parentId},
         orderBy: {position: 'asc'},
     });
-    // const ordering = await prisma.$queryRaw(`SELECT id, position, 'PLAYLISTS' AS source FROM PLAYLISTS WHERE parentId = ${parentId} UNION ALL SELECT id, position, 'SONGS' AS source FROM SONGS WHERE parentId = ${parentId} ORDER BY position;`);
     return ordering;
+}
+
+export async function idAt(parentId, position) {
+    const playlist = await prisma.playlist.findFirst({
+        select: {id: true, position: true},
+        where: {parentId, position}
+    });
+    return playlist;
 }
 
 export async function removeSong(id) {
