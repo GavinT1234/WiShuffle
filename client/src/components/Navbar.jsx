@@ -6,6 +6,7 @@ import ProfileButton from "./ProfileButton";
 import { useGetUser } from "../hooks/useGetUser";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import logo from "../assets/logo.svg";
 
 const Navbar = () => {
   const { isLoggedIn, logout } = useAuth();
@@ -62,8 +63,9 @@ const Navbar = () => {
               </svg>
             </label>
           </div>
-          <div onClick={handleLogoClick} className="flex-1 cursor-pointer">
-            <div className="mx-2 px-2 text-2xl font-bold tracking-wider">
+          <div onClick={handleLogoClick} className="flex-1 cursor-pointer flex items-center justify-center pr-10 sm:justify-start gap-2 sm:pl-2">
+            <img src={logo} alt="WiShuffle" className="h-16 w-16" />
+            <div className="hidden sm:block mx-2 px-2 text-2xl font-bold tracking-wider">
               WiShuffle
             </div>
           </div>
