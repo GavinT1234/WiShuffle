@@ -48,7 +48,7 @@ const AVATAR_COLORS = [
 const avatarColor = (name = "") =>
   AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
 
-
+const RoomCard = ({ room, onDetails, onJoin }) => (
   <div className="group bg-base-100 border border-base-200 rounded-2xl p-4 flex gap-3 items-center hover:border-primary/30 hover:shadow-md transition-all duration-200">
     {/* Avatar */}
     <div className={`${avatarColor(room.owner.username)} shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
@@ -157,7 +157,7 @@ const RoomDetails = ({ room, user, isDeleting, onClose, onJoin, onDelete }) => (
   </div>
 );
 
-
+const RoomSection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { rooms, loading, error, fetchRooms } = useGetRooms();
@@ -322,6 +322,6 @@ const RoomDetails = ({ room, user, isDeleting, onClose, onJoin, onDelete }) => (
       </Modal>
     </div>
   );
-};
+}
 
 export default RoomSection;
