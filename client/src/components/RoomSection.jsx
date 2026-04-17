@@ -314,6 +314,6 @@ const RoomSection = () => {
         </Modal>
       </div>
   );
-};
+}
 
 export default RoomSection;
