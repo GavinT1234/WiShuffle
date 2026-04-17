@@ -154,6 +154,10 @@ export function useRoomSync({ socket, roomId, userId, playerControls }) {
 
 
     const queueVideo = useCallback((input, title) => {
+        if (!socket?.connected) {
+            console.error('❌ Socket not connected, cannot queue video');
+            return;
+        }
         console.log('📤 Emitting room:queue_video:', { roomId, input, title });
         socket?.emit('room:queue_video', { roomId, input, title }, (response) => {
             console.log('📥 room:queue_video response:', response);
