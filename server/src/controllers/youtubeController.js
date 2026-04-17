@@ -1,4 +1,5 @@
 import { getVideoDetails, searchVideos, extractVideoId } from '../services/youtubeService.js';
+import { searchYouTube } from '../services/youtubeSearchService.js';
 
 export async function getVideoDetailsHandler(req, res) {
     try {
@@ -27,16 +28,19 @@ export async function getVideoIDHandler(req, res) {
 }
 
 export async function searchVideosHandler(req, res) {
-    try {
+  try {
     const { q, maxResults = 10 } = req.query;
     
-    if (!q) {
+    if (!q || !q.trim()) {
       return res.status(400).json({ error: 'Search query required' });
     }
     
-    const videos = await searchVideos(q, parseInt(maxResults));
-    res.json(videos);
+    const results = await searchYouTube(q.trim(), parseInt(maxResults));
+    
+    res.json({ results });
+    
   } catch (error) {
+    console.error('Search error:', error);
     res.status(500).json({ error: error.message });
   }
 }

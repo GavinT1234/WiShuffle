@@ -5,13 +5,17 @@ export async function getAll() {
   const rooms = await prisma.room.findMany({
     include: { owner: { select: { username: true, avatarUrl: true } } },
   });
+<<<<<<< HEAD
   console.log(rooms);
+=======
+  //console.log(rooms);
+>>>>>>> origin/main
   return rooms;
 }
 
 export async function getById(id) {
   const room = await prisma.room.findUnique({ where: { id } });
-  console.log(room);
+  //console.log(room);
   return room;
 }
 
