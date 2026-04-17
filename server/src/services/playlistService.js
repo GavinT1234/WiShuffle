@@ -1,7 +1,12 @@
-import { create, singlePlaylist, userPlaylists, update, playlistSongs, add, removeSong, playlistOrdering, next, parent, pos, idAt, ownership, remove, playlistContent } from '../repositories/playlistRepo.js'
+import { create, singlePlaylist, userPlaylists, update, playlistSongs, add, removeSong, playlistOrdering, next, parent, pos, idAt, ownership, remove, playlistContent, userPlaylistsAll } from '../repositories/playlistRepo.js'
 
 export async function getPlaylists(ownerId) {
     const playlists = await userPlaylists(ownerId);
+    return playlists;
+}
+
+export async function getPlaylistsAll(ownerId) {
+    const playlists = await userPlaylistsAll(ownerId);
     return playlists;
 }
 

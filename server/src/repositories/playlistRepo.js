@@ -1,6 +1,11 @@
 import prisma from '../config/db.js';
 
 export async function userPlaylists(ownerId) {
+    const playlists = await prisma.playlist.findMany({where: {ownerId, isSong: false, parentId: null}, include: {ownerId: false}});
+    return playlists;
+}
+
+export async function userPlaylistsAll(ownerId) {
     const playlists = await prisma.playlist.findMany({where: {ownerId, isSong: false}, include: {ownerId: false}});
     return playlists;
 }
