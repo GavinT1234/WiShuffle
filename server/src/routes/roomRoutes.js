@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllRoomsHandler, getRoomByIdHandler, createRoomHandler, deleteRoomHandler, addVideoToQueueHandler, getQueueHandler, getTagsHandler } from '../controllers/roomController.js'
+import { getAllRoomsHandler, getRoomByIdHandler, createRoomHandler, updateRoomHandler, deleteRoomHandler, addVideoToQueueHandler, getQueueHandler, getTagsHandler } from '../controllers/roomController.js'
 import { authenticate } from '../middleware/authenticate.js';
 import { authorizeOwnership } from '../middleware/authorizeOwnership.js';
 
@@ -8,6 +8,7 @@ router.get('/', getAllRoomsHandler);
 router.get('/tags', getTagsHandler);
 router.get('/:id', getRoomByIdHandler);
 router.post('/', authenticate, createRoomHandler);
+router.put('/:id', authenticate, authorizeOwnership('room'), updateRoomHandler);
 router.delete('/:id', authenticate, authorizeOwnership('room'), deleteRoomHandler);
 router.post('/:roomId/queue', authenticate, addVideoToQueueHandler);
 router.get('/:roomId/queue', getQueueHandler);

@@ -228,7 +228,7 @@ export function FriendsPage() {
                 <p className="text-base-content/70">You don't have any friends yet.</p>
                 <button
                   onClick={() => setActiveTab('search')}
-                  className="btn btn-success mt-4"
+                  className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] mt-4"
                 >
                   Add a friend
                 </button>
@@ -267,7 +267,7 @@ export function FriendsPage() {
                       </button>
                       <button
                         onClick={() => messageUser(friendship.friend.id)}
-                        className="btn btn-sm btn-primary"
+                        className="btn btn-sm bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc]"
                       >
                         Message
                       </button>
@@ -320,7 +320,7 @@ export function FriendsPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => acceptRequest(request.id)}
-                        className="btn btn-sm btn-success"
+                        className="btn btn-sm bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc]"
                       >
                         Accept
                       </button>
@@ -389,7 +389,7 @@ export function FriendsPage() {
               <button
                 onClick={searchUsers}
                 disabled={searching || friendsLoading}
-                className="btn btn-primary"
+                className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc]"
               >
                 {searching ? 'Searching...' : 'Search'}
               </button>
@@ -425,7 +425,7 @@ export function FriendsPage() {
                         onClick={() => handleAddFriend(user.id)}
                         disabled={friendsLoading || isAlreadyFriend || hasRequestSent}
                         className={`btn btn-sm ${
-                          isAlreadyFriend ? 'btn-disabled' : hasRequestSent ? 'btn-outline' : 'btn-primary'
+                          isAlreadyFriend ? 'btn-disabled' : hasRequestSent ? 'btn-outline' : 'bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc]'
                         }`}
                       >
                         {isAlreadyFriend ? 'Already Friends' : hasRequestSent ? 'Request Sent' : 'Add Friend'}

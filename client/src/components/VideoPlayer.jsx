@@ -7,16 +7,16 @@ import { PlayFill, PauseFill, SkipForwardFill, PlusCircleFill } from 'react-boot
 const PLAYER_DIV_ID = 'yt-player-container';
 
 export function VideoPlayer({
-    playback,
-    playlist,
-    userId,
-    onQueueVideo,
-    onPlay,
-    onPause,
-    onSeek,
-    onNextVideo,
-    onPlayerReady,
-}) {
+                                playback,
+                                playlist,
+                                userId,
+                                onQueueVideo,
+                                onPlay,
+                                onPause,
+                                onSeek,
+                                onNextVideo,
+                                onPlayerReady,
+                            }) {
     const [urlInput, setUrlInput] = useState('');
     const [titleInput, setTitleInput] = useState('');
     //const [localPlaying, setLocalPlaying] = useState(false);

@@ -13,13 +13,17 @@ router.get('/:id', authenticate, authorizeOwnership('playlist'), validatePlaylis
 router.get('/:id/all', authenticate, authorizeOwnership('playlist'), validatePlaylist, getPlaylistContentHandler);
 router.post('/', authenticate, authorizeParentOwnership, validateParent, createPlaylistHandler);
 router.put('/:id', authenticate, authorizeOwnership('playlist'), updatePlaylistHandler);
-router.delete('/:id', authenticate, authorizeOwnership('playlist'), deletePlaylistHandler);
-router.get('/:id/order', validatePlaylist, getPlaylistOrderingHandler);
-router.post('/:id/seed', authenticate, authorizeOwnership('playlist'), validatePlaylist, seedPlaylistHandler);
+
 
 // Songs
 router.get('/:id/songs', authenticate, authorizeOwnership('playlist'), validatePlaylist, getPlaylistSongsHandler);
 router.post('/:id/songs', authenticate, authorizeOwnership('playlist'), addSongHandler);
-router.delete('/songs/:id', authenticate, authorizeOwnership('playlist'), deleteSongHandler);
+router.post('/:id/seed', authenticate, authorizeOwnership('playlist'), validatePlaylist, seedPlaylistHandler);
+
+// Both
+router.delete('/:id', authenticate, authorizeOwnership('playlist'), deletePlaylistHandler);
+
+// Testing
+router.get('/:id/order', validatePlaylist, getPlaylistOrderingHandler);
 
 export default router;

@@ -118,7 +118,7 @@ export function ContactPage() {
                 ></textarea>
               </div>
 
-              <button type="submit" className="btn btn-success w-full">
+              <button type="submit" className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] w-full">
                 Send Message
               </button>
 

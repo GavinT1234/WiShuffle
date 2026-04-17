@@ -17,7 +17,7 @@ export const CreatePlaylistModal = ({ onConfirm }) => {
    return (
        <>
           <button
-              className="btn btn-primary"
+              className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc]"
               onClick={() => document.getElementById("create_playlist_modal").showModal()}
           >
              + Create Playlist
@@ -27,7 +27,7 @@ export const CreatePlaylistModal = ({ onConfirm }) => {
              <div className="modal-box bg-base-200">
                 <div className="flex items-center justify-between mb-4">
                    <h3 className="font-bold text-lg">Create Playlist</h3>
-                   <span className="badge badge-outline badge-primary text-xs">Placeholder</span>
+                   <span className="badge badge-outline text-xs" style={{borderColor: '#aa3bff', color: '#aa3bff'}}>Placeholder</span>
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -69,7 +69,7 @@ export const CreatePlaylistModal = ({ onConfirm }) => {
                    <form method="dialog">
                       <button className="btn btn-ghost">Cancel</button>
                    </form>
-                   <button className="btn btn-primary" onClick={handleCreate}>
+                   <button className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc]" onClick={handleCreate}>
                       Create
                    </button>
                 </div>

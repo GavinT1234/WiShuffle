@@ -253,7 +253,7 @@ export function ProfilePage() {
                 <button
                   type="button"
                   onClick={addSong}
-                  className="btn btn-success btn-sm w-full"
+                  className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc] btn-sm w-full"
                 >
                   Add Song
                 </button>
@@ -272,7 +272,7 @@ export function ProfilePage() {
             <button 
               type="submit" 
               disabled={saving}
-              className="btn btn-success"
+              className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc]"
             >
               {saving ? 'Saving...' : 'Save changes'}
             </button>
