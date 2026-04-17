@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-import React from "react";
-
-export default function PlaylistsPage() {
-  return <div>PlaylistsPage</div>;
-}
-
-=======
 import { useState } from "react";
 import {
   useRootPlaylists,
@@ -533,4 +525,3 @@ export default function PlaylistsPage() {
       </div>
   );
 }
->>>>>>> origin/main

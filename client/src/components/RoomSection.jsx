@@ -55,25 +55,6 @@ const avatarColor = (name = "") =>
     AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
 
 const RoomCard = ({ room, onDetails, onJoin }) => (
-<<<<<<< HEAD
-  <div className="group bg-base-100 border border-base-200 rounded-2xl p-4 flex gap-3 items-center hover:border-primary/30 hover:shadow-md transition-all duration-200">
-    {/* Avatar */}
-     {room.owner.avatarUrl ? <img src={room.owner.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-xl shrink-0" /> : <div className={`${avatarColor(room.owner.username)} shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
-        {initials(room.owner.username)}
-     </div>}
-
-
-    {/* Info */}
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center gap-2 flex-wrap">
-        <p className="font-semibold text-sm text-base-content leading-tight truncate">{room.name}</p>
-        <span className="text-xs text-base-content/40">{room.owner.username}</span>
-      </div>
-      {room.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-1.5">
-          {room.tags.map((t) => (
-            <span key={t} className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 leading-none">
-=======
     <div className="bg-base-100 border border-base-200 rounded-2xl p-4 flex gap-3 items-center hover:border-primary/30 hover:shadow-md transition-all duration-200">
       {room.owner.avatarUrl ? (
           <img src={room.owner.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-xl shrink-0 object-cover" />
@@ -92,7 +73,6 @@ const RoomCard = ({ room, onDetails, onJoin }) => (
             <div className="flex flex-wrap gap-1 mt-1.5">
               {room.tags.map((t) => (
                   <span key={t} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
->>>>>>> origin/main
               {t.toLowerCase()}
             </span>
               ))}

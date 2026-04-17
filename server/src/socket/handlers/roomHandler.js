@@ -265,12 +265,6 @@ export function registerRoomHandlers(io, socket) {
     console.log(`   Stack trace:`);
     console.trace(); 
     console.log(`=====================================`);
-<<<<<<< HEAD
-    
-    await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
-    await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
-
-=======
 
     // Get current playback state to calculate elapsed time
     const playbackData = await redis.hGetAll(`room:${roomId}:playback`);
@@ -291,7 +285,6 @@ export function registerRoomHandlers(io, socket) {
     await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
     await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
->>>>>>> origin/main
     io.to(`room:${roomId}`).emit('room:video_pause', { roomId });
     console.log(`⏸️ Paused in room ${roomId}`);
   } catch (error) {

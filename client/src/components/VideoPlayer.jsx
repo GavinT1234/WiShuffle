@@ -27,11 +27,7 @@ export function VideoPlayer({
             onStateChange: (state) => {
                 console.log('YouTube player state:', state);
                 // 0 = ENDED, 1 = PLAYING, 2 = PAUSED
-<<<<<<< HEAD
-                if (state === 1) setLocalPlaying(true);
-=======
                 //if (state === 1) setLocalPlaying(true);
->>>>>>> origin/main
                 //if (state === 2) setLocalPlaying(false);
                 // On video end, advance to next
                 if (state === 0) {
@@ -67,10 +63,7 @@ export function VideoPlayer({
         onSeek(pos);
     };
 
-<<<<<<< HEAD
-=======
     const isPlaying = playback?.playState === 'playing';
->>>>>>> origin/main
 
     // Use actual player time if available, otherwise fallback to playback state
     const playerCurrentTime = ready ? (getCurrentTime?.() ?? 0) : 0;
