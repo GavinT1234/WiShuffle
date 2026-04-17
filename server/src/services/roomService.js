@@ -13,7 +13,7 @@ export async function getAllRooms() {
 
 export async function getRoomById(id) {
   const room = await getById(id);
-  console.log(room);
+  //console.log(room);
   if (room) return room;
   else {
     const error = new Error(`Room ${id} not found`);

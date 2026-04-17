@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useYoutubePlayer } from '../hooks/useYoutubePlayer';
+import { YoutubeSearch } from './YoutubeSearch';
 
 const PLAYER_DIV_ID = 'yt-player-container';
 
@@ -69,6 +70,11 @@ export function VideoPlayer({
     const duration = getDuration?.() ?? 0;
     const progressPct = duration ? (currentTime / duration) * 100 : 0;
 
+    const handleSearchSelect = (videoId, title) => {
+        console.log('Selected from search:', videoId, title);
+        onQueueVideo(videoId, title);
+    };
+
     return (
         <div style={styles.wrapper}>
             {/* ── Video frame ── */}
@@ -111,6 +117,9 @@ export function VideoPlayer({
                         </button>
                     )}
                 </div>
+
+                {/* Youtube Search */}
+                <YoutubeSearch onSelectVideo={handleSearchSelect} />
 
                 {/* Video input */}
                 <form onSubmit={handleQueueVideo} style={styles.inputRow}>
@@ -324,5 +333,13 @@ const styles = {
         color: '#555',
         fontSize: '13px',
         margin: 0,
+    },
+    divider: {
+        textAlign: 'center',
+        fontSize: '11px',
+        color: '#555',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        margin: '4px 0',
     },
 };
