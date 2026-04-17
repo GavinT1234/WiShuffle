@@ -2,9 +2,14 @@ import { io } from "socket.io-client";
 
 let socket = null;
 
+const SOCKET_URL =
+  import.meta.env.PROD
+    ? window.location.origin
+    : "http://localhost:4000";
+
 export function getSocket(token) {
   if (!socket) {
-    socket = io(import.meta.env.VITE_SERVER_URL, {
+    socket = io(SOCKET_URL, {
       auth: { token },
       autoConnect: false,
       reconnection: true,
