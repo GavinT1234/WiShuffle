@@ -24,8 +24,7 @@ function App() {
     <div className="h-screen flex flex-col">
       <BrowserRouter>
         <AuthProvider>
-
-            <SocketProvider>
+          <SocketProvider>
           <Navbar />
           <div className="flex-1 overflow-y-auto">
             <Routes>
