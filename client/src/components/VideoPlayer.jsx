@@ -130,12 +130,6 @@ export function VideoPlayer({
                         value={urlInput}
                         onChange={(e) => setUrlInput(e.target.value)}
                     />
-                    <input
-                        style={{ ...styles.input, maxWidth: 160 }}
-                        placeholder="Title (optional)"
-                        value={titleInput}
-                        onChange={(e) => setTitleInput(e.target.value)}
-                    />
                     <button style={styles.btn} type="submit">+ Add to Queue</button>
                 </form>
             </div>
