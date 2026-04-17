@@ -1,8 +1,8 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useYoutubePlayer } from '../hooks/useYoutubePlayer';
 import { YoutubeSearch } from './YoutubeSearch';
-import { PlayFill, PauseFill, SkipForwardFill, PlusCircleFill } from 'react-bootstrap-icons';
+import { PlaylistImportModal } from './PlaylistImportModal';
+import { PlayFill, PauseFill, SkipForwardFill, PlusCircleFill, MusicNoteList } from 'react-bootstrap-icons';
 
 const PLAYER_DIV_ID = 'yt-player-container';
 
@@ -19,7 +19,7 @@ export function VideoPlayer({
                             }) {
     const [urlInput, setUrlInput] = useState('');
     const [titleInput, setTitleInput] = useState('');
-    //const [localPlaying, setLocalPlaying] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
     const videoEndedRef = useRef(false);
 
     const { ready, loadVideo, play, pause, seekTo, getCurrentTime, getDuration } =
@@ -75,6 +75,19 @@ export function VideoPlayer({
     const handleSearchSelect = (videoId, title) => {
         console.log('Selected from search:', videoId, title);
         onQueueVideo(videoId, title);
+    };
+
+    const handleImportPlaylist = (songs) => {
+        // Add each song to the queue with a small delay to ensure proper ordering
+        songs.forEach((song, index) => {
+            setTimeout(() => {
+                const videoId = song.url;
+                const title = song.name;
+                if (videoId) {
+                    onQueueVideo(videoId, title);
+                }
+            }, index * 10); // 10ms delay per song
+        });
     };
 
     return (
@@ -136,6 +149,13 @@ export function VideoPlayer({
                             Skip
                         </button>
                     )}
+                    <button
+                        style={{ ...styles.btn, marginLeft: 'auto' }}
+                        onClick={() => setShowImportModal(true)}
+                    >
+                        <MusicNoteList size={16} style={{ marginRight: '6px' }} />
+                        Import Playlist
+                    </button>
                 </div>
 
                 {/* Youtube Search */}
@@ -184,6 +204,12 @@ export function VideoPlayer({
                     </ol>
                 )}
             </div>
+
+            <PlaylistImportModal
+                isOpen={showImportModal}
+                onClose={() => setShowImportModal(false)}
+                onImport={handleImportPlaylist}
+            />
         </div>
     );
 }
