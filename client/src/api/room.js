@@ -75,7 +75,6 @@ export const deleteRoom = async (roomId) => {
   });
 };
 
-
 export async function getTags(){
   const res = await fetch('/api/rooms/tags');
   if (!res.ok) throw new Error('Failed to fetch tags');

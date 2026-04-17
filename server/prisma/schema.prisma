@@ -55,7 +55,7 @@ model Playlist {
   isSong Boolean @default(false)
   
   parentId Int?
-  parentPlaylist Playlist? @relation("PlaylistHierarchy", fields: [parentId], references: [id])
+  parentPlaylist Playlist? @relation("PlaylistHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
   subPlaylist Playlist[] @relation("PlaylistHierarchy")
 
   owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)

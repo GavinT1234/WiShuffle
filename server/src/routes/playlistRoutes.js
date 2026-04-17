@@ -1,5 +1,5 @@
 import express from 'express';
-import { addSongHandler, createPlaylistHandler, deletePlaylistHandler, deleteSongHandler, getPlaylistContentHandler, getPlaylistHandler, getPlaylistOrderingHandler, getPlaylistsHandler, getPlaylistSongsHandler, updatePlaylistHandler } from '../controllers/playlistController.js'
+import { addSongHandler, createPlaylistHandler, deletePlaylistHandler, deleteSongHandler, getPlaylistContentHandler, getPlaylistHandler, getPlaylistOrderingHandler, getPlaylistsAllHandler, getPlaylistsHandler, getPlaylistSongsHandler, seedPlaylistHandler, updatePlaylistHandler } from '../controllers/playlistController.js'
 import { authenticate } from '../middleware/authenticate.js';
 import { authorizeOwnership, authorizeParentOwnership } from '../middleware/authorizeOwnership.js';
 import { validateParent, validatePlaylist } from '../middleware/playlistValidators.js';
@@ -8,12 +8,14 @@ const router = express.Router();
 
 // Playlists
 router.get('/', authenticate, getPlaylistsHandler);
+router.get('/all', authenticate, getPlaylistsAllHandler);
 router.get('/:id', authenticate, authorizeOwnership('playlist'), validatePlaylist, getPlaylistHandler);
 router.get('/:id/all', authenticate, authorizeOwnership('playlist'), validatePlaylist, getPlaylistContentHandler);
 router.post('/', authenticate, authorizeParentOwnership, validateParent, createPlaylistHandler);
 router.put('/:id', authenticate, authorizeOwnership('playlist'), updatePlaylistHandler);
 router.delete('/:id', authenticate, authorizeOwnership('playlist'), deletePlaylistHandler);
-router.get('/:id/order', getPlaylistOrderingHandler);
+router.get('/:id/order', validatePlaylist, getPlaylistOrderingHandler);
+router.post('/:id/seed', authenticate, authorizeOwnership('playlist'), validatePlaylist, seedPlaylistHandler);
 
 // Songs
 router.get('/:id/songs', authenticate, authorizeOwnership('playlist'), validatePlaylist, getPlaylistSongsHandler);
