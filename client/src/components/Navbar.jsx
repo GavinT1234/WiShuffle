@@ -60,9 +60,18 @@ const Navbar = () => {
           <div className="hidden flex-none lg:block">
             <ul className="menu menu-horizontal flex gap-4 items-center">
               {isLoggedIn ? (
+                  <>
+                    <li>
+                      <button className="btn border hover:border-white" onClick={() => navigate("/playlists")}>Playlists</button>
+                    </li>
+                    <li>
+                      <button className="btn border hover:border-white" onClick={() => navigate("/dashboard")}>Rooms</button>
+                    </li>
                 <li>
                   <ProfileButton user={user} loading={loading} />
                 </li>
+
+                  </>
               ) : (
                 <>
                   <li>

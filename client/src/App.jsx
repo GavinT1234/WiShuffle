@@ -19,6 +19,7 @@ import {SocketProvider} from "./context/SocketContext.jsx";
 import { AuthProvider } from "./context/AuthContext";
 import Dashboard from "./pages/Dashboard";
 import RoomPage from "./pages/RoomPage";
+import PlaylistsPage from "./pages/PlaylistsPage";
 function App() {
   return (
     <div className="h-screen flex flex-col">
@@ -46,6 +47,15 @@ function App() {
                   </ProtectedRoutes>
                 }
               />
+               <Route
+                   path="/playlists"
+                   element={
+                      <ProtectedRoutes>
+                        <PlaylistsPage />
+                      </ProtectedRoutes>
+                   }
+               />
+
 
               <Route
                 path="/room/:id"
