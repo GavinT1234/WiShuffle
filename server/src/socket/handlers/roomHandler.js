@@ -229,6 +229,7 @@ export function registerRoomHandlers(io, socket) {
       // Broadcast updated playlist to room
       const updatedPlaylist = await redis.lRange(`room:${roomId}:playlist`, 0, -1);
       io.to(`room:${roomId}`).emit('room:queue_updated', { queue: updatedPlaylist, roomId });
+      socket.broadcast.to(`room:${roomId}`).emit('room:video_load', payload);
 
       if (ack) ack({ ok: true });
       console.log(`✅ Video queued`);
