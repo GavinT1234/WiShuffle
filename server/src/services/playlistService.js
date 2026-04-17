@@ -140,7 +140,7 @@ export async function seedPlaylist(id, ownerId) {
         {name: 'Bagger 288!', author: 'Rathergood', url: 'https://www.youtube.com/watch?v=azEvfD4C6ow'},
         [
             {name: 'Faded (Interlude)', author: 'Alan Walker', url: 'https://www.youtube.com/watch?v=nIPgx1b02gM'},
-            {name: 'Faded', author: 'Alan Walker', url: 'https://www.youtube.com/watch?v=60ItHLz5WEA'}
+            {name: 'Faded', author: 'Alan Walker', url: 'https://www.youtube.com/watch?v=zbxl4aiJo3M'}
         ],
         {name: 'Stuck In The Air ', author: 'The Tower', url: 'https://www.youtube.com/watch?v=Fpe3YOTlXac'},
         {name: 'D-E-C-A-D-E', author: 'Sheet Music Boss', url: 'https://www.youtube.com/watch?v=tD4_iPsWD7k'},
