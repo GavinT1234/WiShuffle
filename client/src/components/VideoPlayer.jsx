@@ -18,7 +18,7 @@ export function VideoPlayer({
 }) {
     const [urlInput, setUrlInput] = useState('');
     const [titleInput, setTitleInput] = useState('');
-    const [localPlaying, setLocalPlaying] = useState(false);
+    //const [localPlaying, setLocalPlaying] = useState(false);
     const videoEndedRef = useRef(false);
 
     const { ready, loadVideo, play, pause, seekTo, getCurrentTime, getDuration } =
@@ -27,7 +27,7 @@ export function VideoPlayer({
             onStateChange: (state) => {
                 console.log('YouTube player state:', state);
                 // 0 = ENDED, 1 = PLAYING, 2 = PAUSED
-                if (state === 1) setLocalPlaying(true);
+                //if (state === 1) setLocalPlaying(true);
                 //if (state === 2) setLocalPlaying(false);
                 // On video end, advance to next
                 if (state === 0) {
@@ -63,6 +63,7 @@ export function VideoPlayer({
         onSeek(pos);
     };
 
+    const isPlaying = playback?.playState === 'playing';
 
     // Use actual player time if available, otherwise fallback to playback state
     const playerCurrentTime = ready ? (getCurrentTime?.() ?? 0) : 0;
@@ -106,10 +107,10 @@ export function VideoPlayer({
                 <div style={styles.controls}>
                     <button
                         style={styles.btn}
-                        onClick={playback ? (localPlaying ? onPause : onPlay) : undefined}
+                        onClick={playback ? (isPlaying ? onPause : onPlay) : undefined}
                         disabled={!playback}
                     >
-                        {playback ? (localPlaying ? '⏸ Pause' : '▶ Play') : '▶ Play'}
+                        {playback ? (isPlaying ? '⏸ Pause' : '▶ Play') : '▶ Play'}
                     </button>
                     {playlist.length > 0 && (
                         <button style={{ ...styles.btn, ...styles.btnSecondary }} onClick={onNextVideo}>
