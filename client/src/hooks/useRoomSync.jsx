@@ -37,9 +37,20 @@ export function useRoomSync({ socket, roomId, userId, playerControls }) {
         const onVideoLoad = ({ song, elapsedSeconds, playState, roomId: eventRoomId }) => {
             if (eventRoomId !== roomId) return;
             console.log('🎬 room:video_load received:', song);
-            if (!song?.videoId) return;
+            if (!song?.videoId) {
+                console.warn('⚠️ No videoId in room:video_load');
+                return;
+            }
             setPlayback({ song, elapsedSeconds, playState });
             attemptLoadVideo(song.videoId, elapsedSeconds);
+
+            if (playState === 'playing') {
+                console.log('▶️ Video should auto-play (playState: playing)');
+                setTimeout(() => {
+                    console.log('▶️ Calling play() now');
+                    playerControls.current?.play();
+                }, 1500);  // Wait for loadVideo to finish
+            }
         };
 
         const onVideoPlay = ({ roomId: eventRoomId }) => {
@@ -65,6 +76,15 @@ export function useRoomSync({ socket, roomId, userId, playerControls }) {
 
         const onTimeUpdate = ({ videoId, elapsedSeconds, playState, roomId: eventRoomId }) => {
             if (eventRoomId !== roomId) return;
+            if (!window.updateCounter) window.updateCounter = 0;
+            window.updateCounter++;
+            if (window.updateCounter % 50 === 0) {
+                console.log('🔄 Time sync active:', {
+                    elapsedSeconds,
+                    playState,
+                    updates: window.updateCounter
+                });
+            }
             setPlayback(prev =>
                 prev ? {
                     ...prev,
@@ -134,6 +154,10 @@ export function useRoomSync({ socket, roomId, userId, playerControls }) {
 
 
     const queueVideo = useCallback((input, title) => {
+        if (!socket?.connected) {
+            console.error('❌ Socket not connected, cannot queue video');
+            return;
+        }
         console.log('📤 Emitting room:queue_video:', { roomId, input, title });
         socket?.emit('room:queue_video', { roomId, input, title }, (response) => {
             console.log('📥 room:queue_video response:', response);
@@ -148,7 +172,10 @@ export function useRoomSync({ socket, roomId, userId, playerControls }) {
 
 
     const emitPause = useCallback(() => {
-        console.log('⏸️ Emitting room:video_pause');
+        console.log('⏸️ ========== EMIT PAUSE ==========');
+        console.log('   Stack trace:');
+        console.trace();
+        console.log('==================================');
         socket?.emit('room:video_pause', { roomId });
     }, [socket, roomId]);
 

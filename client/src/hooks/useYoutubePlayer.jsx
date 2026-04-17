@@ -19,11 +19,12 @@ function loadYTScript() {
 }
 
 export function useYoutubePlayer({ containerId, onStateChange }) {
-    
+
     const playerRef = useRef(null);
     const [ready, setReady] = useState(false);
     // Suppress echoing back events triggered by our own programmatic calls
     const isSyncing = useRef(false);
+    const isLoadingRef = useRef(false);
 
     useEffect(() => {
         let destroyed = false;
@@ -49,7 +50,14 @@ export function useYoutubePlayer({ containerId, onStateChange }) {
                             if (!destroyed) setReady(true);
                         },
                         onStateChange: (event) => {
-                            console.log('📊 Player state changed:', event.data);
+                            const state = event.data;
+                            console.log('📊 Player state changed:', state);
+
+                            // ✅ Add this check
+                            if (state === 2) {  // 2 = paused
+                                console.warn('⚠️ Player paused - checking if this was intentional');
+                                console.trace();  // Shows what caused the pause
+                            }
                             if (isSyncing.current) return; // ignore our own commands
                             onStateChange?.(event.data);
                         },
@@ -79,11 +87,21 @@ export function useYoutubePlayer({ containerId, onStateChange }) {
             console.error('❌ loadVideo: Player not initialized yet');
             return;
         }
+        console.log('📺 loadVideo called:', videoId, 'startSeconds:', startSeconds);
+        isLoadingRef.current = true;
         isSyncing.current = true;
         playerRef.current.loadVideoById({ videoId, startSeconds });
         // YT fires onStateChange during load; clear flag after brief delay
-        setTimeout(() => { isSyncing.current = false; }, 1000);
-        console.log('📺 loadVideo called:', videoId, 'player ready:', !!playerRef.current);
+        console.log('📺 Video loaded, will auto-play in 800ms');
+        setTimeout(() => {
+            console.log('▶️ Calling playVideo()');
+            playerRef.current?.playVideo();
+
+            // Clear loading flag after play
+            setTimeout(() => {
+                isLoadingRef.current = false;  // Clear after video starts
+            }, 500);
+        }, 800);
     }, []);
 
 
