@@ -364,6 +364,33 @@ export function registerRoomHandlers(io, socket) {
     }
   });
 
+  // ── Room Messages ──
+  socket.on('room:send_message', async ({ roomId, content }, ack) => {
+    try {
+      if (!roomId || !content || !content.trim()) {
+        if (ack) ack({ ok: false, error: 'Missing roomId or content' });
+        return;
+      }
+
+      const message = {
+        userId: socket.user.id,
+        username: socket.user.username || `User ${socket.user.id}`,
+        content: content.trim(),
+        timestamp: new Date().toISOString(),
+        roomId
+      };
+
+      // Broadcast message to all users in the room
+      io.to(`room:${roomId}`).emit('room:message', message);
+
+      console.log(`💬 Message in room ${roomId} from user ${socket.user.id}: ${content.substring(0, 50)}`);
+      if (ack) ack({ ok: true });
+    } catch (error) {
+      console.error('❌ Send message error:', error);
+      if (ack) ack({ ok: false, error: error.message });
+    }
+  });
+
 }
 
 export function getRoomsHandler(io, socket) {

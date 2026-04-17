@@ -3,7 +3,7 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
 import { socketAuthMiddleware } from './middleware/authSocket.js';
 import {getRoomsHandler, registerRoomHandlers} from './handlers/roomHandler.js';
-//import { registerChatHandlers } from "./handlers/chat.handler.js";
+import { registerMessageHandlers } from './handlers/messageHandler.js';
 //import { registerQueueHandlers } from "./handlers/queue.handler.js";
 //import { registerVoteHandlers } from "./handlers/vote.handler.js";
 
@@ -25,7 +25,7 @@ export async function initSocket(httpServer) {
     console.log(`User connected: ${socket.user.id}`);
 
     registerRoomHandlers(io, socket);
-    //registerChatHandlers(io, socket);
+    registerMessageHandlers(io, socket);
     //registerQueueHandlers(io, socket);
     //registerVoteHandlers(io, socket);
 

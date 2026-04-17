@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetUser } from '../hooks/useGetUser';
+import { useSocket } from '../context/SocketContext';
 
 export function MessagesPage() {
   const { partnerId } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const { user: currentUser, loading: userLoading } = useGetUser();
+  const { socket, isConnected } = useSocket();
   
   const [messages, setMessages] = useState([]);
   const [conversations, setConversations] = useState([]);
@@ -32,6 +34,46 @@ export function MessagesPage() {
     }
   }, [currentPartner]);
 
+  // Listen for incoming messages via websocket
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleMessageReceived = (message) => {
+      console.log('[MessagesPage] Message received:', message);
+      
+      // Add message to current conversation if it's from the current partner
+      if (message.senderId === currentPartner || message.receiverId === currentPartner) {
+        setMessages((prev) => {
+          const exists = prev.some((m) => m.id === message.id);
+          if (exists) return prev;
+          
+          return [
+            ...prev,
+            {
+              id: message.id,
+              content: message.content,
+              senderId: message.senderId,
+              receiverId: message.receiverId,
+              createdAt: message.timestamp,
+              sender: {
+                username: message.senderUsername,
+              },
+            },
+          ];
+        });
+      }
+
+      // Refresh conversations to update last message
+      fetchConversations();
+    };
+
+    socket.on('message:received', handleMessageReceived);
+
+    return () => {
+      socket.off('message:received', handleMessageReceived);
+    };
+  }, [socket, currentPartner]);
+
   const fetchConversations = async () => {
     try {
       const res = await fetch(`/api/messages/conversations`, {
@@ -56,11 +98,13 @@ export function MessagesPage() {
       if (res.ok) {
         const data = await res.json();
         setMessages(data);
-        // Mark as read
-        await fetch(`/api/messages/${currentPartner}/read`, {
-          method: 'PATCH',
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        
+        // Mark as read via websocket if connected
+        if (socket) {
+          socket.emit('message:mark_read', {
+            senderId: currentPartner,
+          });
+        }
       }
     } catch (error) {
       console.error('Failed to fetch messages:', error);
@@ -84,30 +128,45 @@ export function MessagesPage() {
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
+    if (!socket) {
+      console.error('Socket not connected');
+      return;
+    }
 
     setSending(true);
-    try {
-      const res = await fetch(`/api/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          receiverId: currentPartner,
-          content: newMessage.trim(),
-        }),
-      });
+    const messageText = newMessage.trim();
+    setNewMessage('');
 
-      if (res.ok) {
-        const sent = await res.json();
-        setMessages([...messages, sent]);
-        setNewMessage('');
-        // Refresh conversations list
-        fetchConversations();
-      }
+    try {
+      socket.emit('message:send', {
+        receiverId: currentPartner,
+        content: messageText,
+      }, (ack) => {
+        if (ack && ack.ok) {
+          // Message was sent successfully
+          console.log('[MessagesPage] Message sent successfully');
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: ack.message.id,
+              content: ack.message.content,
+              senderId: ack.message.senderId,
+              receiverId: ack.message.receiverId,
+              createdAt: ack.message.timestamp,
+              sender: {
+                username: currentUser?.username,
+              },
+            },
+          ]);
+          fetchConversations();
+        } else {
+          console.error('Failed to send message:', ack?.error);
+          setNewMessage(messageText); // Restore input on error
+        }
+      });
     } catch (error) {
       console.error('Failed to send message:', error);
+      setNewMessage(messageText); // Restore input on error
     } finally {
       setSending(false);
     }
@@ -175,7 +234,7 @@ export function MessagesPage() {
                         <p className="text-sm text-base-content/70 truncate">{conv.lastMessage}</p>
                       </div>
                       {conv.unreadCount > 0 && (
-                        <div className="badge badge-primary">{conv.unreadCount}</div>
+                        <div className="badge" style={{backgroundColor: '#aa3bff', color: 'white'}}>{conv.unreadCount}</div>
                       )}
                     </div>
                   </button>
@@ -244,7 +303,7 @@ export function MessagesPage() {
                         </div>
                         <div className={`chat-bubble ${
                           msg.senderId === currentUser?.id
-                            ? 'chat-bubble-primary'
+                            ? 'bg-[#aa3bff] text-white'
                             : 'chat-bubble-secondary'
                         }`}>
                           {msg.content}
@@ -268,7 +327,7 @@ export function MessagesPage() {
                     <button
                       type="submit"
                       disabled={sending || !newMessage.trim()}
-                      className="btn btn-primary"
+                      className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc]"
                     >
                       {sending ? '...' : 'Send'}
                     </button>

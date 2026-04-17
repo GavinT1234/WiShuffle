@@ -1,4 +1,4 @@
-import { getAll, getById, create, remove, tagsEnum } from '../repositories/roomRepo.js';
+import { getAll, getById, create, edit, remove, tagsEnum } from '../repositories/roomRepo.js';
 import { redis } from '../config/redis.js';
 import prisma from '../config/db.js';
 // CRUD
@@ -24,6 +24,16 @@ export async function getRoomById(id) {
 
 export async function createRoom(roomData) {
   return create(roomData);
+}
+
+export async function updateRoom(id, roomData) {
+  const result = edit(id, roomData);
+  if (result) return;
+  else {
+    const error = new Error(`Room ${id} not found`);
+    error.status = 404;
+    throw error;
+  }
 }
 
 export async function deleteRoom(id) {

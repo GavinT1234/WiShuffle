@@ -53,7 +53,7 @@ export function FriendProfilePage() {
         <main className="max-w-2xl mx-auto px-4 py-8">
           <div className="card bg-base-200 p-8 text-center">
             <p className="text-error mb-4">{error}</p>
-            <button onClick={() => navigate('/friends')} className="btn btn-success">
+            <button onClick={() => navigate('/friends')} className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc]">
               Back to Friends
             </button>
           </div>
@@ -98,7 +98,7 @@ export function FriendProfilePage() {
 
             <button
               onClick={messageUser}
-              className="btn btn-success"
+              className="btn bg-[#aa3bff] text-white border-[#aa3bff] hover:bg-[#8b28cc] hover:border-[#8b28cc]"
             >
               Send Message
             </button>

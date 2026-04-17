@@ -2,6 +2,7 @@ import {
   getAllRooms,
   getRoomById,
   createRoom,
+  updateRoom,
   deleteRoom,
   getTags,
 } from '../services/roomService.js';
@@ -37,6 +38,20 @@ export async function createRoomHandler(req, res, next) {
       ownerId: req.user.id,
     });
     res.status(201).json(newRoom);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateRoomHandler(req, res, next) {
+  try {
+    const id = parseInt(req.params.id);
+    const { name, tags } = req.body;
+    const room = await updateRoom(id, {
+      name,
+      tags,
+    });
+    res.status(200).json(room);
   } catch (error) {
     next(error);
   }
