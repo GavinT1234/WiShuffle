@@ -1,10 +1,10 @@
-const BASE_URL = "";
+const BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost:4000/api';
 
 export const request = async (endpoint, options = {}) => {
   try {
 
     const token = localStorage.getItem("token");
-    const response = await fetch(`/api${endpoint}`, {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...options,
       headers: {
         "Content-Type": "application/json",

@@ -7,6 +7,56 @@ import {
 import { redis } from '../../config/redis.js';
 import { extractVideoId } from '../../services/youtubeService.js';
 
+// Track active room syncing intervals
+const roomSyncIntervals = new Map();
+
+function startRoomSync(io, roomId) {
+  // Only start one interval per room
+  if (roomSyncIntervals.has(roomId)) return;
+
+  const intervalId = setInterval(async () => {
+    try {
+      const playbackData = await redis.hGetAll(`room:${roomId}:playback`);
+      if (!playbackData || !playbackData.videoId) {
+        // Room has no active playback, clear interval
+        clearInterval(intervalId);
+        roomSyncIntervals.delete(roomId);
+        return;
+      }
+
+      // Calculate current elapsed time based on playback state
+      let elapsedSeconds = parseInt(playbackData.elapsedSeconds || '0');
+      const timestamp = parseInt(playbackData.timestamp || Date.now());
+      const timeSinceUpdate = (Date.now() - timestamp) / 1000;
+
+      // Only add time if actively playing
+      if (playbackData.playState === 'playing') {
+        elapsedSeconds += timeSinceUpdate;
+      }
+
+      // Send time update to all users in room
+      io.to(`room:${roomId}`).emit('room:time_update', {
+        roomId,
+        videoId: playbackData.videoId,
+        elapsedSeconds: Math.floor(elapsedSeconds),
+        playState: playbackData.playState || 'paused',
+        timestamp: Date.now() // Client uses this for drift correction
+      });
+    } catch (err) {
+      console.error(`[Sync] Error syncing room ${roomId}:`, err);
+    }
+  }, 100); // Send time update every 100ms for smooth sync
+
+  roomSyncIntervals.set(roomId, intervalId);
+}
+
+function stopRoomSync(roomId) {
+  if (roomSyncIntervals.has(roomId)) {
+    clearInterval(roomSyncIntervals.get(roomId));
+    roomSyncIntervals.delete(roomId);
+  }
+}
+
 export function registerRoomHandlers(io, socket) {
   // Join a room
   socket.on('room:join', async ({ roomId }, ack) => {
@@ -157,6 +207,9 @@ export function registerRoomHandlers(io, socket) {
         await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
         await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
+        // Start syncing this room
+        startRoomSync(io, roomId);
+
         const payload = {
           song,
           elapsedSeconds: 0,
@@ -239,6 +292,7 @@ export function registerRoomHandlers(io, socket) {
       if (nextPlaylist.length === 0) {
         // Queue is empty
         console.log(`📭 Queue empty in room ${roomId}`);
+        stopRoomSync(roomId);
         io.to(`room:${roomId}`).emit('room:queue_empty', { roomId });
         // Clear playback
         await redis.del(`room:${roomId}:playback`);
