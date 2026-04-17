@@ -38,6 +38,29 @@ export async function create(data) {
   return newRoom;
 }
 
+export async function edit(data) {
+  const { name, tags } = data;
+
+  const newRoom = await prisma.room.update({
+    where: {id},
+    data: {
+      name,
+      tags: {
+        set: tags.map((t) => Genre[t]),
+      },
+    },
+    include: {
+      owner: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
+
+  return newRoom;
+}
+
 export async function remove(id) {
   try {
     const deletedRoom = await prisma.room.delete({ where: { id } });
