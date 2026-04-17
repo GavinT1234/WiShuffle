@@ -248,6 +248,7 @@ export function registerRoomHandlers(io, socket) {
       await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
       io.to(`room:${roomId}`).emit('room:video_play', { roomId });
+      const playbackData = await redis.hGetAll(`room:${roomId}:playback`);
       console.log(`▶️  Playing in room ${roomId}`);
 
     } catch (error) {
@@ -264,6 +265,22 @@ export function registerRoomHandlers(io, socket) {
     console.log(`   Stack trace:`);
     console.trace(); 
     console.log(`=====================================`);
+
+    // Get current playback state to calculate elapsed time
+    const playbackData = await redis.hGetAll(`room:${roomId}:playback`);
+    
+    if (playbackData && playbackData.videoId) {
+      let elapsedSeconds = parseInt(playbackData.elapsedSeconds || '0');
+      const timestamp = parseInt(playbackData.timestamp || Date.now());
+      const timeSinceUpdate = (Date.now() - timestamp) / 1000;
+
+      // If video was playing, add the elapsed time
+      if (playbackData.playState === 'playing') {
+        elapsedSeconds += timeSinceUpdate;
+      }
+
+      await redis.hSet(`room:${roomId}:playback`, 'elapsedSeconds', Math.floor(elapsedSeconds).toString());
+    }
     
     await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
     await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
@@ -278,7 +295,7 @@ export function registerRoomHandlers(io, socket) {
   // ── Seek (Any user) ──
   socket.on('room:video_seek', async ({ roomId, positionSeconds }) => {
     try {
-      await redis.hSet(`room:${roomId}:playback`, 'elapsedSeconds', positionSeconds.toString());
+      await redis.hSet(`room:${roomId}:playback`, 'elapsedSeconds', Math.floor(positionSeconds).toString());
       await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
       io.to(`room:${roomId}`).emit('room:video_seek', { positionSeconds, roomId });
