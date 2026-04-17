@@ -23,6 +23,12 @@ export function useRoom(roomId) {
     // Register listener FIRST, before joining, so we never miss a broadcast
     socket.on("room:state", applyState);
 
+    const timeout = setTimeout(() => {
+    console.warn('⏰ room:state timeout - no response from server');
+    setIsLoading(false);
+    // Optionally set error state or retry
+  }, 10000);
+
     const join = () => {
       if (hasJoinedRef.current) return;
       hasJoinedRef.current = true;
