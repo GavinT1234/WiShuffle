@@ -27,7 +27,7 @@ export function VideoPlayer({
                 console.log('YouTube player state:', state);
                 // 0 = ENDED, 1 = PLAYING, 2 = PAUSED
                 if (state === 1) setLocalPlaying(true);
-                if (state === 2) setLocalPlaying(false);
+                //if (state === 2) setLocalPlaying(false);
                 // On video end, advance to next
                 if (state === 0) {
                     console.log('🎬 Video ended, advancing to next');
@@ -84,16 +84,6 @@ export function VideoPlayer({
                     </div>
                 )}
             </div>
-
-            {/* ── Progress bar (clickable by all) ── */}
-            {playback && (
-                <div
-                    style={{ ...styles.progressTrack, cursor: 'pointer' }}
-                    onClick={handleSeekClick}
-                >
-                    <div style={{ ...styles.progressFill, width: `${progressPct}%` }} />
-                </div>
-            )}
 
             {/* ── Now playing info ── */}
             {playback?.song && (

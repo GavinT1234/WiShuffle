@@ -19,6 +19,7 @@ function startRoomSync(io, roomId) {
       const playbackData = await redis.hGetAll(`room:${roomId}:playback`);
       if (!playbackData || !playbackData.videoId) {
         // Room has no active playback, clear interval
+        console.log(`⏹️ No playback in room ${roomId}, stopping sync`);
         clearInterval(intervalId);
         roomSyncIntervals.delete(roomId);
         return;
@@ -39,7 +40,7 @@ function startRoomSync(io, roomId) {
         roomId,
         videoId: playbackData.videoId,
         elapsedSeconds: Math.floor(elapsedSeconds),
-        playState: playbackData.playState || 'paused',
+        playState: playbackData.playState || 'playing',
         timestamp: Date.now() // Client uses this for drift correction
       });
     } catch (err) {
@@ -109,7 +110,7 @@ export function registerRoomHandlers(io, socket) {
               title: playbackData.title || playbackData.videoId,
             },
             elapsedSeconds: Math.floor(elapsedSeconds),
-            playState: playbackData.playState || 'paused',
+            playState: playbackData.playState || 'playing',
             roomId
           };
           socket.emit('room:video_load', payload);
@@ -204,16 +205,17 @@ export function registerRoomHandlers(io, socket) {
         await redis.hSet(`room:${roomId}:playback`, 'videoId', videoId);
         await redis.hSet(`room:${roomId}:playback`, 'title', song.title);
         await redis.hSet(`room:${roomId}:playback`, 'elapsedSeconds', '0');
-        await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
+        await redis.hSet(`room:${roomId}:playback`, 'playState', 'playing');
         await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
         // Start syncing this room
+        console.log(`🔄 Starting sync for room ${roomId}`);
         startRoomSync(io, roomId);
 
         const payload = {
           song,
           elapsedSeconds: 0,
-          playState: 'paused',
+          playState: 'playing',
           roomId
         };
 
@@ -254,17 +256,23 @@ export function registerRoomHandlers(io, socket) {
 
   // ── Pause (Any user) ──
   socket.on('room:video_pause', async ({ roomId }) => {
-    try {
-      await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
-      await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
+  try {
+    console.log(`⏸️ ========== PAUSE EVENT ==========`);
+    console.log(`   User: ${socket.user.id}`);
+    console.log(`   Room: ${roomId}`);
+    console.log(`   Stack trace:`);
+    console.trace(); 
+    console.log(`=====================================`);
+    
+    await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
+    await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
-      io.to(`room:${roomId}`).emit('room:video_pause', { roomId });
-      console.log(`⏸️  Paused in room ${roomId}`);
-
-    } catch (error) {
-      console.error('❌ Pause error:', error);
-    }
-  });
+    io.to(`room:${roomId}`).emit('room:video_pause', { roomId });
+    console.log(`⏸️ Paused in room ${roomId}`);
+  } catch (error) {
+    console.error('❌ Pause error:', error);
+  }
+});
 
   // ── Seek (Any user) ──
   socket.on('room:video_seek', async ({ roomId, positionSeconds }) => {
@@ -312,7 +320,7 @@ export function registerRoomHandlers(io, socket) {
         await redis.hSet(`room:${roomId}:playback`, 'videoId', nextVideoId);
         await redis.hSet(`room:${roomId}:playback`, 'title', videoTitle);
         await redis.hSet(`room:${roomId}:playback`, 'elapsedSeconds', '0');
-        await redis.hSet(`room:${roomId}:playback`, 'playState', 'paused');
+        await redis.hSet(`room:${roomId}:playback`, 'playState', 'playing');
         await redis.hSet(`room:${roomId}:playback`, 'timestamp', Date.now().toString());
 
         const payload = {
@@ -321,7 +329,7 @@ export function registerRoomHandlers(io, socket) {
             title: videoTitle,
           },
           elapsedSeconds: 0,
-          playState: 'paused',
+          playState: 'playing',
           roomId
         };
 
