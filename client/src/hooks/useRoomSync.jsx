@@ -119,6 +119,8 @@ export function useRoomSync({ socket, roomId, userId, playerControls }) {
             console.log('📭 Queue empty');
             setPlaylist([]);
             setPlayback(null);
+            playerControls.current?.pause();
+            playerControls.current?.loadVideo('', 0);
         };
 
         const onError = ({ message }) => {
